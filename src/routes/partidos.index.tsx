@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useFantasy } from "@/lib/fantasy/store";
 import { CategoryBadge, StatusBadge } from "@/components/fantasy-ui";
 
-export const Route = createFileRoute("/partidos")({
+export const Route = createFileRoute("/partidos/")({
   head: () => ({
     meta: [
       { title: "Partidos · BZG Fantasy Eskubaloia" },

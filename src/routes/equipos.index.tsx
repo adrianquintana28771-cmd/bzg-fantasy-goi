@@ -5,7 +5,7 @@ import { CategoryBadge } from "@/components/fantasy-ui";
 import { CATEGORY_LABEL, type Category } from "@/lib/fantasy/types";
 import { Users } from "lucide-react";
 
-export const Route = createFileRoute("/equipos")({
+export const Route = createFileRoute("/equipos/")({
   head: () => ({
     meta: [
       { title: "Equipos · BZG Fantasy Eskubaloia" },

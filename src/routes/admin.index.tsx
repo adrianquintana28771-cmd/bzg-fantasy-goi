@@ -3,7 +3,7 @@ import { Calendar, Users, ClipboardList, Settings, FileText, Trophy, ShieldAlert
 import { useFantasy, fantasyStore } from "@/lib/fantasy/store";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/admin/")({
   head: () => ({
     meta: [
       { title: "Administración · BZG Fantasy" },
