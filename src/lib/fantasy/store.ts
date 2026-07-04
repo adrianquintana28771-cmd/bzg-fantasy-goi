@@ -14,8 +14,8 @@ interface State {
 }
 
 const RULES_KEY = "bzg.rules.v1";
-const ACTAS_KEY = "bzg.actas.v1";
-const STATS_KEY = "bzg.stats.v1";
+const ACTAS_KEY = "bzg.actas.v2";
+const STATS_KEY = "bzg.stats.v2";
 
 function loadRules(): ScoringRule[] {
   if (typeof window === "undefined") return DEFAULT_RULES;

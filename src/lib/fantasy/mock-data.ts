@@ -8,16 +8,16 @@ export const seasons: Season[] = [
 export const teams: Team[] = [
   { id: "t1", seasonId: "s24", name: "BZG Senior Masc.", category: "senior", gender: "masculino" },
   { id: "t2", seasonId: "s24", name: "BZG Senior Fem.", category: "senior", gender: "femenino" },
-  { id: "t3", seasonId: "s24", name: "BZG Cadete Fem.", category: "cadete", gender: "femenino" },
-  { id: "t4", seasonId: "s24", name: "BZG Alevín Mixto", category: "alevin", gender: "mixto" },
+  { id: "t3", seasonId: "s24", name: "BZG Juvenil Masc.", category: "juvenil", gender: "masculino" },
+  { id: "t4", seasonId: "s24", name: "BZG Juvenil Fem.", category: "juvenil", gender: "femenino" },
 ];
 
 // 20 players, 5 per team, deterministic
 const names = [
   "Jon M.", "Iker A.", "Unai B.", "Ander G.", "Aitor R.",
   "Ane G.", "Nora Z.", "Maialen E.", "Leire O.", "Uxue T.",
+  "Oihan V.", "Eneko C.", "Danel Q.", "Mikel H.", "Beñat L.",
   "Naia H.", "Irati L.", "June K.", "Amaia P.", "Miren D.",
-  "Oihan V.", "Eneko C.", "Nahia S.", "Danel Q.", "Haizea F.",
 ];
 const positions = ["portero", "extremo", "lateral", "central", "pivote"] as const;
 
@@ -30,7 +30,7 @@ export const players: Player[] = names.map((n, i) => {
     publicName: n,
     dorsal: (i % 5) * 3 + 4,
     position: pos,
-    isMinor: teamIdx >= 2,
+    isMinor: teamIdx >= 2, // juveniles
     active: true,
   };
 });
@@ -39,8 +39,8 @@ export const matches: Match[] = [
   { id: "m1", seasonId: "s24", teamId: "t1", opponent: "Anaitasuna", date: "2024-10-05", round: 1, locationType: "local", goalsFor: 28, goalsAgainst: 24, status: "publicado", matchCode: "BZG-M1" },
   { id: "m2", seasonId: "s24", teamId: "t1", opponent: "Barakaldo HC", date: "2024-10-12", round: 2, locationType: "visitante", goalsFor: 22, goalsAgainst: 25, status: "publicado", matchCode: "BZG-M2" },
   { id: "m3", seasonId: "s24", teamId: "t2", opponent: "Zuazo", date: "2024-10-13", round: 1, locationType: "local", goalsFor: 30, goalsAgainst: 18, status: "publicado", matchCode: "BZG-M3" },
-  { id: "m4", seasonId: "s24", teamId: "t3", opponent: "Leioa", date: "2024-10-19", round: 1, locationType: "visitante", goalsFor: 19, goalsAgainst: 19, status: "publicado", matchCode: "BZG-M4" },
-  { id: "m5", seasonId: "s24", teamId: "t4", opponent: "Getxo", date: "2024-10-20", round: 1, locationType: "local", goalsFor: 15, goalsAgainst: 12, status: "estadisticas", matchCode: "BZG-M5" },
+  { id: "m4", seasonId: "s24", teamId: "t3", opponent: "Leioa", date: "2024-10-19", round: 1, locationType: "visitante", goalsFor: 25, goalsAgainst: 22, status: "publicado", matchCode: "BZG-M4" },
+  { id: "m5", seasonId: "s24", teamId: "t4", opponent: "Getxo", date: "2024-10-20", round: 1, locationType: "local", goalsFor: 23, goalsAgainst: 20, status: "estadisticas", matchCode: "BZG-M5" },
 ];
 
 // deterministic pseudo-random

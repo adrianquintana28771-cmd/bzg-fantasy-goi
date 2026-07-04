@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useFantasy } from "@/lib/fantasy/store";
 import { buildRanking } from "@/lib/fantasy/queries";
 import { PlayerCard } from "@/components/fantasy-ui";
+import { BackButton } from "@/components/back-button";
 import { CATEGORY_LABEL, POSITION_LABEL } from "@/lib/fantasy/types";
 
 export const Route = createFileRoute("/rankings")({
@@ -44,7 +45,8 @@ function Rankings() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <BackButton />
+      <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-4xl">Rankings</h1>
           <p className="text-sm text-muted-foreground">Los mejores puntos Fantasy del club.</p>

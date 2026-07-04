@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Calendar, Users, ClipboardList, Settings, FileText, Trophy, ShieldAlert } from "lucide-react";
 import { useFantasy, fantasyStore } from "@/lib/fantasy/store";
 import { toast } from "sonner";
+import { BackButton } from "@/components/back-button";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -20,7 +21,8 @@ function Admin() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning-foreground">
+      <BackButton />
+      <div className="mt-3 rounded-2xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning-foreground">
         <div className="flex items-center gap-2 font-semibold">
           <ShieldAlert className="h-4 w-4" /> Modo demostración
         </div>
