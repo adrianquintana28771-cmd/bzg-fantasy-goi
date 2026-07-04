@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useFantasy, fantasyStore } from "@/lib/fantasy/store";
+import { AdminGuard } from "@/components/admin-guard";
 
 export const Route = createFileRoute("/admin/reglas")({
   head: () => ({
@@ -10,7 +11,11 @@ export const Route = createFileRoute("/admin/reglas")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: Reglas,
+  component: () => (
+    <AdminGuard>
+      <Reglas />
+    </AdminGuard>
+  ),
 });
 
 function Reglas() {
