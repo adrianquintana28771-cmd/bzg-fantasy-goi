@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useFantasy } from "@/lib/fantasy/store";
 import { buildRanking } from "@/lib/fantasy/queries";
 import { CategoryBadge } from "@/components/fantasy-ui";
+import { BackButton } from "@/components/back-button";
 import { CATEGORY_LABEL, type Category } from "@/lib/fantasy/types";
 import { Users } from "lucide-react";
 
@@ -31,7 +32,8 @@ function Equipos() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="font-display text-4xl">Equipos</h1>
+      <BackButton />
+      <h1 className="mt-3 font-display text-4xl">Equipos</h1>
       <p className="text-sm text-muted-foreground">Temporada {activeSeason?.name}</p>
 
       <div className="mt-8 space-y-10">
