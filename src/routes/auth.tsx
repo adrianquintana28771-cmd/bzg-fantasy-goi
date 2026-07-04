@@ -101,7 +101,10 @@ function LoginForm() {
     }
     setBusy(true);
     try {
-      const { data: emailData, error: rpcError } = await supabase.rpc("email_for_dni", {
+      const { data: emailData, error: rpcError } = await (supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: string | null; error: unknown }>)("email_for_dni", {
         _dni: parsed.data.dni,
       });
       if (rpcError) throw rpcError;

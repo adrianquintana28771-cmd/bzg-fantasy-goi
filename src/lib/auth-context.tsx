@@ -26,9 +26,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setDisplayName(null);
       return;
     }
+    const client = supabase as unknown as {
+      from: (t: string) => {
+        select: (c: string) => {
+          eq: (col: string, val: string) => Promise<{ data: Array<Record<string, unknown>> | null }> & {
+            maybeSingle: () => Promise<{ data: Record<string, unknown> | null }>;
+          };
+        };
+      };
+    };
     const [rolesRes, profileRes] = await Promise.all([
-      supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("profiles").select("display_name, dni").eq("id", userId).maybeSingle(),
+      client.from("user_roles").select("role").eq("user_id", userId) as unknown as Promise<{ data: Array<{ role: string }> | null }>,
+      (client.from("profiles").select("display_name, dni").eq("id", userId) as unknown as { maybeSingle: () => Promise<{ data: { display_name: string | null; dni: string } | null }> }).maybeSingle(),
     ]);
     setIsAdmin((rolesRes.data ?? []).some((r) => r.role === "admin"));
     setDisplayName(profileRes.data?.display_name ?? profileRes.data?.dni ?? null);
