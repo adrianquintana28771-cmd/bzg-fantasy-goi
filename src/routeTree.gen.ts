@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RankingsRouteImport } from './routes/rankings'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PartidosIndexRouteImport } from './routes/partidos.index'
 import { Route as EquiposIndexRouteImport } from './routes/equipos.index'
@@ -22,6 +23,11 @@ import { Route as AdminReglasRouteImport } from './routes/admin.reglas'
 const RankingsRoute = RankingsRouteImport.update({
   id: '/rankings',
   path: '/rankings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -67,6 +73,7 @@ const AdminReglasRoute = AdminReglasRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/rankings': typeof RankingsRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/rankings': typeof RankingsRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
@@ -90,6 +98,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/rankings': typeof RankingsRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/rankings'
     | '/admin/reglas'
     | '/equipos/$teamId'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/rankings'
     | '/admin/reglas'
     | '/equipos/$teamId'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/rankings'
     | '/admin/reglas'
     | '/equipos/$teamId'
@@ -137,6 +149,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   RankingsRoute: typeof RankingsRoute
   AdminReglasRoute: typeof AdminReglasRoute
   EquiposTeamIdRoute: typeof EquiposTeamIdRoute
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/rankings'
       fullPath: '/rankings'
       preLoaderRoute: typeof RankingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -217,6 +237,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   RankingsRoute: RankingsRoute,
   AdminReglasRoute: AdminReglasRoute,
   EquiposTeamIdRoute: EquiposTeamIdRoute,
