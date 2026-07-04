@@ -3,6 +3,7 @@ import { Calendar, Users, ClipboardList, Settings, FileText, Trophy, ShieldAlert
 import { useFantasy, fantasyStore } from "@/lib/fantasy/store";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
+import { AdminGuard } from "@/components/admin-guard";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -12,7 +13,11 @@ export const Route = createFileRoute("/admin/")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: Admin,
+  component: () => (
+    <AdminGuard>
+      <Admin />
+    </AdminGuard>
+  ),
 });
 
 function Admin() {
