@@ -29,11 +29,11 @@ function Admin() {
       <BackButton />
       <div className="mt-3 rounded-2xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning-foreground">
         <div className="flex items-center gap-2 font-semibold">
-          <ShieldAlert className="h-4 w-4" /> Modo demostración
+          <ShieldAlert className="h-4 w-4" /> Zona de administración
         </div>
         <p className="mt-1 text-xs">
-          En el MVP no hay login todavía. Los cambios se guardan en tu navegador.
-          En la Fase 2 se añade autenticación con roles (admin, delegado/a, familia).
+          Estás dentro porque tienes rol <strong>admin</strong>. Para dar el rol a otra
+          persona, añade una fila en la tabla <code>user_roles</code> con su <code>user_id</code> y rol <code>admin</code>.
         </p>
       </div>
 
