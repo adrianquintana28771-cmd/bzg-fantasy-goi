@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -20,6 +21,11 @@ import { Route as JugadoresPlayerIdRouteImport } from './routes/jugadores.$playe
 import { Route as EquiposTeamIdRouteImport } from './routes/equipos.$teamId'
 import { Route as AdminReglasRouteImport } from './routes/admin.reglas'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RankingsRoute = RankingsRouteImport.update({
   id: '/rankings',
   path: '/rankings',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/rankings': typeof RankingsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/rankings': typeof RankingsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/rankings': typeof RankingsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/rankings'
+    | '/reset-password'
     | '/admin/reglas'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/rankings'
+    | '/reset-password'
     | '/admin/reglas'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/rankings'
+    | '/reset-password'
     | '/admin/reglas'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   RankingsRoute: typeof RankingsRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   AdminReglasRoute: typeof AdminReglasRoute
   EquiposTeamIdRoute: typeof EquiposTeamIdRoute
   JugadoresPlayerIdRoute: typeof JugadoresPlayerIdRoute
@@ -162,6 +175,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rankings': {
       id: '/rankings'
       path: '/rankings'
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   RankingsRoute: RankingsRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   AdminReglasRoute: AdminReglasRoute,
   EquiposTeamIdRoute: EquiposTeamIdRoute,
   JugadoresPlayerIdRoute: JugadoresPlayerIdRoute,
