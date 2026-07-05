@@ -4,7 +4,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
-import { LogIn, UserPlus, ArrowLeft } from "lucide-react";
+import { LogIn, UserPlus, ArrowLeft, KeyRound, MailCheck } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -35,8 +35,10 @@ const signupSchema = z.object({
   password: z.string().min(6, "Mínimo 6 caracteres").max(72),
 });
 
+type Mode = "login" | "signup" | "forgot";
+
 function AuthPage() {
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<Mode>("login");
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -52,32 +54,40 @@ function AuthPage() {
 
       <div className="mt-4 rounded-2xl border border-border bg-card p-6 shadow-card" style={{ background: "var(--gradient-card)" }}>
         <h1 className="font-display text-3xl">
-          {mode === "login" ? "Entrar" : "Crear cuenta"}
+          {mode === "login" ? "Entrar" : mode === "signup" ? "Crear cuenta" : "Recuperar contraseña"}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {mode === "login" ? "Accede con tu DNI y contraseña." : "Regístrate con tu DNI, email y contraseña."}
+          {mode === "login"
+            ? "Accede con tu DNI y contraseña."
+            : mode === "signup"
+              ? "Regístrate con tu DNI, email y contraseña."
+              : "Introduce tu DNI y te enviaremos un enlace al email registrado."}
         </p>
 
-        <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl bg-secondary/60 p-1">
-          <button
-            onClick={() => setMode("login")}
-            className={`rounded-lg py-2 text-sm font-semibold transition ${
-              mode === "login" ? "bg-background shadow-card" : "text-muted-foreground"
-            }`}
-          >
-            Entrar
-          </button>
-          <button
-            onClick={() => setMode("signup")}
-            className={`rounded-lg py-2 text-sm font-semibold transition ${
-              mode === "signup" ? "bg-background shadow-card" : "text-muted-foreground"
-            }`}
-          >
-            Registrarme
-          </button>
-        </div>
+        {mode !== "forgot" && (
+          <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl bg-secondary/60 p-1">
+            <button
+              onClick={() => setMode("login")}
+              className={`rounded-lg py-2 text-sm font-semibold transition ${
+                mode === "login" ? "bg-background shadow-card" : "text-muted-foreground"
+              }`}
+            >
+              Entrar
+            </button>
+            <button
+              onClick={() => setMode("signup")}
+              className={`rounded-lg py-2 text-sm font-semibold transition ${
+                mode === "signup" ? "bg-background shadow-card" : "text-muted-foreground"
+              }`}
+            >
+              Registrarme
+            </button>
+          </div>
+        )}
 
-        {mode === "login" ? <LoginForm /> : <SignupForm onDone={() => setMode("login")} />}
+        {mode === "login" && <LoginForm onForgot={() => setMode("forgot")} />}
+        {mode === "signup" && <SignupForm onDone={() => setMode("login")} />}
+        {mode === "forgot" && <ForgotForm onBack={() => setMode("login")} />}
       </div>
 
       <p className="mt-4 text-center text-xs text-muted-foreground">
@@ -87,7 +97,7 @@ function AuthPage() {
   );
 }
 
-function LoginForm() {
+function LoginForm({ onForgot }: { onForgot: () => void }) {
   const [dni, setDni] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -117,7 +127,12 @@ function LoginForm() {
         password: parsed.data.password,
       });
       if (error) {
-        toast.error("DNI o contraseña incorrectos");
+        const msg = error.message.toLowerCase();
+        if (msg.includes("email not confirmed") || msg.includes("not confirmed")) {
+          toast.error("Aún no has validado tu email. Revisa tu bandeja de entrada.");
+        } else {
+          toast.error("DNI o contraseña incorrectos");
+        }
         return;
       }
       toast.success("¡Bienvenido/a!");
@@ -140,6 +155,13 @@ function LoginForm() {
       >
         <LogIn className="h-5 w-5" /> {busy ? "Entrando..." : "Entrar"}
       </button>
+      <button
+        type="button"
+        onClick={onForgot}
+        className="mt-2 inline-flex w-full items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <KeyRound className="h-4 w-4" /> ¿Has olvidado la contraseña?
+      </button>
     </form>
   );
 }
@@ -150,6 +172,9 @@ function SignupForm({ onDone }: { onDone: () => void }) {
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [otp, setOtp] = useState("");
+  const [resending, setResending] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -176,7 +201,7 @@ function SignupForm({ onDone }: { onDone: () => void }) {
         email: parsed.data.email,
         password: parsed.data.password,
         options: {
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/auth`,
           data: {
             dni: parsed.data.dni,
             display_name: parsed.data.displayName,
@@ -185,31 +210,128 @@ function SignupForm({ onDone }: { onDone: () => void }) {
       });
       if (error) {
         const msg = error.message.toLowerCase();
-        if (msg.includes("profiles_dni_key") || msg.includes("duplicate")) {
+        if (msg.includes("profiles_dni_key")) {
           toast.error("Ese DNI ya está registrado");
-          return;
-        }
-        if (msg.includes("database error")) {
-          toast.error("Ese DNI ya está registrado");
-          return;
-        }
-        if (msg.includes("already")) {
+        } else if (msg.includes("already") || msg.includes("registered")) {
           toast.error("Ese email ya está registrado");
-        } else if (error.message.toLowerCase().includes("duplicate") || error.message.includes("profiles_dni_key")) {
-          toast.error("Ese DNI ya está registrado");
+        } else if (msg.includes("duplicate") || msg.includes("database error")) {
+          toast.error("Ese DNI o email ya está registrado");
         } else {
           toast.error(error.message);
         }
         return;
       }
-      toast.success("Cuenta creada. Ya puedes entrar con tu DNI.");
-      onDone();
+      toast.success("Te hemos enviado un código de 6 dígitos al email.");
+      setPendingEmail(parsed.data.email);
     } catch (err) {
       console.error(err);
       toast.error("Error al registrarte");
     } finally {
       setBusy(false);
     }
+  }
+
+  async function verify(e: React.FormEvent) {
+    e.preventDefault();
+    if (!pendingEmail) return;
+    if (!/^\d{6}$/.test(otp)) {
+      toast.error("El código son 6 dígitos");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: pendingEmail,
+        token: otp,
+        type: "email",
+      });
+      if (error) {
+        toast.error("Código incorrecto o caducado");
+        return;
+      }
+      toast.success("Email validado. ¡Ya puedes entrar!");
+      await supabase.auth.signOut();
+      setPendingEmail(null);
+      setOtp("");
+      onDone();
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al validar el código");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function resend() {
+    if (!pendingEmail) return;
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: pendingEmail,
+        options: { emailRedirectTo: `${window.location.origin}/auth` },
+      });
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success("Te hemos enviado un nuevo código.");
+    } finally {
+      setResending(false);
+    }
+  }
+
+  if (pendingEmail) {
+    return (
+      <form onSubmit={verify} className="mt-5 space-y-4">
+        <div className="rounded-xl bg-secondary/50 p-4 text-sm">
+          <p className="flex items-center gap-2 font-semibold">
+            <MailCheck className="h-4 w-4" /> Revisa tu email
+          </p>
+          <p className="mt-1 text-muted-foreground">
+            Hemos enviado un código de 6 dígitos a <span className="font-mono">{pendingEmail}</span>. Introdúcelo para validar tu cuenta.
+          </p>
+        </div>
+        <label className="block">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Código de 6 dígitos
+          </span>
+          <input
+            inputMode="numeric"
+            pattern="\d{6}"
+            maxLength={6}
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+            placeholder="123456"
+            required
+            autoComplete="one-time-code"
+            className="w-full rounded-lg border border-input bg-background px-3 py-3 text-center font-mono text-2xl tracking-[0.5em] outline-none focus:ring-2 focus:ring-ring"
+          />
+        </label>
+        <button
+          type="submit"
+          disabled={busy}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-display text-lg text-primary-foreground shadow-card transition hover:-translate-y-0.5 disabled:opacity-60"
+        >
+          <MailCheck className="h-5 w-5" /> {busy ? "Validando..." : "Validar email"}
+        </button>
+        <div className="flex items-center justify-between text-sm">
+          <button type="button" onClick={resend} disabled={resending} className="text-muted-foreground hover:text-foreground disabled:opacity-60">
+            {resending ? "Reenviando..." : "Reenviar código"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setPendingEmail(null);
+              setOtp("");
+            }}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Cambiar datos
+          </button>
+        </div>
+      </form>
+    );
   }
 
   return (
@@ -223,7 +345,86 @@ function SignupForm({ onDone }: { onDone: () => void }) {
         disabled={busy}
         className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-display text-lg text-primary-foreground shadow-card transition hover:-translate-y-0.5 disabled:opacity-60"
       >
-        <UserPlus className="h-5 w-5" /> {busy ? "Creando..." : "Crear cuenta"}
+        <UserPlus className="h-5 w-5" /> {busy ? "Enviando código..." : "Crear cuenta"}
+      </button>
+    </form>
+  );
+}
+
+function ForgotForm({ onBack }: { onBack: () => void }) {
+  const [dni, setDni] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const parsed = dniSchema.safeParse(dni);
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
+    setBusy(true);
+    try {
+      const { data: emailData, error: rpcError } = await (supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: string | null; error: unknown }>)("email_for_dni", {
+        _dni: parsed.data,
+      });
+      if (rpcError) throw rpcError;
+      // Always show the same message to avoid revealing whether a DNI exists.
+      if (emailData) {
+        const { error } = await supabase.auth.resetPasswordForEmail(emailData as string, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) console.error(error);
+      }
+      setSent(true);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al enviar el enlace");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (sent) {
+    return (
+      <div className="mt-5 space-y-4">
+        <div className="rounded-xl bg-secondary/50 p-4 text-sm">
+          <p className="flex items-center gap-2 font-semibold">
+            <MailCheck className="h-4 w-4" /> Revisa tu email
+          </p>
+          <p className="mt-1 text-muted-foreground">
+            Si el DNI está registrado, hemos enviado un enlace para restablecer tu contraseña. Puede tardar unos minutos.
+          </p>
+        </div>
+        <button
+          onClick={onBack}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-display text-lg text-primary-foreground shadow-card"
+        >
+          Volver
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} className="mt-5 space-y-3">
+      <Field label="DNI" value={dni} onChange={setDni} placeholder="12345678A" autoComplete="username" maxLength={9} />
+      <button
+        type="submit"
+        disabled={busy}
+        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-display text-lg text-primary-foreground shadow-card transition hover:-translate-y-0.5 disabled:opacity-60"
+      >
+        <KeyRound className="h-5 w-5" /> {busy ? "Enviando..." : "Enviar enlace"}
+      </button>
+      <button
+        type="button"
+        onClick={onBack}
+        className="mt-2 inline-flex w-full items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" /> Volver a entrar
       </button>
     </form>
   );
