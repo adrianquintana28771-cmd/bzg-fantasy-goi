@@ -64,6 +64,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      dni_exists: { Args: { _dni: string }; Returns: boolean }
       email_for_dni: { Args: { _dni: string }; Returns: string }
       has_role: {
         Args: {
