@@ -160,6 +160,18 @@ function SignupForm({ onDone }: { onDone: () => void }) {
     }
     setBusy(true);
     try {
+      const { data: exists, error: existsErr } = await (supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: boolean | null; error: unknown }>)("dni_exists", {
+        _dni: parsed.data.dni,
+      });
+      if (existsErr) throw existsErr;
+      if (exists) {
+        toast.error("Ese DNI ya está registrado. Prueba a entrar con tu contraseña.");
+        return;
+      }
+
       const { error } = await supabase.auth.signUp({
         email: parsed.data.email,
         password: parsed.data.password,
@@ -172,7 +184,16 @@ function SignupForm({ onDone }: { onDone: () => void }) {
         },
       });
       if (error) {
-        if (error.message.toLowerCase().includes("already")) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("profiles_dni_key") || msg.includes("duplicate")) {
+          toast.error("Ese DNI ya está registrado");
+          return;
+        }
+        if (msg.includes("database error")) {
+          toast.error("Ese DNI ya está registrado");
+          return;
+        }
+        if (msg.includes("already")) {
           toast.error("Ese email ya está registrado");
         } else if (error.message.toLowerCase().includes("duplicate") || error.message.includes("profiles_dni_key")) {
           toast.error("Ese DNI ya está registrado");
