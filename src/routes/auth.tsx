@@ -17,22 +17,50 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+const DNI_LETTERS = "TRWAGMYFPDXBNJZSQVHLCKE";
+
 const dniSchema = z
   .string()
   .trim()
   .regex(/^\d{8}[A-Za-z]$/, "DNI no válido (8 dígitos y 1 letra)")
-  .transform((v) => v.toUpperCase());
+  .transform((v) => v.toUpperCase())
+  .refine((v) => {
+    const num = parseInt(v.slice(0, 8), 10);
+    return DNI_LETTERS[num % 23] === v[8];
+  }, "La letra del DNI no es correcta");
+
+const passwordSchema = z
+  .string()
+  .min(8, "La contraseña debe tener al menos 8 caracteres")
+  .max(72, "Máximo 72 caracteres")
+  .regex(/[a-z]/, "Debe incluir una letra minúscula")
+  .regex(/[A-Z]/, "Debe incluir una letra mayúscula")
+  .regex(/\d/, "Debe incluir un número");
+
+const displayNameSchema = z
+  .string()
+  .trim()
+  .min(2, "Nombre demasiado corto")
+  .max(60, "Máximo 60 caracteres")
+  .regex(/^[\p{L}\p{M}\s'.\-]+$/u, "Sólo letras, espacios, guiones y apóstrofos");
+
+const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email("Email no válido")
+  .max(255, "Email demasiado largo");
 
 const loginSchema = z.object({
   dni: dniSchema,
-  password: z.string().min(6, "Mínimo 6 caracteres"),
+  password: z.string().min(1, "Introduce tu contraseña").max(72),
 });
 
 const signupSchema = z.object({
   dni: dniSchema,
-  email: z.string().trim().email("Email no válido").max(255),
-  displayName: z.string().trim().min(2, "Mínimo 2 caracteres").max(60),
-  password: z.string().min(6, "Mínimo 6 caracteres").max(72),
+  email: emailSchema,
+  displayName: displayNameSchema,
+  password: passwordSchema,
 });
 
 type Mode = "login" | "signup" | "forgot";
@@ -97,6 +125,25 @@ function AuthPage() {
   );
 }
 
+const LOCK_KEY = "bzg_login_lock";
+const MAX_ATTEMPTS = 5;
+const LOCK_MS = 60_000;
+
+function getLock(): { count: number; until: number } {
+  if (typeof window === "undefined") return { count: 0, until: 0 };
+  try {
+    return JSON.parse(window.sessionStorage.getItem(LOCK_KEY) ?? "") ?? { count: 0, until: 0 };
+  } catch {
+    return { count: 0, until: 0 };
+  }
+}
+function setLock(v: { count: number; until: number }) {
+  if (typeof window !== "undefined") window.sessionStorage.setItem(LOCK_KEY, JSON.stringify(v));
+}
+function clearLock() {
+  if (typeof window !== "undefined") window.sessionStorage.removeItem(LOCK_KEY);
+}
+
 function LoginForm({ onForgot }: { onForgot: () => void }) {
   const [dni, setDni] = useState("");
   const [password, setPassword] = useState("");
@@ -104,6 +151,12 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    const lock = getLock();
+    if (lock.until > Date.now()) {
+      const secs = Math.ceil((lock.until - Date.now()) / 1000);
+      toast.error(`Demasiados intentos. Prueba de nuevo en ${secs}s.`);
+      return;
+    }
     const parsed = loginSchema.safeParse({ dni, password });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
@@ -119,6 +172,7 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
       });
       if (rpcError) throw rpcError;
       if (!emailData) {
+        registerFailedAttempt();
         toast.error("DNI o contraseña incorrectos");
         return;
       }
@@ -131,16 +185,29 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
         if (msg.includes("email not confirmed") || msg.includes("not confirmed")) {
           toast.error("Aún no has validado tu email. Revisa tu bandeja de entrada.");
         } else {
+          registerFailedAttempt();
           toast.error("DNI o contraseña incorrectos");
         }
         return;
       }
+      clearLock();
       toast.success("¡Bienvenido/a!");
     } catch (err) {
       console.error(err);
       toast.error("Error al iniciar sesión");
     } finally {
       setBusy(false);
+    }
+  }
+
+  function registerFailedAttempt() {
+    const lock = getLock();
+    const count = lock.count + 1;
+    if (count >= MAX_ATTEMPTS) {
+      setLock({ count: 0, until: Date.now() + LOCK_MS });
+      toast.error(`Cuenta bloqueada temporalmente ${LOCK_MS / 1000}s por seguridad.`);
+    } else {
+      setLock({ count, until: 0 });
     }
   }
 
@@ -212,6 +279,10 @@ function SignupForm({ onDone }: { onDone: () => void }) {
         const msg = error.message.toLowerCase();
         if (msg.includes("profiles_dni_key")) {
           toast.error("Ese DNI ya está registrado");
+        } else if (msg.includes("pwned") || msg.includes("leak") || msg.includes("compromised")) {
+          toast.error("Esa contraseña ha aparecido en filtraciones. Usa otra distinta.");
+        } else if (msg.includes("weak") || msg.includes("password should")) {
+          toast.error("La contraseña es demasiado débil. Usa mayúsculas, minúsculas y números.");
         } else if (msg.includes("already") || msg.includes("registered")) {
           toast.error("Ese email ya está registrado");
         } else if (msg.includes("duplicate") || msg.includes("database error")) {
@@ -340,6 +411,9 @@ function SignupForm({ onDone }: { onDone: () => void }) {
       <Field label="DNI" value={dni} onChange={setDni} placeholder="12345678A" autoComplete="username" maxLength={9} />
       <Field label="Email" value={email} onChange={setEmail} type="email" autoComplete="email" maxLength={255} />
       <Field label="Contraseña" value={password} onChange={setPassword} type="password" autoComplete="new-password" maxLength={72} />
+      <p className="text-xs text-muted-foreground">
+        Mínimo 8 caracteres, con mayúscula, minúscula y número. No se admiten contraseñas filtradas.
+      </p>
       <button
         type="submit"
         disabled={busy}
