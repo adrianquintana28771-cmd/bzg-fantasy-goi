@@ -10,14 +10,18 @@ export const teams: Team[] = [
   { id: "t2", seasonId: "s24", name: "BZG Senior Fem.", category: "senior", gender: "femenino" },
   { id: "t3", seasonId: "s24", name: "BZG Juvenil Masc.", category: "juvenil", gender: "masculino" },
   { id: "t4", seasonId: "s24", name: "BZG Juvenil Fem.", category: "juvenil", gender: "femenino" },
+  { id: "t5", seasonId: "s24", name: "BZG Cadete Masc.", category: "cadete", gender: "masculino" },
+  { id: "t6", seasonId: "s24", name: "BZG Cadete Fem.", category: "cadete", gender: "femenino" },
 ];
 
-// 20 players, 5 per team, deterministic
+// 30 players, 5 per team, deterministic
 const names = [
   "Jon M.", "Iker A.", "Unai B.", "Ander G.", "Aitor R.",
   "Ane G.", "Nora Z.", "Maialen E.", "Leire O.", "Uxue T.",
   "Oihan V.", "Eneko C.", "Danel Q.", "Mikel H.", "Beñat L.",
   "Naia H.", "Irati L.", "June K.", "Amaia P.", "Miren D.",
+  "Xabi F.", "Julen S.", "Asier N.", "Peio R.", "Haritz U.",
+  "Elene B.", "Nahia J.", "Malen R.", "Izaro C.", "Nerea A.",
 ];
 const positions = ["portero", "extremo", "lateral", "central", "pivote"] as const;
 
