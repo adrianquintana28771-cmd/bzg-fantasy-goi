@@ -31,18 +31,17 @@ const dniSchema = z
 
 const passwordSchema = z
   .string()
-  .min(8, "La contraseña debe tener al menos 8 caracteres")
   .max(72, "Máximo 72 caracteres")
-  .regex(/[a-z]/, "Debe incluir una letra minúscula")
-  .regex(/[A-Z]/, "Debe incluir una letra mayúscula")
-  .regex(/\d/, "Debe incluir un número");
+  .refine((v) => (v.match(/[A-Z]/g) ?? []).length >= 1, "Debe incluir al menos 1 mayúscula")
+  .refine((v) => (v.match(/[a-z]/g) ?? []).length >= 5, "Debe incluir al menos 5 minúsculas")
+  .refine((v) => (v.match(/\d/g) ?? []).length >= 2, "Debe incluir al menos 2 números");
 
 const displayNameSchema = z
   .string()
   .trim()
   .min(2, "Nombre demasiado corto")
   .max(60, "Máximo 60 caracteres")
-  .regex(/^[\p{L}\p{M}\s'.\-]+$/u, "Sólo letras, espacios, guiones y apóstrofos");
+  .regex(/^[\p{L}\p{N}\s]+$/u, "Sólo letras y números");
 
 const emailSchema = z
   .string()
