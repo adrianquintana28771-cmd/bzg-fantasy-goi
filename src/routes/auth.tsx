@@ -279,6 +279,10 @@ function SignupForm({ onDone }: { onDone: () => void }) {
         const msg = error.message.toLowerCase();
         if (msg.includes("profiles_dni_key")) {
           toast.error("Ese DNI ya está registrado");
+        } else if (msg.includes("pwned") || msg.includes("leak") || msg.includes("compromised")) {
+          toast.error("Esa contraseña ha aparecido en filtraciones. Usa otra distinta.");
+        } else if (msg.includes("weak") || msg.includes("password should")) {
+          toast.error("La contraseña es demasiado débil. Usa mayúsculas, minúsculas y números.");
         } else if (msg.includes("already") || msg.includes("registered")) {
           toast.error("Ese email ya está registrado");
         } else if (msg.includes("duplicate") || msg.includes("database error")) {
