@@ -17,22 +17,50 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+const DNI_LETTERS = "TRWAGMYFPDXBNJZSQVHLCKE";
+
 const dniSchema = z
   .string()
   .trim()
   .regex(/^\d{8}[A-Za-z]$/, "DNI no válido (8 dígitos y 1 letra)")
-  .transform((v) => v.toUpperCase());
+  .transform((v) => v.toUpperCase())
+  .refine((v) => {
+    const num = parseInt(v.slice(0, 8), 10);
+    return DNI_LETTERS[num % 23] === v[8];
+  }, "La letra del DNI no es correcta");
+
+const passwordSchema = z
+  .string()
+  .min(8, "La contraseña debe tener al menos 8 caracteres")
+  .max(72, "Máximo 72 caracteres")
+  .regex(/[a-z]/, "Debe incluir una letra minúscula")
+  .regex(/[A-Z]/, "Debe incluir una letra mayúscula")
+  .regex(/\d/, "Debe incluir un número");
+
+const displayNameSchema = z
+  .string()
+  .trim()
+  .min(2, "Nombre demasiado corto")
+  .max(60, "Máximo 60 caracteres")
+  .regex(/^[\p{L}\p{M}\s'.\-]+$/u, "Sólo letras, espacios, guiones y apóstrofos");
+
+const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email("Email no válido")
+  .max(255, "Email demasiado largo");
 
 const loginSchema = z.object({
   dni: dniSchema,
-  password: z.string().min(6, "Mínimo 6 caracteres"),
+  password: z.string().min(1, "Introduce tu contraseña").max(72),
 });
 
 const signupSchema = z.object({
   dni: dniSchema,
-  email: z.string().trim().email("Email no válido").max(255),
-  displayName: z.string().trim().min(2, "Mínimo 2 caracteres").max(60),
-  password: z.string().min(6, "Mínimo 6 caracteres").max(72),
+  email: emailSchema,
+  displayName: displayNameSchema,
+  password: passwordSchema,
 });
 
 type Mode = "login" | "signup" | "forgot";
