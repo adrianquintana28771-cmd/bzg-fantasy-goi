@@ -45,6 +45,8 @@ export const matches: Match[] = [
   { id: "m3", seasonId: "s24", teamId: "t2", opponent: "Zuazo", date: "2024-10-13", round: 1, locationType: "local", goalsFor: 30, goalsAgainst: 18, status: "publicado", matchCode: "BZG-M3" },
   { id: "m4", seasonId: "s24", teamId: "t3", opponent: "Leioa", date: "2024-10-19", round: 1, locationType: "visitante", goalsFor: 25, goalsAgainst: 22, status: "publicado", matchCode: "BZG-M4" },
   { id: "m5", seasonId: "s24", teamId: "t4", opponent: "Getxo", date: "2024-10-20", round: 1, locationType: "local", goalsFor: 23, goalsAgainst: 20, status: "estadisticas", matchCode: "BZG-M5" },
+  { id: "m6", seasonId: "s24", teamId: "t5", opponent: "Romo", date: "2024-10-26", round: 1, locationType: "local", goalsFor: 24, goalsAgainst: 21, status: "publicado", matchCode: "BZG-M6" },
+  { id: "m7", seasonId: "s24", teamId: "t6", opponent: "Basauri", date: "2024-10-27", round: 1, locationType: "visitante", goalsFor: 19, goalsAgainst: 22, status: "publicado", matchCode: "BZG-M7" },
 ];
 
 // deterministic pseudo-random
