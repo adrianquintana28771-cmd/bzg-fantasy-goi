@@ -411,6 +411,9 @@ function SignupForm({ onDone }: { onDone: () => void }) {
       <Field label="DNI" value={dni} onChange={setDni} placeholder="12345678A" autoComplete="username" maxLength={9} />
       <Field label="Email" value={email} onChange={setEmail} type="email" autoComplete="email" maxLength={255} />
       <Field label="Contraseña" value={password} onChange={setPassword} type="password" autoComplete="new-password" maxLength={72} />
+      <p className="text-xs text-muted-foreground">
+        Mínimo 8 caracteres, con mayúscula, minúscula y número. No se admiten contraseñas filtradas.
+      </p>
       <button
         type="submit"
         disabled={busy}
