@@ -125,6 +125,25 @@ function AuthPage() {
   );
 }
 
+const LOCK_KEY = "bzg_login_lock";
+const MAX_ATTEMPTS = 5;
+const LOCK_MS = 60_000;
+
+function getLock(): { count: number; until: number } {
+  if (typeof window === "undefined") return { count: 0, until: 0 };
+  try {
+    return JSON.parse(window.sessionStorage.getItem(LOCK_KEY) ?? "") ?? { count: 0, until: 0 };
+  } catch {
+    return { count: 0, until: 0 };
+  }
+}
+function setLock(v: { count: number; until: number }) {
+  if (typeof window !== "undefined") window.sessionStorage.setItem(LOCK_KEY, JSON.stringify(v));
+}
+function clearLock() {
+  if (typeof window !== "undefined") window.sessionStorage.removeItem(LOCK_KEY);
+}
+
 function LoginForm({ onForgot }: { onForgot: () => void }) {
   const [dni, setDni] = useState("");
   const [password, setPassword] = useState("");
@@ -132,6 +151,12 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    const lock = getLock();
+    if (lock.until > Date.now()) {
+      const secs = Math.ceil((lock.until - Date.now()) / 1000);
+      toast.error(`Demasiados intentos. Prueba de nuevo en ${secs}s.`);
+      return;
+    }
     const parsed = loginSchema.safeParse({ dni, password });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
@@ -147,6 +172,7 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
       });
       if (rpcError) throw rpcError;
       if (!emailData) {
+        registerFailedAttempt();
         toast.error("DNI o contraseña incorrectos");
         return;
       }
@@ -159,16 +185,29 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
         if (msg.includes("email not confirmed") || msg.includes("not confirmed")) {
           toast.error("Aún no has validado tu email. Revisa tu bandeja de entrada.");
         } else {
+          registerFailedAttempt();
           toast.error("DNI o contraseña incorrectos");
         }
         return;
       }
+      clearLock();
       toast.success("¡Bienvenido/a!");
     } catch (err) {
       console.error(err);
       toast.error("Error al iniciar sesión");
     } finally {
       setBusy(false);
+    }
+  }
+
+  function registerFailedAttempt() {
+    const lock = getLock();
+    const count = lock.count + 1;
+    if (count >= MAX_ATTEMPTS) {
+      setLock({ count: 0, until: Date.now() + LOCK_MS });
+      toast.error(`Cuenta bloqueada temporalmente ${LOCK_MS / 1000}s por seguridad.`);
+    } else {
+      setLock({ count, until: 0 });
     }
   }
 
