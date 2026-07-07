@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Calendar, Users, ClipboardList, Settings, FileText, Trophy, ShieldAlert } from "lucide-react";
+import { Calendar, Users, ClipboardList, Settings, FileText, Trophy, ShieldAlert, BarChart3 } from "lucide-react";
 import { useFantasy, fantasyStore } from "@/lib/fantasy/store";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
 import { AdminGuard } from "@/components/admin-guard";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -22,7 +23,14 @@ export const Route = createFileRoute("/admin/")({
 
 function Admin() {
   const { seasons, teams, players, matches, stats, rules, actaFiles } = useFantasy((s) => s);
+  const { isSuperAdmin, isManager, isAdmin, canEditStats, canEditMatches, canManagePlayers, canManageAll } = useAuth();
   const active = seasons.find((s) => s.isActive);
+  const roleLabel = isSuperAdmin ? "super_admin" : isManager ? "manager" : isAdmin ? "admin" : "";
+  const roleDescription = isSuperAdmin
+    ? "Puedes gestionar todo: reglas, partidos, jugadores/as y estadísticas."
+    : isManager
+      ? "Puedes editar la información de partidos y añadir o borrar jugadores/as."
+      : "Puedes editar el desempeño (estadísticas) de cada jugador/a en los partidos.";
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -32,13 +40,12 @@ function Admin() {
           <ShieldAlert className="h-4 w-4" /> Zona de administración
         </div>
         <p className="mt-1 text-xs">
-          Estás dentro porque tienes rol <strong>admin</strong>. Para dar el rol a otra
-          persona, añade una fila en la tabla <code>user_roles</code> con su <code>user_id</code> y rol <code>admin</code>.
+          Rol actual: <strong>{roleLabel}</strong>. {roleDescription}
         </p>
       </div>
 
       <h1 className="mt-6 font-display text-4xl">Panel de administración</h1>
-      <p className="text-sm text-muted-foreground">Gestiona temporadas, equipos, jugadores/as, partidos y puntuación.</p>
+      <p className="text-sm text-muted-foreground">Accede a las secciones que tu rol permite gestionar.</p>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={Calendar} label="Temporadas" value={seasons.length} sub={`Activa: ${active?.name ?? "—"}`} />
@@ -48,24 +55,38 @@ function Admin() {
       </div>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
-        <Section
-          icon={Settings}
-          title="Reglas de puntuación"
-          description="Configura los puntos Fantasy de cada acción. Con opción de modo educativo."
-          to="/admin/reglas"
-        />
-        <Section
-          icon={ClipboardList}
-          title="Gestionar partidos"
-          description="Crea partidos, genera actas y sube el acta con las estadísticas."
-          to="/partidos"
-        />
-        <Section
-          icon={Users}
-          title="Equipos y plantillas"
-          description="Consulta equipos, jugadores/as y sus estadísticas."
-          to="/equipos"
-        />
+        {canManageAll && (
+          <Section
+            icon={Settings}
+            title="Reglas de puntuación"
+            description="Configura los puntos Fantasy de cada acción. Sólo super_admin."
+            to="/admin/reglas"
+          />
+        )}
+        {canEditMatches && (
+          <Section
+            icon={ClipboardList}
+            title="Gestionar partidos"
+            description="Crea, edita partidos y sube el acta."
+            to="/partidos"
+          />
+        )}
+        {canEditStats && (
+          <Section
+            icon={BarChart3}
+            title="Editar estadísticas"
+            description="Introduce el desempeño de cada jugador/a en los partidos."
+            to="/partidos"
+          />
+        )}
+        {canManagePlayers && (
+          <Section
+            icon={Users}
+            title="Equipos y jugadores/as"
+            description="Añade o borra jugadores/as de cada equipo."
+            to="/equipos"
+          />
+        )}
         <Section
           icon={Trophy}
           title="Rankings"
@@ -74,35 +95,39 @@ function Admin() {
         />
       </div>
 
-      <h2 className="mt-10 font-display text-2xl">Reglas activas actualmente</h2>
-      <p className="text-xs text-muted-foreground">Vista rápida — edítalas en “Reglas de puntuación”.</p>
-      <div className="mt-3 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-        {rules.filter((r) => r.active).map((r) => (
-          <div
-            key={r.key}
-            className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-sm"
-          >
-            <span>{r.label}</span>
-            <span
-              className={`font-display text-lg ${r.points >= 0 ? "text-primary" : "text-destructive"}`}
-            >
-              {r.points > 0 ? `+${r.points}` : r.points}
-            </span>
+      {canManageAll && (
+        <>
+          <h2 className="mt-10 font-display text-2xl">Reglas activas actualmente</h2>
+          <p className="text-xs text-muted-foreground">Vista rápida — edítalas en “Reglas de puntuación”.</p>
+          <div className="mt-3 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+            {rules.filter((r) => r.active).map((r) => (
+              <div
+                key={r.key}
+                className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-sm"
+              >
+                <span>{r.label}</span>
+                <span
+                  className={`font-display text-lg ${r.points >= 0 ? "text-primary" : "text-destructive"}`}
+                >
+                  {r.points > 0 ? `+${r.points}` : r.points}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="mt-8 flex flex-wrap gap-2">
-        <button
-          onClick={() => {
-            fantasyStore.resetRules();
-            toast.success("Reglas restauradas");
-          }}
-          className="rounded-lg border border-border bg-card px-4 py-2 text-sm hover:bg-secondary"
-        >
-          Restaurar reglas por defecto
-        </button>
-      </div>
+          <div className="mt-8 flex flex-wrap gap-2">
+            <button
+              onClick={() => {
+                fantasyStore.resetRules();
+                toast.success("Reglas restauradas");
+              }}
+              className="rounded-lg border border-border bg-card px-4 py-2 text-sm hover:bg-secondary"
+            >
+              Restaurar reglas por defecto
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
