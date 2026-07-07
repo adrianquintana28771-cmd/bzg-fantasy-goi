@@ -19,7 +19,8 @@ const BASE_NAV: NavItem[] = [
 ];
 
 export function SiteHeader() {
-  const { user, displayName, signOut, isAdmin } = useAuth();
+  const { user, displayName, signOut, isStaff, isSuperAdmin, isManager, isAdmin } = useAuth();
+  const roleLabel = isSuperAdmin ? "Super admin" : isManager ? "Manager" : isAdmin ? "Admin" : "Usuario";
   const navigate = useNavigate();
 
   async function handleSignOut() {
@@ -48,7 +49,7 @@ export function SiteHeader() {
             <div className="hidden text-right sm:block">
               <div className="truncate text-sm font-semibold">{displayName ?? "Usuario"}</div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                {isAdmin ? "Admin" : "Usuario"}
+                {roleLabel}
               </div>
             </div>
             <button
@@ -75,9 +76,9 @@ export function SiteHeader() {
 }
 
 export function BottomNav() {
-  const { isAdmin, user, signOut } = useAuth();
+  const { isStaff, user, signOut } = useAuth();
   const navigate = useNavigate();
-  const nav = BASE_NAV.filter((n) => !n.adminOnly || isAdmin);
+  const nav = BASE_NAV.filter((n) => !n.adminOnly || isStaff);
   const cols = nav.length + (user ? 1 : 0);
 
   async function handleSignOut() {
