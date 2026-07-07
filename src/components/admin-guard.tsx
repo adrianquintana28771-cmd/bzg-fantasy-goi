@@ -4,7 +4,7 @@ import { ShieldAlert } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 export function AdminGuard({ children }: { children: ReactNode }) {
-  const { loading, user, isAdmin } = useAuth();
+  const { loading, user, isStaff } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export function AdminGuard({ children }: { children: ReactNode }) {
     return <div className="mx-auto max-w-md p-10 text-center text-muted-foreground">Cargando...</div>;
   }
   if (!user) return null;
-  if (!isAdmin) {
+  if (!isStaff) {
     return (
       <div className="mx-auto max-w-md p-10 text-center">
         <ShieldAlert className="mx-auto h-12 w-12 text-warning" />
