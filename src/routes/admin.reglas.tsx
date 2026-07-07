@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useFantasy, fantasyStore } from "@/lib/fantasy/store";
 import { AdminGuard } from "@/components/admin-guard";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/admin/reglas")({
   head: () => ({
@@ -13,10 +14,29 @@ export const Route = createFileRoute("/admin/reglas")({
   }),
   component: () => (
     <AdminGuard>
-      <Reglas />
+      <SuperOnly>
+        <Reglas />
+      </SuperOnly>
     </AdminGuard>
   ),
 });
+
+function SuperOnly({ children }: { children: React.ReactNode }) {
+  const { canManageAll } = useAuth();
+  if (!canManageAll) {
+    return (
+      <div className="mx-auto max-w-md p-10 text-center">
+        <ShieldAlert className="mx-auto h-12 w-12 text-warning" />
+        <h1 className="mt-3 font-display text-3xl">Sólo super_admin</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Editar las reglas de puntuación está reservado al rol super_admin.
+        </p>
+        <Link to="/admin" className="mt-6 inline-block text-primary hover:underline">Volver al panel</Link>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
 
 function Reglas() {
   const { rules } = useFantasy((s) => s);
