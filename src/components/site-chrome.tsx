@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Home, Trophy, Users, ClipboardList, Settings, LogIn, LogOut } from "lucide-react";
+import { Home, Trophy, ClipboardList, Settings, LogIn, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 type NavItem = {
@@ -8,12 +8,13 @@ type NavItem = {
   Icon: typeof Home;
   color: string;
   adminOnly?: boolean;
+  authOnly?: boolean;
 };
 
 const BASE_NAV: NavItem[] = [
   { to: "/", label: "Inicio", Icon: Home, color: "var(--color-primary)" },
+  { to: "/plantilla", label: "Plantilla", Icon: Shield, color: "var(--color-accent)", authOnly: true },
   { to: "/rankings", label: "Rankings", Icon: Trophy, color: "var(--gold)" },
-  { to: "/equipos", label: "Equipos", Icon: Users, color: "var(--color-accent)" },
   { to: "/partidos", label: "Partidos", Icon: ClipboardList, color: "var(--color-destructive)" },
   { to: "/admin", label: "Admin", Icon: Settings, color: "var(--color-muted-foreground)", adminOnly: true },
 ];
