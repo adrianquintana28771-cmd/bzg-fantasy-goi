@@ -14,6 +14,218 @@ export type Database = {
   }
   public: {
     Tables: {
+      jornadas: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          is_locked: boolean
+          nombre: string
+          numero: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_locked?: boolean
+          nombre: string
+          numero: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_locked?: boolean
+          nombre?: string
+          numero?: number
+        }
+        Relationships: []
+      }
+      lineups: {
+        Row: {
+          central: string | null
+          created_at: string
+          extremo_der: string | null
+          extremo_izq: string | null
+          id: string
+          jornada_id: string
+          lateral_der: string | null
+          lateral_izq: string | null
+          locked: boolean
+          pivote: string | null
+          portero: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          central?: string | null
+          created_at?: string
+          extremo_der?: string | null
+          extremo_izq?: string | null
+          id?: string
+          jornada_id: string
+          lateral_der?: string | null
+          lateral_izq?: string | null
+          locked?: boolean
+          pivote?: string | null
+          portero?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          central?: string | null
+          created_at?: string
+          extremo_der?: string | null
+          extremo_izq?: string | null
+          id?: string
+          jornada_id?: string
+          lateral_der?: string | null
+          lateral_izq?: string | null
+          locked?: boolean
+          pivote?: string | null
+          portero?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lineups_central_fkey"
+            columns: ["central"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_extremo_der_fkey"
+            columns: ["extremo_der"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_extremo_izq_fkey"
+            columns: ["extremo_izq"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_jornada_id_fkey"
+            columns: ["jornada_id"]
+            isOneToOne: false
+            referencedRelation: "jornadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_lateral_der_fkey"
+            columns: ["lateral_der"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_lateral_izq_fkey"
+            columns: ["lateral_izq"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_pivote_fkey"
+            columns: ["pivote"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_portero_fkey"
+            columns: ["portero"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      misiones: {
+        Row: {
+          created_at: string
+          descripcion: string
+          id: string
+          is_active: boolean
+          nombre: string
+          recompensa_sobres: number
+        }
+        Insert: {
+          created_at?: string
+          descripcion: string
+          id?: string
+          is_active?: boolean
+          nombre: string
+          recompensa_sobres?: number
+        }
+        Update: {
+          created_at?: string
+          descripcion?: string
+          id?: string
+          is_active?: boolean
+          nombre?: string
+          recompensa_sobres?: number
+        }
+        Relationships: []
+      }
+      player_pool: {
+        Row: {
+          created_at: string
+          id: string
+          nombre: string
+          posicion: Database["public"]["Enums"]["plantilla_posicion"]
+          rating: number
+          team_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          nombre: string
+          posicion: Database["public"]["Enums"]["plantilla_posicion"]
+          rating?: number
+          team_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nombre?: string
+          posicion?: Database["public"]["Enums"]["plantilla_posicion"]
+          rating?: number
+          team_id?: string | null
+        }
+        Relationships: []
+      }
+      player_usage: {
+        Row: {
+          player_id: string
+          user_id: string
+          usos_gastados: number
+        }
+        Insert: {
+          player_id: string
+          user_id: string
+          usos_gastados?: number
+        }
+        Update: {
+          player_id?: string
+          user_id?: string
+          usos_gastados?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_usage_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -38,6 +250,58 @@ export type Database = {
         }
         Relationships: []
       }
+      user_misiones: {
+        Row: {
+          claimed_at: string
+          mision_id: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          mision_id: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          mision_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_misiones_mision_id_fkey"
+            columns: ["mision_id"]
+            isOneToOne: false
+            referencedRelation: "misiones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_players: {
+        Row: {
+          obtained_at: string
+          player_id: string
+          user_id: string
+        }
+        Insert: {
+          obtained_at?: string
+          player_id: string
+          user_id: string
+        }
+        Update: {
+          obtained_at?: string
+          player_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_players_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -59,11 +323,31 @@ export type Database = {
         }
         Relationships: []
       }
+      user_wallet: {
+        Row: {
+          sobres: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          sobres?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          sobres?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      claim_mision: { Args: { _mision_id: string }; Returns: number }
+      close_jornada: { Args: { _jornada_id: string }; Returns: undefined }
       dni_exists: { Args: { _dni: string }; Returns: boolean }
       email_for_dni: { Args: { _dni: string }; Returns: string }
       has_role: {
@@ -73,9 +357,26 @@ export type Database = {
         }
         Returns: boolean
       }
+      open_sobre: {
+        Args: never
+        Returns: {
+          nombre: string
+          player_id: string
+          posicion: Database["public"]["Enums"]["plantilla_posicion"]
+          rating: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "manager" | "super_admin"
+      plantilla_posicion:
+        | "portero"
+        | "extremo_izq"
+        | "extremo_der"
+        | "lateral_izq"
+        | "lateral_der"
+        | "central"
+        | "pivote"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -204,6 +505,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "manager", "super_admin"],
+      plantilla_posicion: [
+        "portero",
+        "extremo_izq",
+        "extremo_der",
+        "lateral_izq",
+        "lateral_der",
+        "central",
+        "pivote",
+      ],
     },
   },
 } as const
