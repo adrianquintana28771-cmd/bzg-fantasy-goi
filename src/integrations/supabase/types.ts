@@ -360,10 +360,10 @@ export type Database = {
       open_sobre: {
         Args: never
         Returns: {
-          nombre: string
-          player_id: string
-          posicion: Database["public"]["Enums"]["plantilla_posicion"]
-          rating: number
+          p_id: string
+          p_nombre: string
+          p_posicion: Database["public"]["Enums"]["plantilla_posicion"]
+          p_rating: number
         }[]
       }
     }
