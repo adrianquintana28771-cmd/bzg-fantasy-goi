@@ -1,64 +1,80 @@
-# BZG Fantasy Eskubaloia — Plan MVP
+# Plan: Plantilla, sobres, misiones y alineación
 
-Propongo construir la app en **dos fases** para entregar valor rápido y evitar bloqueos. Confírmame la fase 1 y sigo.
+Nota: al describir los huecos salieron 7 posiciones (portero + 2 extremos + 2 laterales + central + pivote), no 5. El plan asume **7 huecos reales de balonmano**. Dime si prefieres reducirlo.
 
-## Fase 1 — Prototipo visual navegable (sin backend)
+## Alcance
+1. Nueva ruta `/plantilla` (protegida) con dos zonas: **Mis jugadores** y **Pista (alineación)**.
+2. Sistema de **sobres** ganados completando **misiones**.
+3. Alineación **por jornada** con límite de **5 usos por jugador en toda la temporada**.
+4. Panel admin (super_admin/manager) para crear misiones y abrir jornadas.
 
-Objetivo: ver y validar la app completa en móvil con datos de ejemplo, generación de acta PDF real, y sistema de puntos calculado en cliente. Nada de login todavía.
+## UX
 
-### Diseño
-- Identidad club: verde / blanco / rojo, moderno, deportivo, cercano, apto para familias.
-- Design system en `src/styles.css` (tokens oklch, tipografía deportiva, tarjetas, badges, podio).
-- Mobile-first, responsive.
+### Ruta `/plantilla`
+```
++-----------------------------------------+
+|  Jornada activa: J5   ·  Sobres: 2 [Abrir] |
++----------------------+------------------+
+|  MIS JUGADORES       |  PISTA           |
+|  (lista con usos     |    [EI]  [C]  [ED]|
+|   restantes 5/5)     |    [LI] [P] [LD] |
+|  drag → hueco        |         [PT]     |
+|                      |  Guardar alineac.|
++----------------------+------------------+
+|  Misiones activas  [Completar]           |
++-----------------------------------------+
+```
+- Cada jugador muestra `usos_restantes`. Al llegar a 0 no se puede alinear.
+- Al **Guardar alineación** se bloquea al inicio de la jornada (fecha configurable por admin).
+- Solo los jugadores alineados suman puntos en esa jornada.
 
-### Rutas (TanStack Start)
-- `/` Inicio: hero, jugador/a de la jornada, equipo destacado, últimos partidos, Top 5.
-- `/rankings` con filtros (temporada, categoría, equipo, jornada, género, posición).
-- `/equipos` listado por categoría + `/equipos/$teamId` ficha equipo con plantilla y ranking interno.
-- `/jugadores/$playerId` ficha con stats, puntos, evolución por jornada (gráfico).
-- `/partidos` listado + `/partidos/$matchId` detalle con estadísticas y estado.
-- `/admin` panel (mock, sin auth aún): temporadas, equipos, jugadores, partidos, reglas de puntuación, generar/subir acta.
-- `/acta/$matchId` vista imprimible A4 + botón "Descargar PDF".
+### Sobres
+- Botón "Abrir sobre" → animación simple → 3 jugadores aleatorios del pool disponible (respetando categoría/género si aplica; por defecto todos). Se añaden a la plantilla del usuario.
 
-### Datos de ejemplo (mock en memoria)
-- 2 temporadas, 4 equipos (categorías mixtas), 20 jugadores/as ficticios (alias tipo "Ane G.", "Jon M."), 5 partidos con estadísticas y puntos calculados.
-- Reglas de puntuación por defecto según tu propuesta, con "modo educativo" para benjamín/alevín.
+### Misiones
+- Ejemplos: "Inicia sesión 3 días seguidos", "Predice el resultado de un partido", "Alinea 7 jugadores en una jornada".
+- Al cumplirse, el usuario reclama la recompensa (nº de sobres).
+- MVP: misiones marcadas manualmente como completadas por el usuario (`self-report`) + una automática ("primera alineación guardada"). Ampliaciones futuras.
 
-### Motor Fantasy
-- Función pura `calculateFantasyPoints(stats, rules)` configurable.
-- Reglas editables desde `/admin/reglas` (persistidas en `localStorage` en fase 1).
+## Modelo de datos (Lovable Cloud)
 
-### Acta PDF
-- Generación cliente con `jspdf` + `jspdf-autotable`.
-- Selección de convocados, tabla imprimible A4, QR con id de partido, firma, observaciones.
+- `jornadas` (numero, nombre, lineup_locks_at, is_active)
+- `player_pool` (id, nombre, posicion enum, categoria, genero, rating)
+- `user_players` (user_id, player_id, obtenido_at) — inventario del usuario, único (user_id, player_id)
+- `player_usage` (user_id, player_id, usos_gastados int default 0) — se incrementa al validarse la jornada
+- `lineups` (user_id, jornada_id, portero, ext_izq, ext_der, lat_izq, lat_der, central, pivote, locked_at) — únicos por (user_id, jornada_id)
+- `sobres` (id, user_id, source enum('mision','admin'), opened_at nullable)
+- `misiones` (id, nombre, descripcion, recompensa_sobres, tipo enum('self','auto'), is_active)
+- `user_misiones` (user_id, mision_id, completed_at, claimed_at) — único por (user_id, mision_id)
 
-### Subida de acta
-- Input de archivo (foto/PDF), preview, guardado en memoria/localStorage.
-- Formulario rápido de estadísticas junto al preview.
+Enum `posicion`: `portero | extremo_izq | extremo_der | lateral_izq | lateral_der | central | pivote`.
 
-### Privacidad
-- Solo alias o nombre + inicial en vistas públicas. Sin fechas/emails/teléfonos.
+Cada hueco de la pista solo acepta jugadores cuya `posicion` coincida (portero solo portero; el resto por su posición natural).
 
-## Fase 2 — Backend con Lovable Cloud (tras validar fase 1)
+RLS:
+- `user_players`, `player_usage`, `lineups`, `sobres`, `user_misiones`: usuario ve/edita solo lo suyo; admins/managers ven todo.
+- `player_pool`, `misiones`, `jornadas`: lectura pública autenticada; escritura solo staff.
 
-- Auth con roles: admin, delegado, familia/jugador, público.
-- Tablas: `seasons, teams, players, matches, player_match_stats, scoring_rules` + `user_roles` (tabla separada, `has_role()` security definer).
-- RLS: público lee rankings/equipos (columnas seguras); delegados escriben partidos de sus equipos; admin todo.
-- Storage bucket privado `actas` para PDFs/fotos.
-- Migración de mocks a Supabase.
-- Preparado para futuro OCR (columna `acta_file_url`, endpoint edge listo).
+## Server functions
+- `openSobre()` → escoge N jugadores random no repetidos, los inserta en `user_players`, marca `opened_at`.
+- `saveLineup({ jornadaId, slots })` → valida posiciones, usos restantes > 0, jornada no bloqueada; upsert.
+- `lockJornada(jornadaId)` (staff) → incrementa `usos_gastados` de todos los alineados y bloquea.
+- `completeMision(misionId)` (self) → crea `user_misiones` completado; `claimReward()` → genera sobres.
 
-## Fuera de MVP (dejar arquitectura preparada)
-OCR automático, notificaciones, euskera/castellano toggle, exportación Excel, comparativas, trofeos.
+## Admin (`/admin/plantilla`)
+- Crear jornadas, marcar activa, botón "Cerrar jornada" (aplica usos).
+- Crear/editar misiones y su recompensa.
+- Otorgar sobres manualmente a un usuario.
+- Ver plantillas y alineaciones de usuarios (solo staff).
 
-## Detalles técnicos
-- Stack ya existente: TanStack Start + React 19 + Tailwind v4 + shadcn.
-- Nuevas deps: `jspdf`, `jspdf-autotable`, `qrcode`, `recharts` (evolución puntos).
-- Todo con tokens de diseño semánticos, sin colores hardcoded en componentes.
+## UI
+- Componente `HandballCourt` con SVG de media pista y 7 slots posicionados.
+- Drag&drop con `@dnd-kit/core`.
+- Reutiliza tokens de diseño existentes (nada de colores hardcoded).
 
----
+## Fuera de alcance (siguiente iteración)
+- Puntuación real vinculada a estadísticas de partidos (hoy los stats están en mock; cuando migren a DB, conectar `lineups` × `match_stats` para calcular la puntuación del usuario por jornada).
+- Mercado entre usuarios / trades.
+- Animaciones avanzadas de apertura de sobre.
 
-**Preguntas antes de construir:**
-1. ¿Empezamos por **Fase 1** (prototipo visual con mocks, ~1 iteración) y luego Cloud? ¿O prefieres arrancar ya con Cloud + auth desde el principio?
-2. ¿Tienes **logo del club** o lo genero provisional?
-3. ¿Idioma de la UI en esta primera versión: **castellano**, euskera, o ambos con toggle?
+¿Confirmas huecos = 7 y avanzo con la migración + UI?
