@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Home, Trophy, ClipboardList, Settings, LogIn, LogOut, Shield } from "lucide-react";
+import { Home, Trophy, Users, ClipboardList, Settings, LogIn, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 type NavItem = {
