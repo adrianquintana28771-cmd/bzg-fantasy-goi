@@ -203,7 +203,8 @@ function Inner({ userId, onInvalidate }: { userId: string; onInvalidate: () => v
     mutationFn: async () => {
       const { data, error } = await supabase.rpc("open_sobre");
       if (error) throw error;
-      return data as Array<{ player_id: string; nombre: string; posicion: Posicion; rating: number }>;
+      const rows = (data ?? []) as Array<{ p_id: string; p_nombre: string; p_posicion: Posicion; p_rating: number }>;
+      return rows.map((r) => ({ player_id: r.p_id, nombre: r.p_nombre, posicion: r.p_posicion, rating: r.p_rating }));
     },
     onSuccess: (data) => {
       setSobreResult(data);
