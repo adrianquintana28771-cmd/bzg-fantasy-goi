@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RankingsRouteImport } from './routes/rankings'
+import { Route as PlantillaRouteImport } from './routes/plantilla'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PartidosIndexRouteImport } from './routes/partidos.index'
@@ -29,6 +30,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const RankingsRoute = RankingsRouteImport.update({
   id: '/rankings',
   path: '/rankings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlantillaRoute = PlantillaRouteImport.update({
+  id: '/plantilla',
+  path: '/plantilla',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -80,6 +86,7 @@ const AdminReglasRoute = AdminReglasRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/reglas': typeof AdminReglasRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/reglas': typeof AdminReglasRoute
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/reglas': typeof AdminReglasRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/plantilla'
     | '/rankings'
     | '/reset-password'
     | '/admin/reglas'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/plantilla'
     | '/rankings'
     | '/reset-password'
     | '/admin/reglas'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/plantilla'
     | '/rankings'
     | '/reset-password'
     | '/admin/reglas'
@@ -162,6 +174,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  PlantillaRoute: typeof PlantillaRoute
   RankingsRoute: typeof RankingsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   AdminReglasRoute: typeof AdminReglasRoute
@@ -187,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/rankings'
       fullPath: '/rankings'
       preLoaderRoute: typeof RankingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plantilla': {
+      id: '/plantilla'
+      path: '/plantilla'
+      fullPath: '/plantilla'
+      preLoaderRoute: typeof PlantillaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -258,6 +278,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  PlantillaRoute: PlantillaRoute,
   RankingsRoute: RankingsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   AdminReglasRoute: AdminReglasRoute,
