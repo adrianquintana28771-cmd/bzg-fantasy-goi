@@ -14,6 +14,369 @@ export type Database = {
   }
   public: {
     Tables: {
+      club_action_types: {
+        Row: {
+          activo: boolean
+          created_at: string
+          grupo: string
+          id: string
+          nombre: string
+          orden: number
+          puntos: number
+          solo_portero: boolean
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          grupo?: string
+          id: string
+          nombre: string
+          orden?: number
+          puntos?: number
+          solo_portero?: boolean
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          grupo?: string
+          id?: string
+          nombre?: string
+          orden?: number
+          puntos?: number
+          solo_portero?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      club_match_actions: {
+        Row: {
+          action_id: string
+          cantidad: number
+          created_at: string
+          id: string
+          match_id: string
+          player_id: string
+          updated_at: string
+        }
+        Insert: {
+          action_id: string
+          cantidad?: number
+          created_at?: string
+          id?: string
+          match_id: string
+          player_id: string
+          updated_at?: string
+        }
+        Update: {
+          action_id?: string
+          cantidad?: number
+          created_at?: string
+          id?: string
+          match_id?: string
+          player_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_match_actions_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "club_action_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_match_actions_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "club_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_match_actions_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_match_players: {
+        Row: {
+          jugado: boolean
+          match_id: string
+          minutos: number | null
+          player_id: string
+        }
+        Insert: {
+          jugado?: boolean
+          match_id: string
+          minutos?: number | null
+          player_id: string
+        }
+        Update: {
+          jugado?: boolean
+          match_id?: string
+          minutos?: number | null
+          player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_match_players_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "club_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_match_players_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_matches: {
+        Row: {
+          created_at: string
+          es_local: boolean
+          fecha: string
+          goles_contra: number
+          goles_favor: number
+          id: string
+          jornada: number
+          rival: string
+          season_id: string
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          es_local?: boolean
+          fecha: string
+          goles_contra?: number
+          goles_favor?: number
+          id?: string
+          jornada?: number
+          rival: string
+          season_id: string
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          es_local?: boolean
+          fecha?: string
+          goles_contra?: number
+          goles_favor?: number
+          id?: string
+          jornada?: number
+          rival?: string
+          season_id?: string
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_matches_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "club_seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_matches_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "club_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_player_positions: {
+        Row: {
+          es_principal: boolean
+          player_id: string
+          position_id: string
+        }
+        Insert: {
+          es_principal?: boolean
+          player_id: string
+          position_id: string
+        }
+        Update: {
+          es_principal?: boolean
+          player_id?: string
+          position_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_player_positions_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_player_positions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "club_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_player_teams: {
+        Row: {
+          created_at: string
+          dorsal: number | null
+          player_id: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          dorsal?: number | null
+          player_id: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          dorsal?: number | null
+          player_id?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_player_teams_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_player_teams_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "club_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_players: {
+        Row: {
+          activo: boolean
+          alias: string | null
+          anio_nacimiento: number | null
+          created_at: string
+          id: string
+          nombre: string
+          sexo: Database["public"]["Enums"]["club_sexo"]
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          alias?: string | null
+          anio_nacimiento?: number | null
+          created_at?: string
+          id?: string
+          nombre: string
+          sexo: Database["public"]["Enums"]["club_sexo"]
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          alias?: string | null
+          anio_nacimiento?: number | null
+          created_at?: string
+          id?: string
+          nombre?: string
+          sexo?: Database["public"]["Enums"]["club_sexo"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      club_positions: {
+        Row: {
+          id: string
+          nombre: string
+          orden: number
+        }
+        Insert: {
+          id: string
+          nombre: string
+          orden?: number
+        }
+        Update: {
+          id?: string
+          nombre?: string
+          orden?: number
+        }
+        Relationships: []
+      }
+      club_seasons: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          nombre: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          nombre: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          nombre?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      club_teams: {
+        Row: {
+          categoria: Database["public"]["Enums"]["club_categoria"]
+          created_at: string
+          id: string
+          nombre: string
+          season_id: string
+          sexo: Database["public"]["Enums"]["club_sexo"]
+          updated_at: string
+        }
+        Insert: {
+          categoria: Database["public"]["Enums"]["club_categoria"]
+          created_at?: string
+          id?: string
+          nombre: string
+          season_id: string
+          sexo: Database["public"]["Enums"]["club_sexo"]
+          updated_at?: string
+        }
+        Update: {
+          categoria?: Database["public"]["Enums"]["club_categoria"]
+          created_at?: string
+          id?: string
+          nombre?: string
+          season_id?: string
+          sexo?: Database["public"]["Enums"]["club_sexo"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_teams_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "club_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jornadas: {
         Row: {
           created_at: string
@@ -343,7 +706,29 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      club_player_match_points: {
+        Row: {
+          match_id: string | null
+          player_id: string | null
+          puntos: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_match_actions_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "club_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_match_actions_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       claim_mision: { Args: { _mision_id: string }; Returns: number }
@@ -369,6 +754,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "manager" | "super_admin"
+      club_categoria: "cadete" | "juvenil" | "senior"
+      club_sexo: "masculino" | "femenino"
       plantilla_posicion:
         | "portero"
         | "extremo_izq"
@@ -392,12 +779,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -421,11 +808,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -446,11 +833,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -471,11 +858,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -488,11 +875,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -505,6 +892,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "manager", "super_admin"],
+      club_categoria: ["cadete", "juvenil", "senior"],
+      club_sexo: ["masculino", "femenino"],
       plantilla_posicion: [
         "portero",
         "extremo_izq",
