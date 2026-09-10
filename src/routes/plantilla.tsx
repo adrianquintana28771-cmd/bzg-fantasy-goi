@@ -78,8 +78,27 @@ interface WalletRow { sobres: number }
 interface MisionRow { id: string; nombre: string; descripcion: string; recompensa_sobres: number }
 
 function PlantillaPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, isSuperAdmin, isAdmin, isManager } = useAuth();
   const qc = useQueryClient();
+
+  if (!loading && user && !isSuperAdmin && (isAdmin || isManager)) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-10 text-center">
+        <BackButton />
+        <h1 className="mt-4 font-display text-3xl">Sección de juego</h1>
+        <p className="mt-2 text-muted-foreground">
+          Las cuentas de administración no tienen plantilla, sobres ni misiones. Tu trabajo es
+          registrar el desempeño de los jugadores/as.
+        </p>
+        <Link
+          to="/admin/desempeno"
+          className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+        >
+          Ir a Desempeño
+        </Link>
+      </div>
+    );
+  }
 
   if (loading) {
     return <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">Cargando…</div>;
