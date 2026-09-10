@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader, SiteFooter, BottomNav } from "@/components/site-chrome";
 import { AuthProvider } from "@/lib/auth-context";
+import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -125,12 +126,24 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <div className="flex min-h-screen flex-col bg-background pb-24">
+        <div className="relative flex min-h-screen flex-col bg-background pb-24">
+          <div
+            aria-hidden
+            className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center"
+          >
+            <img
+              src={escudoAsset.url}
+              alt=""
+              className="w-[150%] max-w-none opacity-[0.07] blur-sm sm:w-[70%] lg:w-[45%]"
+            />
+          </div>
+          <div className="relative z-10 flex min-h-screen flex-1 flex-col">
           <SiteHeader />
           <main className="flex-1">
             <Outlet />
           </main>
           <SiteFooter />
+          </div>
           <BottomNav />
         </div>
         <Toaster richColors position="top-center" />

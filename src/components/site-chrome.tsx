@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Home, Trophy, Users, ClipboardList, Settings, LogIn, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 
 type NavItem = {
   to: string;
@@ -36,9 +37,11 @@ export function SiteHeader() {
       <div className="bzg-stripe h-1 w-full" />
       <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
         <Link to="/" className="flex min-w-0 items-center gap-2.5">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground font-display text-lg shadow-card">
-            BZG
-          </span>
+          <img
+            src={escudoAsset.url}
+            alt="Escudo BZG Etxebarri"
+            className="h-11 w-11 shrink-0 object-contain drop-shadow"
+          />
           <div className="min-w-0 leading-tight">
             <div className="truncate font-display text-lg tracking-wide">BZG Fantasy</div>
             <div className="truncate text-[10px] uppercase tracking-widest text-muted-foreground">
