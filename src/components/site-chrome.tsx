@@ -9,11 +9,12 @@ type NavItem = {
   color: string;
   adminOnly?: boolean;
   authOnly?: boolean;
+  gameOnly?: boolean;
 };
 
 const BASE_NAV: NavItem[] = [
   { to: "/", label: "Inicio", Icon: Home, color: "var(--color-primary)" },
-  { to: "/plantilla", label: "Plantilla", Icon: Shield, color: "var(--color-accent)", authOnly: true },
+  { to: "/plantilla", label: "Plantilla", Icon: Shield, color: "var(--color-accent)", authOnly: true, gameOnly: true },
   { to: "/rankings", label: "Rankings", Icon: Trophy, color: "var(--gold)" },
   { to: "/equipos", label: "Equipos", Icon: Users, color: "var(--color-accent)" },
   { to: "/partidos", label: "Partidos", Icon: ClipboardList, color: "var(--color-destructive)" },

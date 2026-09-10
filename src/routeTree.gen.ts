@@ -21,6 +21,7 @@ import { Route as PartidosMatchIdRouteImport } from './routes/partidos.$matchId'
 import { Route as JugadoresPlayerIdRouteImport } from './routes/jugadores.$playerId'
 import { Route as EquiposTeamIdRouteImport } from './routes/equipos.$teamId'
 import { Route as AdminReglasRouteImport } from './routes/admin.reglas'
+import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -82,6 +83,11 @@ const AdminReglasRoute = AdminReglasRouteImport.update({
   path: '/admin/reglas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminDesempenoRoute = AdminDesempenoRouteImport.update({
+  id: '/admin/desempeno',
+  path: '/admin/desempeno',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/plantilla'
     | '/rankings'
     | '/reset-password'
+    | '/admin/desempeno'
     | '/admin/reglas'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/plantilla'
     | '/rankings'
     | '/reset-password'
+    | '/admin/desempeno'
     | '/admin/reglas'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/plantilla'
     | '/rankings'
     | '/reset-password'
+    | '/admin/desempeno'
     | '/admin/reglas'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
@@ -177,6 +189,7 @@ export interface RootRouteChildren {
   PlantillaRoute: typeof PlantillaRoute
   RankingsRoute: typeof RankingsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  AdminDesempenoRoute: typeof AdminDesempenoRoute
   AdminReglasRoute: typeof AdminReglasRoute
   EquiposTeamIdRoute: typeof EquiposTeamIdRoute
   JugadoresPlayerIdRoute: typeof JugadoresPlayerIdRoute
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReglasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/desempeno': {
+      id: '/admin/desempeno'
+      path: '/admin/desempeno'
+      fullPath: '/admin/desempeno'
+      preLoaderRoute: typeof AdminDesempenoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -281,6 +301,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlantillaRoute: PlantillaRoute,
   RankingsRoute: RankingsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  AdminDesempenoRoute: AdminDesempenoRoute,
   AdminReglasRoute: AdminReglasRoute,
   EquiposTeamIdRoute: EquiposTeamIdRoute,
   JugadoresPlayerIdRoute: JugadoresPlayerIdRoute,
