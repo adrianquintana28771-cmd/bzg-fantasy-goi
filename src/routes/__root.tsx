@@ -134,7 +134,7 @@ function RootComponent() {
             <img
               src={escudoAsset.url}
               alt=""
-              className="w-[150%] max-w-none opacity-15 blur-[2px] saturate-50 sm:w-[70%] lg:w-[45%]"
+              className="w-[90%] max-w-none opacity-25 blur-[1px] saturate-75 sm:w-[60%] lg:w-[40%]"
             />
           </div>
           <div className="relative z-10 flex min-h-screen flex-1 flex-col">
