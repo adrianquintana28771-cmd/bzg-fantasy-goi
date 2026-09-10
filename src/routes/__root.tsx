@@ -143,6 +143,7 @@ function RootComponent() {
             <Outlet />
           </main>
           <SiteFooter />
+          </div>
           <BottomNav />
         </div>
         <Toaster richColors position="top-center" />
