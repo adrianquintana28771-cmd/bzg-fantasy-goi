@@ -79,9 +79,12 @@ export function SiteHeader() {
 }
 
 export function BottomNav() {
-  const { isStaff, user, signOut } = useAuth();
+  const { isStaff, user, signOut, isSuperAdmin, isAdmin, isManager } = useAuth();
   const navigate = useNavigate();
-  const nav = BASE_NAV.filter((n) => (!n.adminOnly || isStaff) && (!n.authOnly || !!user));
+  const canPlay = isSuperAdmin || (!isAdmin && !isManager);
+  const nav = BASE_NAV.filter(
+    (n) => (!n.adminOnly || isStaff) && (!n.authOnly || !!user) && (!n.gameOnly || canPlay),
+  );
   const cols = nav.length + (user ? 1 : 0);
 
   async function handleSignOut() {
