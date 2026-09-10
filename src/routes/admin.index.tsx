@@ -74,9 +74,9 @@ function Admin() {
         {canEditStats && (
           <Section
             icon={BarChart3}
-            title="Editar estadísticas"
-            description="Introduce el desempeño de cada jugador/a en los partidos."
-            to="/partidos"
+            title="Desempeño de jugadores/as"
+            description="Formulario oficial: anota goles, flys, roscas, paradas, robos, fallos… y los puntos se calculan solos."
+            to="/admin/desempeno"
           />
         )}
         {canManagePlayers && (
