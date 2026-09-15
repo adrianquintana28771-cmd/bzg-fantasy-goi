@@ -269,7 +269,11 @@ export type Database = {
           activo: boolean
           alias: string | null
           anio_nacimiento: number | null
+          apellido1: string | null
+          apellido2: string | null
           created_at: string
+          dorsal: number | null
+          estado: Database["public"]["Enums"]["player_estado"]
           id: string
           nombre: string
           sexo: Database["public"]["Enums"]["club_sexo"]
@@ -279,7 +283,11 @@ export type Database = {
           activo?: boolean
           alias?: string | null
           anio_nacimiento?: number | null
+          apellido1?: string | null
+          apellido2?: string | null
           created_at?: string
+          dorsal?: number | null
+          estado?: Database["public"]["Enums"]["player_estado"]
           id?: string
           nombre: string
           sexo: Database["public"]["Enums"]["club_sexo"]
@@ -289,7 +297,11 @@ export type Database = {
           activo?: boolean
           alias?: string | null
           anio_nacimiento?: number | null
+          apellido1?: string | null
+          apellido2?: string | null
           created_at?: string
+          dorsal?: number | null
+          estado?: Database["public"]["Enums"]["player_estado"]
           id?: string
           nombre?: string
           sexo?: Database["public"]["Enums"]["club_sexo"]
@@ -511,53 +523,71 @@ export type Database = {
       }
       misiones: {
         Row: {
+          codigo_qr: string | null
           created_at: string
           descripcion: string
           id: string
           is_active: boolean
           nombre: string
           recompensa_sobres: number
+          tipo_sobre: string
         }
         Insert: {
+          codigo_qr?: string | null
           created_at?: string
           descripcion: string
           id?: string
           is_active?: boolean
           nombre: string
           recompensa_sobres?: number
+          tipo_sobre?: string
         }
         Update: {
+          codigo_qr?: string | null
           created_at?: string
           descripcion?: string
           id?: string
           is_active?: boolean
           nombre?: string
           recompensa_sobres?: number
+          tipo_sobre?: string
         }
         Relationships: []
       }
       player_pool: {
         Row: {
+          apellido1: string | null
           created_at: string
+          dorsal: number | null
+          estado: Database["public"]["Enums"]["player_estado"]
           id: string
           nombre: string
           posicion: Database["public"]["Enums"]["plantilla_posicion"]
+          rareza: Database["public"]["Enums"]["card_rareza"]
           rating: number
           team_id: string | null
         }
         Insert: {
+          apellido1?: string | null
           created_at?: string
+          dorsal?: number | null
+          estado?: Database["public"]["Enums"]["player_estado"]
           id: string
           nombre: string
           posicion: Database["public"]["Enums"]["plantilla_posicion"]
+          rareza?: Database["public"]["Enums"]["card_rareza"]
           rating?: number
           team_id?: string | null
         }
         Update: {
+          apellido1?: string | null
           created_at?: string
+          dorsal?: number | null
+          estado?: Database["public"]["Enums"]["player_estado"]
           id?: string
           nombre?: string
           posicion?: Database["public"]["Enums"]["plantilla_posicion"]
+          rareza?: Database["public"]["Enums"]["card_rareza"]
           rating?: number
           team_id?: string | null
         }
@@ -591,25 +621,34 @@ export type Database = {
       }
       profiles: {
         Row: {
+          apellido: string | null
           created_at: string
           display_name: string | null
           dni: string
           id: string
+          nombre: string | null
           updated_at: string
+          username: string | null
         }
         Insert: {
+          apellido?: string | null
           created_at?: string
           display_name?: string | null
           dni: string
           id: string
+          nombre?: string | null
           updated_at?: string
+          username?: string | null
         }
         Update: {
+          apellido?: string | null
           created_at?: string
           display_name?: string | null
           dni?: string
           id?: string
+          nombre?: string | null
           updated_at?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -641,19 +680,25 @@ export type Database = {
       }
       user_players: {
         Row: {
+          id: string
           obtained_at: string
           player_id: string
           user_id: string
+          usos: number
         }
         Insert: {
+          id?: string
           obtained_at?: string
           player_id: string
           user_id: string
+          usos?: number
         }
         Update: {
+          id?: string
           obtained_at?: string
           player_id?: string
           user_id?: string
+          usos?: number
         }
         Relationships: [
           {
@@ -689,16 +734,19 @@ export type Database = {
       user_wallet: {
         Row: {
           sobres: number
+          sobres_premium: number
           updated_at: string
           user_id: string
         }
         Insert: {
           sobres?: number
+          sobres_premium?: number
           updated_at?: string
           user_id: string
         }
         Update: {
           sobres?: number
+          sobres_premium?: number
           updated_at?: string
           user_id?: string
         }
@@ -732,9 +780,11 @@ export type Database = {
     }
     Functions: {
       claim_mision: { Args: { _mision_id: string }; Returns: number }
+      claim_qr: { Args: { _codigo: string }; Returns: number }
       close_jornada: { Args: { _jornada_id: string }; Returns: undefined }
       dni_exists: { Args: { _dni: string }; Returns: boolean }
       email_for_dni: { Args: { _dni: string }; Returns: string }
+      email_for_username: { Args: { _username: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -742,18 +792,31 @@ export type Database = {
         }
         Returns: boolean
       }
-      open_sobre: {
-        Args: never
-        Returns: {
-          p_id: string
-          p_nombre: string
-          p_posicion: Database["public"]["Enums"]["plantilla_posicion"]
-          p_rating: number
-        }[]
-      }
+      open_sobre:
+        | {
+            Args: never
+            Returns: {
+              p_id: string
+              p_nombre: string
+              p_posicion: Database["public"]["Enums"]["plantilla_posicion"]
+              p_rating: number
+            }[]
+          }
+        | {
+            Args: { _tipo?: string }
+            Returns: {
+              p_id: string
+              p_nombre: string
+              p_posicion: Database["public"]["Enums"]["plantilla_posicion"]
+              p_rareza: Database["public"]["Enums"]["card_rareza"]
+              p_rating: number
+            }[]
+          }
+      username_exists: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user" | "manager" | "super_admin"
+      card_rareza: "normal" | "raro" | "legendario"
       club_categoria: "cadete" | "juvenil" | "senior"
       club_sexo: "masculino" | "femenino"
       plantilla_posicion:
@@ -764,6 +827,7 @@ export type Database = {
         | "lateral_der"
         | "central"
         | "pivote"
+      player_estado: "disponible" | "dudoso" | "no_disponible"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -892,6 +956,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "manager", "super_admin"],
+      card_rareza: ["normal", "raro", "legendario"],
       club_categoria: ["cadete", "juvenil", "senior"],
       club_sexo: ["masculino", "femenino"],
       plantilla_posicion: [
@@ -903,6 +968,7 @@ export const Constants = {
         "central",
         "pivote",
       ],
+      player_estado: ["disponible", "dudoso", "no_disponible"],
     },
   },
 } as const
