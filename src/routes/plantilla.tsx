@@ -345,7 +345,7 @@ function Inner({ userId }: { userId: string }) {
         <h2 className="mb-3 font-display text-lg">Mis jugadores ({cards.length})</h2>
         {cards.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Todavía no tienes jugadores. Completa <Link to="/misiones" className="text-primary underline">misiones</Link> para conseguir sobres.
+            Todavía no tienes jugadores. Completa <Link to="/misiones" search={{ qr: undefined }} className="text-primary underline">misiones</Link> para conseguir sobres.
           </p>
         ) : (
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">

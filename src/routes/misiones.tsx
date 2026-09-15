@@ -124,7 +124,7 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
   useEffect(() => {
     if (initialQr) {
       qrMut.mutate(initialQr);
-      navigate({ to: "/misiones", search: {}, replace: true });
+      navigate({ to: "/misiones", search: { qr: undefined }, replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQr]);
