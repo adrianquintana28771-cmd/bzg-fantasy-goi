@@ -25,6 +25,14 @@ const names = [
 ];
 const positions = ["portero", "extremo", "lateral", "central", "pivote"] as const;
 
+const apellidos = [
+  "Etxebarria", "Aguirre", "Gorostiza", "Larrea", "Mendieta",
+  "Urrutia", "Zabala", "Bilbao", "Olabarria", "Iturbe",
+  "Arrieta", "Landa", "Garaikoetxea", "Uriarte", "Basterra",
+];
+
+const estados = ["disponible", "disponible", "disponible", "dudoso", "no_disponible"] as const;
+
 export const players: Player[] = names.map((n, i) => {
   const teamIdx = Math.floor(i / 5);
   const pos = positions[i % 5];
@@ -32,6 +40,10 @@ export const players: Player[] = names.map((n, i) => {
     id: `p${i + 1}`,
     teamId: teams[teamIdx].id,
     publicName: n,
+    nombre: n.split(" ")[0],
+    apellido1: apellidos[i % apellidos.length],
+    apellido2: apellidos[(i * 7 + 3) % apellidos.length],
+    estado: estados[(i * 3) % estados.length],
     dorsal: (i % 5) * 3 + 4,
     position: pos,
     isMinor: teamIdx >= 2, // juveniles

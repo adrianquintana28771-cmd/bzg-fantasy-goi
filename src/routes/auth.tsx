@@ -4,7 +4,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
-import { LogIn, UserPlus, ArrowLeft, KeyRound, MailCheck } from "lucide-react";
+import { LogIn, UserPlus, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -29,6 +29,14 @@ const dniSchema = z
     return DNI_LETTERS[num % 23] === v[8];
   }, "La letra del DNI no es correcta");
 
+const usernameSchema = z
+  .string()
+  .trim()
+  .min(3, "Mínimo 3 caracteres")
+  .max(24, "Máximo 24 caracteres")
+  .regex(/^[a-zA-Z0-9_]+$/, "Sólo letras, números y guion bajo")
+  .transform((v) => v.toLowerCase());
+
 const passwordSchema = z
   .string()
   .max(72, "Máximo 72 caracteres")
@@ -36,33 +44,38 @@ const passwordSchema = z
   .refine((v) => (v.match(/[a-z]/g) ?? []).length >= 5, "Debe incluir al menos 5 minúsculas")
   .refine((v) => (v.match(/\d/g) ?? []).length >= 2, "Debe incluir al menos 2 números");
 
-const displayNameSchema = z
+const nameSchema = z
   .string()
   .trim()
-  .min(2, "Nombre demasiado corto")
-  .max(60, "Máximo 60 caracteres")
-  .regex(/^[\p{L}\p{N}\s]+$/u, "Sólo letras y números");
-
-const emailSchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .email("Email no válido")
-  .max(255, "Email demasiado largo");
+  .min(2, "Demasiado corto")
+  .max(40, "Máximo 40 caracteres")
+  .regex(/^[\p{L}\s'-]+$/u, "Sólo letras");
 
 const loginSchema = z.object({
-  dni: dniSchema,
+  username: usernameSchema,
   password: z.string().min(1, "Introduce tu contraseña").max(72),
 });
 
 const signupSchema = z.object({
-  dni: dniSchema,
-  email: emailSchema,
-  displayName: displayNameSchema,
+  username: usernameSchema,
   password: passwordSchema,
+  nombre: nameSchema,
+  apellido: nameSchema,
+  dni: dniSchema,
 });
 
-type Mode = "login" | "signup" | "forgot";
+type Mode = "login" | "signup";
+
+function emailForUsername(username: string) {
+  return `${username}@bzgfantasy.app`;
+}
+
+async function rpc<T>(fn: string, args: Record<string, unknown>) {
+  return (supabase.rpc as unknown as (
+    f: string,
+    a: Record<string, unknown>,
+  ) => Promise<{ data: T | null; error: unknown }>)(fn, args);
+}
 
 function AuthPage() {
   const [mode, setMode] = useState<Mode>("login");
@@ -80,41 +93,29 @@ function AuthPage() {
       </Link>
 
       <div className="mt-4 rounded-2xl border border-border bg-card p-6 shadow-card" style={{ background: "var(--gradient-card)" }}>
-        <h1 className="font-display text-3xl">
-          {mode === "login" ? "Entrar" : mode === "signup" ? "Crear cuenta" : "Recuperar contraseña"}
-        </h1>
+        <h1 className="font-display text-3xl">{mode === "login" ? "Entrar" : "Crear cuenta"}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {mode === "login"
-            ? "Accede con tu DNI y contraseña."
-            : mode === "signup"
-              ? "Regístrate con tu DNI, email y contraseña."
-              : "Introduce tu DNI y te enviaremos un enlace al email registrado."}
+            ? "Accede con tu nombre de usuario y contraseña."
+            : "Regístrate con usuario, contraseña, nombre, apellido y DNI."}
         </p>
 
-        {mode !== "forgot" && (
-          <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl bg-secondary/60 p-1">
-            <button
-              onClick={() => setMode("login")}
-              className={`rounded-lg py-2 text-sm font-semibold transition ${
-                mode === "login" ? "bg-background shadow-card" : "text-muted-foreground"
-              }`}
-            >
-              Entrar
-            </button>
-            <button
-              onClick={() => setMode("signup")}
-              className={`rounded-lg py-2 text-sm font-semibold transition ${
-                mode === "signup" ? "bg-background shadow-card" : "text-muted-foreground"
-              }`}
-            >
-              Registrarme
-            </button>
-          </div>
-        )}
+        <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl bg-secondary/60 p-1">
+          <button
+            onClick={() => setMode("login")}
+            className={`rounded-lg py-2 text-sm font-semibold transition ${mode === "login" ? "bg-background shadow-card" : "text-muted-foreground"}`}
+          >
+            Entrar
+          </button>
+          <button
+            onClick={() => setMode("signup")}
+            className={`rounded-lg py-2 text-sm font-semibold transition ${mode === "signup" ? "bg-background shadow-card" : "text-muted-foreground"}`}
+          >
+            Registrarme
+          </button>
+        </div>
 
-        {mode === "login" && <LoginForm onForgot={() => setMode("forgot")} />}
-        {mode === "signup" && <SignupForm onDone={() => setMode("login")} />}
-        {mode === "forgot" && <ForgotForm onBack={() => setMode("login")} />}
+        {mode === "login" ? <LoginForm /> : <SignupForm />}
       </div>
 
       <p className="mt-4 text-center text-xs text-muted-foreground">
@@ -143,50 +144,42 @@ function clearLock() {
   if (typeof window !== "undefined") window.sessionStorage.removeItem(LOCK_KEY);
 }
 
-function LoginForm({ onForgot }: { onForgot: () => void }) {
-  const [dni, setDni] = useState("");
+function LoginForm() {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+
+  function registerFailedAttempt() {
+    const lock = getLock();
+    const count = lock.count + 1;
+    if (count >= MAX_ATTEMPTS) {
+      setLock({ count: 0, until: Date.now() + LOCK_MS });
+      toast.error(`Demasiados intentos. Espera ${LOCK_MS / 1000}s.`);
+    } else {
+      setLock({ count, until: 0 });
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const lock = getLock();
     if (lock.until > Date.now()) {
-      const secs = Math.ceil((lock.until - Date.now()) / 1000);
-      toast.error(`Demasiados intentos. Prueba de nuevo en ${secs}s.`);
+      toast.error(`Demasiados intentos. Prueba en ${Math.ceil((lock.until - Date.now()) / 1000)}s.`);
       return;
     }
-    const parsed = loginSchema.safeParse({ dni, password });
+    const parsed = loginSchema.safeParse({ username, password });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
     }
     setBusy(true);
     try {
-      const { data: emailData, error: rpcError } = await (supabase.rpc as unknown as (
-        fn: string,
-        args: Record<string, unknown>,
-      ) => Promise<{ data: string | null; error: unknown }>)("email_for_dni", {
-        _dni: parsed.data.dni,
-      });
-      if (rpcError) throw rpcError;
-      if (!emailData) {
-        registerFailedAttempt();
-        toast.error("DNI o contraseña incorrectos");
-        return;
-      }
-      const { error } = await supabase.auth.signInWithPassword({
-        email: emailData as string,
-        password: parsed.data.password,
-      });
+      const { data: mail } = await rpc<string>("email_for_username", { _username: parsed.data.username });
+      const email = mail ?? emailForUsername(parsed.data.username);
+      const { error } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
       if (error) {
-        const msg = error.message.toLowerCase();
-        if (msg.includes("email not confirmed") || msg.includes("not confirmed")) {
-          toast.error("Aún no has validado tu email. Revisa tu bandeja de entrada.");
-        } else {
-          registerFailedAttempt();
-          toast.error("DNI o contraseña incorrectos");
-        }
+        registerFailedAttempt();
+        toast.error("Usuario o contraseña incorrectos");
         return;
       }
       clearLock();
@@ -199,20 +192,9 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
     }
   }
 
-  function registerFailedAttempt() {
-    const lock = getLock();
-    const count = lock.count + 1;
-    if (count >= MAX_ATTEMPTS) {
-      setLock({ count: 0, until: Date.now() + LOCK_MS });
-      toast.error(`Cuenta bloqueada temporalmente ${LOCK_MS / 1000}s por seguridad.`);
-    } else {
-      setLock({ count, until: 0 });
-    }
-  }
-
   return (
     <form onSubmit={submit} className="mt-5 space-y-3">
-      <Field label="DNI" value={dni} onChange={setDni} placeholder="12345678A" autoComplete="username" maxLength={9} />
+      <Field label="Usuario" value={username} onChange={setUsername} placeholder="anegk" autoComplete="username" maxLength={24} />
       <Field label="Contraseña" value={password} onChange={setPassword} type="password" autoComplete="current-password" maxLength={72} />
       <button
         type="submit"
@@ -221,78 +203,63 @@ function LoginForm({ onForgot }: { onForgot: () => void }) {
       >
         <LogIn className="h-5 w-5" /> {busy ? "Entrando..." : "Entrar"}
       </button>
-      <button
-        type="button"
-        onClick={onForgot}
-        className="mt-2 inline-flex w-full items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <KeyRound className="h-4 w-4" /> ¿Has olvidado la contraseña?
-      </button>
     </form>
   );
 }
 
-function SignupForm({ onDone }: { onDone: () => void }) {
-  const [dni, setDni] = useState("");
-  const [email, setEmail] = useState("");
-  const [displayName, setDisplayName] = useState("");
+function SignupForm() {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [dni, setDni] = useState("");
   const [busy, setBusy] = useState(false);
-  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
-  const [otp, setOtp] = useState("");
-  const [resending, setResending] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const parsed = signupSchema.safeParse({ dni, email, displayName, password });
+    const parsed = signupSchema.safeParse({ username, password, nombre, apellido, dni });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
     }
     setBusy(true);
     try {
-      const { data: exists, error: existsErr } = await (supabase.rpc as unknown as (
-        fn: string,
-        args: Record<string, unknown>,
-      ) => Promise<{ data: boolean | null; error: unknown }>)("dni_exists", {
-        _dni: parsed.data.dni,
-      });
-      if (existsErr) throw existsErr;
-      if (exists) {
+      const [{ data: userTaken }, { data: dniTaken }] = await Promise.all([
+        rpc<boolean>("username_exists", { _username: parsed.data.username }),
+        rpc<boolean>("dni_exists", { _dni: parsed.data.dni }),
+      ]);
+      if (userTaken) {
+        toast.error("Ese nombre de usuario ya está cogido");
+        return;
+      }
+      if (dniTaken) {
         toast.error("Ese DNI ya está registrado. Prueba a entrar con tu contraseña.");
         return;
       }
 
       const { error } = await supabase.auth.signUp({
-        email: parsed.data.email,
+        email: emailForUsername(parsed.data.username),
         password: parsed.data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth`,
           data: {
+            username: parsed.data.username,
+            display_name: parsed.data.username,
+            nombre: parsed.data.nombre,
+            apellido: parsed.data.apellido,
             dni: parsed.data.dni,
-            display_name: parsed.data.displayName,
           },
         },
       });
       if (error) {
         const msg = error.message.toLowerCase();
-        if (msg.includes("profiles_dni_key")) {
-          toast.error("Ese DNI ya está registrado");
-        } else if (msg.includes("pwned") || msg.includes("leak") || msg.includes("compromised")) {
-          toast.error("Esa contraseña ha aparecido en filtraciones. Usa otra distinta.");
-        } else if (msg.includes("weak") || msg.includes("password should")) {
-          toast.error("La contraseña es demasiado débil. Usa mayúsculas, minúsculas y números.");
-        } else if (msg.includes("already") || msg.includes("registered")) {
-          toast.error("Ese email ya está registrado");
-        } else if (msg.includes("duplicate") || msg.includes("database error")) {
-          toast.error("Ese DNI o email ya está registrado");
+        if (msg.includes("already") || msg.includes("registered") || msg.includes("duplicate")) {
+          toast.error("Ese usuario o DNI ya está registrado");
         } else {
           toast.error(error.message);
         }
         return;
       }
-      toast.success("Te hemos enviado un código de 6 dígitos al email.");
-      setPendingEmail(parsed.data.email);
+      toast.success("¡Cuenta creada! Ya puedes jugar.");
     } catch (err) {
       console.error(err);
       toast.error("Error al registrarte");
@@ -301,203 +268,22 @@ function SignupForm({ onDone }: { onDone: () => void }) {
     }
   }
 
-  async function verify(e: React.FormEvent) {
-    e.preventDefault();
-    if (!pendingEmail) return;
-    if (!/^\d{6}$/.test(otp)) {
-      toast.error("El código son 6 dígitos");
-      return;
-    }
-    setBusy(true);
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: pendingEmail,
-        token: otp,
-        type: "email",
-      });
-      if (error) {
-        toast.error("Código incorrecto o caducado");
-        return;
-      }
-      toast.success("Email validado. ¡Ya puedes entrar!");
-      await supabase.auth.signOut();
-      setPendingEmail(null);
-      setOtp("");
-      onDone();
-    } catch (err) {
-      console.error(err);
-      toast.error("Error al validar el código");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function resend() {
-    if (!pendingEmail) return;
-    setResending(true);
-    try {
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email: pendingEmail,
-        options: { emailRedirectTo: `${window.location.origin}/auth` },
-      });
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-      toast.success("Te hemos enviado un nuevo código.");
-    } finally {
-      setResending(false);
-    }
-  }
-
-  if (pendingEmail) {
-    return (
-      <form onSubmit={verify} className="mt-5 space-y-4">
-        <div className="rounded-xl bg-secondary/50 p-4 text-sm">
-          <p className="flex items-center gap-2 font-semibold">
-            <MailCheck className="h-4 w-4" /> Revisa tu email
-          </p>
-          <p className="mt-1 text-muted-foreground">
-            Hemos enviado un código de 6 dígitos a <span className="font-mono">{pendingEmail}</span>. Introdúcelo para validar tu cuenta.
-          </p>
-        </div>
-        <label className="block">
-          <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Código de 6 dígitos
-          </span>
-          <input
-            inputMode="numeric"
-            pattern="\d{6}"
-            maxLength={6}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-            placeholder="123456"
-            required
-            autoComplete="one-time-code"
-            className="w-full rounded-lg border border-input bg-background px-3 py-3 text-center font-mono text-2xl tracking-[0.5em] outline-none focus:ring-2 focus:ring-ring"
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={busy}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-display text-lg text-primary-foreground shadow-card transition hover:-translate-y-0.5 disabled:opacity-60"
-        >
-          <MailCheck className="h-5 w-5" /> {busy ? "Validando..." : "Validar email"}
-        </button>
-        <div className="flex items-center justify-between text-sm">
-          <button type="button" onClick={resend} disabled={resending} className="text-muted-foreground hover:text-foreground disabled:opacity-60">
-            {resending ? "Reenviando..." : "Reenviar código"}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setPendingEmail(null);
-              setOtp("");
-            }}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            Cambiar datos
-          </button>
-        </div>
-      </form>
-    );
-  }
-
   return (
     <form onSubmit={submit} className="mt-5 space-y-3">
-      <Field label="Nombre visible" value={displayName} onChange={setDisplayName} placeholder="Ane G." maxLength={60} />
-      <Field label="DNI" value={dni} onChange={setDni} placeholder="12345678A" autoComplete="username" maxLength={9} />
-      <Field label="Email" value={email} onChange={setEmail} type="email" autoComplete="email" maxLength={255} />
+      <Field label="Usuario" value={username} onChange={setUsername} placeholder="anegk" autoComplete="username" maxLength={24} />
       <Field label="Contraseña" value={password} onChange={setPassword} type="password" autoComplete="new-password" maxLength={72} />
+      <Field label="Nombre" value={nombre} onChange={setNombre} placeholder="Ane" maxLength={40} />
+      <Field label="Apellido" value={apellido} onChange={setApellido} placeholder="Etxebarria" maxLength={40} />
+      <Field label="DNI" value={dni} onChange={setDni} placeholder="12345678A" maxLength={9} />
       <p className="text-xs text-muted-foreground">
-        Al menos 1 mayúscula, 5 minúsculas y 2 números. No se admiten contraseñas filtradas.
+        La contraseña necesita al menos 1 mayúscula, 5 minúsculas y 2 números.
       </p>
       <button
         type="submit"
         disabled={busy}
         className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-display text-lg text-primary-foreground shadow-card transition hover:-translate-y-0.5 disabled:opacity-60"
       >
-        <UserPlus className="h-5 w-5" /> {busy ? "Enviando código..." : "Crear cuenta"}
-      </button>
-    </form>
-  );
-}
-
-function ForgotForm({ onBack }: { onBack: () => void }) {
-  const [dni, setDni] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [sent, setSent] = useState(false);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    const parsed = dniSchema.safeParse(dni);
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
-      return;
-    }
-    setBusy(true);
-    try {
-      const { data: emailData, error: rpcError } = await (supabase.rpc as unknown as (
-        fn: string,
-        args: Record<string, unknown>,
-      ) => Promise<{ data: string | null; error: unknown }>)("email_for_dni", {
-        _dni: parsed.data,
-      });
-      if (rpcError) throw rpcError;
-      // Always show the same message to avoid revealing whether a DNI exists.
-      if (emailData) {
-        const { error } = await supabase.auth.resetPasswordForEmail(emailData as string, {
-          redirectTo: `${window.location.origin}/reset-password`,
-        });
-        if (error) console.error(error);
-      }
-      setSent(true);
-    } catch (err) {
-      console.error(err);
-      toast.error("Error al enviar el enlace");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  if (sent) {
-    return (
-      <div className="mt-5 space-y-4">
-        <div className="rounded-xl bg-secondary/50 p-4 text-sm">
-          <p className="flex items-center gap-2 font-semibold">
-            <MailCheck className="h-4 w-4" /> Revisa tu email
-          </p>
-          <p className="mt-1 text-muted-foreground">
-            Si el DNI está registrado, hemos enviado un enlace para restablecer tu contraseña. Puede tardar unos minutos.
-          </p>
-        </div>
-        <button
-          onClick={onBack}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-display text-lg text-primary-foreground shadow-card"
-        >
-          Volver
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={submit} className="mt-5 space-y-3">
-      <Field label="DNI" value={dni} onChange={setDni} placeholder="12345678A" autoComplete="username" maxLength={9} />
-      <button
-        type="submit"
-        disabled={busy}
-        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-display text-lg text-primary-foreground shadow-card transition hover:-translate-y-0.5 disabled:opacity-60"
-      >
-        <KeyRound className="h-5 w-5" /> {busy ? "Enviando..." : "Enviar enlace"}
-      </button>
-      <button
-        type="button"
-        onClick={onBack}
-        className="mt-2 inline-flex w-full items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" /> Volver a entrar
+        <UserPlus className="h-5 w-5" /> {busy ? "Creando..." : "Crear cuenta"}
       </button>
     </form>
   );

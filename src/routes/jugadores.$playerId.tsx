@@ -6,7 +6,7 @@ import {
 import { useFantasy } from "@/lib/fantasy/store";
 import { aggregatePlayer } from "@/lib/fantasy/queries";
 import { CategoryBadge } from "@/components/fantasy-ui";
-import { POSITION_LABEL } from "@/lib/fantasy/types";
+import { POSITION_LABEL, ESTADO_LABEL, type PlayerEstado } from "@/lib/fantasy/types";
 
 export const Route = createFileRoute("/jugadores/$playerId")({
   component: Jugador,
@@ -35,33 +35,47 @@ function Jugador() {
         <ArrowLeft className="h-4 w-4" /> {agg.team.name}
       </Link>
 
-      <div className="mt-4 rounded-2xl border border-border bg-card p-6 shadow-card" style={{ background: "var(--gradient-card)" }}>
-        <div className="flex items-center gap-5">
-          <div className="grid h-24 w-24 place-items-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 font-display text-5xl text-primary-foreground shadow-elevated">
-            {player.dorsal}
+      <div className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6" style={{ background: "var(--gradient-card)" }}>
+        {/* Foto grande con pie de foto (estado) */}
+        <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-elevated">
+          <div className="grid h-full w-full place-items-center">
+            <span className="font-display text-[8rem] leading-none text-primary-foreground/90">
+              {player.dorsal}
+            </span>
           </div>
-          <div className="flex-1">
-            <h1 className="font-display text-4xl">{player.publicName}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-              <CategoryBadge category={agg.team.category} />
-              <span className="rounded bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
-                {POSITION_LABEL[player.position]}
-              </span>
-              <span className="text-muted-foreground">{agg.team.name}</span>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="font-display text-5xl text-primary">{agg.totalPoints}</div>
-            <div className="text-xs uppercase tracking-widest text-muted-foreground">puntos Fantasy</div>
+          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent p-3">
+            <EstadoBadge estado={player.estado} />
+            <span className="rounded bg-black/40 px-2 py-0.5 text-[11px] font-semibold text-white">
+              #{player.dorsal}
+            </span>
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="mt-4 text-center">
+          <h1 className="font-display text-2xl leading-tight sm:text-3xl">{player.publicName}</h1>
+          {(player.apellido1 || player.apellido2) && (
+            <p className="text-sm text-muted-foreground">
+              {[player.apellido1, player.apellido2].filter(Boolean).join(" ")}
+            </p>
+          )}
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5 text-xs">
+            <CategoryBadge category={agg.team.category} />
+            <span className="rounded bg-primary/15 px-2 py-0.5 font-medium text-primary">
+              {POSITION_LABEL[player.position]}
+            </span>
+            <span className="rounded bg-secondary px-2 py-0.5 text-muted-foreground">{agg.team.name}</span>
+            <span className="rounded bg-[color:var(--gold,#d4a017)]/20 px-2 py-0.5 font-bold text-foreground">
+              {agg.totalPoints} pts
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
           <MiniStat label="Partidos" value={agg.matchesPlayed} />
-          <MiniStat label="Media/partido" value={agg.avgPoints.toFixed(1)} />
+          <MiniStat label="Media" value={agg.avgPoints.toFixed(1)} />
           <MiniStat label="Goles" value={agg.goals} />
-          <MiniStat label="Asistencias" value={agg.assists} />
-          <MiniStat label="Recuperaciones" value={agg.steals} />
+          <MiniStat label="Asist." value={agg.assists} />
+          <MiniStat label="Recup." value={agg.steals} />
           <MiniStat label="Paradas" value={agg.saves} />
         </div>
       </div>
@@ -106,9 +120,22 @@ function Jugador() {
 
 function MiniStat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-xl bg-secondary p-3 text-center">
-      <div className="font-display text-2xl text-foreground">{value}</div>
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+    <div className="rounded-lg bg-secondary p-2 text-center">
+      <div className="font-display text-lg text-foreground">{value}</div>
+      <div className="text-[9px] uppercase tracking-wide text-muted-foreground">{label}</div>
     </div>
+  );
+}
+
+function EstadoBadge({ estado }: { estado: PlayerEstado }) {
+  const style: Record<PlayerEstado, string> = {
+    disponible: "bg-primary text-primary-foreground",
+    dudoso: "bg-[color:var(--gold,#d4a017)] text-black",
+    no_disponible: "bg-destructive text-white",
+  };
+  return (
+    <span className={`rounded-md px-2 py-1 text-[11px] font-bold uppercase tracking-wide shadow ${style[estado]}`}>
+      {ESTADO_LABEL[estado]}
+    </span>
   );
 }
