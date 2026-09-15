@@ -6,7 +6,7 @@ import {
 import { useFantasy } from "@/lib/fantasy/store";
 import { aggregatePlayer } from "@/lib/fantasy/queries";
 import { CategoryBadge } from "@/components/fantasy-ui";
-import { POSITION_LABEL } from "@/lib/fantasy/types";
+import { POSITION_LABEL, ESTADO_LABEL, type PlayerEstado } from "@/lib/fantasy/types";
 
 export const Route = createFileRoute("/jugadores/$playerId")({
   component: Jugador,
@@ -120,9 +120,22 @@ function Jugador() {
 
 function MiniStat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-xl bg-secondary p-3 text-center">
-      <div className="font-display text-2xl text-foreground">{value}</div>
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+    <div className="rounded-lg bg-secondary p-2 text-center">
+      <div className="font-display text-lg text-foreground">{value}</div>
+      <div className="text-[9px] uppercase tracking-wide text-muted-foreground">{label}</div>
     </div>
+  );
+}
+
+function EstadoBadge({ estado }: { estado: PlayerEstado }) {
+  const style: Record<PlayerEstado, string> = {
+    disponible: "bg-primary text-primary-foreground",
+    dudoso: "bg-[color:var(--gold,#d4a017)] text-black",
+    no_disponible: "bg-destructive text-white",
+  };
+  return (
+    <span className={`rounded-md px-2 py-1 text-[11px] font-bold uppercase tracking-wide shadow ${style[estado]}`}>
+      {ESTADO_LABEL[estado]}
+    </span>
   );
 }
