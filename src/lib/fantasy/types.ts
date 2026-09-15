@@ -48,10 +48,36 @@ export interface Team {
   color?: string;
 }
 
+export type PlayerEstado = "disponible" | "dudoso" | "no_disponible";
+
+export const ESTADO_LABEL: Record<PlayerEstado, string> = {
+  disponible: "Disponible",
+  dudoso: "Dudoso",
+  no_disponible: "No disponible",
+};
+
+export type Rareza = "normal" | "raro" | "legendario";
+
+export const RAREZA_LABEL: Record<Rareza, string> = {
+  normal: "Normal",
+  raro: "Raro",
+  legendario: "Legendario",
+};
+
+export const RAREZA_MULT: Record<Rareza, number> = {
+  normal: 1,
+  raro: 1.3,
+  legendario: 1.5,
+};
+
 export interface Player {
   id: string;
   teamId: string;
   publicName: string; // alias or "Ane G."
+  nombre?: string;
+  apellido1?: string;
+  apellido2?: string;
+  estado: PlayerEstado;
   dorsal: number;
   position: Position;
   isMinor: boolean;
