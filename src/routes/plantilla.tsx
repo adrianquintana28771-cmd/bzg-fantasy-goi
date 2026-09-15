@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Package, Sparkles, X, Lock, Save } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
+import campoAsset from "@/assets/campo-bzg.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import type { Database } from "@/integrations/supabase/types";
@@ -438,19 +439,14 @@ function Inner({ userId }: { userId: string }) {
 function Court({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative w-full" style={{ aspectRatio: "1 / 1.25" }}>
-      <svg viewBox="0 0 100 125" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
-        <defs>
-          <linearGradient id="courtGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#2f8b4d" />
-            <stop offset="1" stopColor="#1f6b39" />
-          </linearGradient>
-        </defs>
-        <rect x="0" y="0" width="100" height="125" fill="url(#courtGrad)" />
-        <rect x="3" y="3" width="94" height="119" fill="none" stroke="white" strokeWidth="0.5" opacity="0.85" />
-        <path d="M 15 100 Q 50 60 85 100" fill="none" stroke="white" strokeWidth="0.4" strokeDasharray="1.5,1.5" opacity="0.9" />
-        <path d="M 22 112 Q 50 80 78 112" fill="none" stroke="white" strokeWidth="0.5" opacity="0.9" />
-        <rect x="40" y="118" width="20" height="4" fill="none" stroke="white" strokeWidth="0.6" opacity="0.95" />
-      </svg>
+      <img
+        src={campoAsset.url}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      {/* velo suave para que los huecos se lean bien sobre el campo */}
+      <div className="absolute inset-0 bg-black/10" />
       <div className="absolute inset-0">{children}</div>
     </div>
   );
