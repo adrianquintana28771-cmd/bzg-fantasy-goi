@@ -274,6 +274,8 @@ function Inner({ userId }: { userId: string }) {
       toast.success("Alineación guardada");
       setDirty(false);
       qc.invalidateQueries({ queryKey: ["lineup", userId] });
+      qc.invalidateQueries({ queryKey: ["historial-jornadas", userId] });
+
     },
     onError: (e: Error) => toast.error(e.message ?? "No se pudo guardar"),
   });
