@@ -56,6 +56,27 @@ function Rankings() {
         </div>
       </div>
 
+      <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-secondary p-1">
+        {([
+          ["jugadores", "Jugadores/as"],
+          ["usuarios", "Usuarios"],
+        ] as const).map(([k, label]) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setTab(k)}
+            className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
+              tab === k ? "bg-primary text-primary-foreground shadow-card" : "text-muted-foreground"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "usuarios" ? <UsuariosRanking /> : (
+      <>
+
       <div className="mt-6 grid grid-cols-2 gap-2 rounded-2xl border border-border bg-card p-3 shadow-card md:grid-cols-6">
         <Select value={seasonId} onChange={setSeasonId} label="Temporada">
           {seasons.map((s) => (
