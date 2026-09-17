@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Calendar, Users, ClipboardList, Settings, FileText, Trophy, ShieldAlert, BarChart3 } from "lucide-react";
-import { useFantasy, fantasyStore } from "@/lib/fantasy/store";
-import { toast } from "sonner";
+import { useFantasy } from "@/lib/fantasy/store";
 import { BackButton } from "@/components/back-button";
 import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
@@ -22,7 +21,7 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function Admin() {
-  const { seasons, teams, players, matches, stats, rules, actaFiles } = useFantasy((s) => s);
+  const { seasons, teams, players, matches, stats, actaFiles } = useFantasy((s) => s);
   const { isSuperAdmin, isManager, isAdmin, canEditStats, canEditMatches, canManagePlayers, canManageAll } = useAuth();
   const active = seasons.find((s) => s.isActive);
   const roleLabel = isSuperAdmin ? "super_admin" : isManager ? "manager" : isAdmin ? "admin" : "";
@@ -58,8 +57,8 @@ function Admin() {
         {canManageAll && (
           <Section
             icon={Settings}
-            title="Reglas de puntuación"
-            description="Configura los puntos Fantasy de cada acción. Sólo super_admin."
+            title="Criterios de puntuación"
+            description="Crea o edita los puntos de cada acción. Al guardar se recalculan todas las jornadas. Sólo super_admin."
             to="/admin/reglas"
           />
         )}
@@ -96,37 +95,11 @@ function Admin() {
       </div>
 
       {canManageAll && (
-        <>
-          <h2 className="mt-10 font-display text-2xl">Reglas activas actualmente</h2>
-          <p className="text-xs text-muted-foreground">Vista rápida — edítalas en “Reglas de puntuación”.</p>
-          <div className="mt-3 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-            {rules.filter((r) => r.active).map((r) => (
-              <div
-                key={r.key}
-                className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-sm"
-              >
-                <span>{r.label}</span>
-                <span
-                  className={`font-display text-lg ${r.points >= 0 ? "text-primary" : "text-destructive"}`}
-                >
-                  {r.points > 0 ? `+${r.points}` : r.points}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-2">
-            <button
-              onClick={() => {
-                fantasyStore.resetRules();
-                toast.success("Reglas restauradas");
-              }}
-              className="rounded-lg border border-border bg-card px-4 py-2 text-sm hover:bg-secondary"
-            >
-              Restaurar reglas por defecto
-            </button>
-          </div>
-        </>
+        <p className="mt-10 text-sm text-muted-foreground">
+          Los criterios de puntuación se gestionan en{" "}
+          <Link to="/admin/reglas" className="text-primary underline">Criterios de puntuación</Link>. Al
+          cambiarlos se recalculan automáticamente todas las jornadas ya jugadas.
+        </p>
       )}
     </div>
   );
