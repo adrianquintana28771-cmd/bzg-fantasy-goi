@@ -458,7 +458,9 @@ function Inner({ userId }: { userId: string }) {
                     <div className="truncate font-semibold">{c.pool.nombre}</div>
                     <div className="font-display text-base text-primary">{cartaPuntos(c.pool.rating, c.pool.rareza)}</div>
                   </div>
-                  <div className="truncate text-[10px] uppercase tracking-wide text-muted-foreground">{POS_LABEL[c.pool.posicion]}</div>
+                  <div className="truncate text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {posList(c.pool.id, c.pool.posicion).map((p) => POS_SHORT[p]).join(" · ")}
+                  </div>
                   <div className="mt-1 flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase">{RAREZA_LABEL[c.pool.rareza]} ·x{RAREZA_MULT[c.pool.rareza]}</span>
                     {c.total > 1 && <span className="rounded bg-secondary px-1 text-[10px] font-bold">x{c.total}</span>}
@@ -520,7 +522,7 @@ function Inner({ userId }: { userId: string }) {
                 <div>
                   <div className="font-semibold">{c.pool.nombre}</div>
                   <div className="text-[10px] uppercase text-muted-foreground">
-                    {POS_LABEL[c.pool.posicion]} · {RAREZA_LABEL[c.pool.rareza]}
+                    {posList(c.pool.id, c.pool.posicion).map((p) => POS_SHORT[p]).join(" · ")} · {RAREZA_LABEL[c.pool.rareza]}
                   </div>
                 </div>
                 <div className="text-right">
