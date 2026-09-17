@@ -89,36 +89,8 @@ function Jugador() {
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-card">
-        <h2 className="font-display text-xl">Evolución por jornada</h2>
-        {agg.perMatch.length === 0 ? (
-          <p className="mt-3 text-sm text-muted-foreground">Sin partidos aún.</p>
-        ) : (
-          <div className="mt-4 h-56 w-full">
-            <ResponsiveContainer>
-              <LineChart data={agg.perMatch.map((m) => ({ jornada: `J${m.round}`, pts: m.points }))}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="jornada" stroke="var(--color-muted-foreground)" />
-                <YAxis stroke="var(--color-muted-foreground)" />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--color-card)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: 8,
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="pts"
-                  stroke="var(--color-primary)"
-                  strokeWidth={3}
-                  dot={{ r: 5, fill: "var(--color-primary)" }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </div>
+      <JornadasChart playerId={player.id} />
+
 
       <p className="mt-4 text-xs text-muted-foreground">
         🔒 Mostramos solo alias o nombre + inicial. Los datos personales de menores están protegidos.
