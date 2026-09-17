@@ -188,3 +188,64 @@ function PodiumSpot({
     </div>
   );
 }
+
+function UsuariosRanking() {
+  const q = useQuery({
+    queryKey: ["user-ranking"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("user_ranking");
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        userId: r.user_id as string,
+        nombre: (r.username as string | null) ?? (r.display_name as string | null) ?? "Usuario",
+        puntos: Math.round(Number(r.puntos)),
+        jornadas: Number(r.jornadas),
+      }));
+    },
+  });
+
+  const rows = q.data ?? [];
+
+  return (
+    <div className="mt-6">
+      <p className="text-sm text-muted-foreground">
+        Cada usuario suma los puntos de los 7 jugadores/as que alineó en cada jornada.
+      </p>
+      {q.isLoading && <p className="mt-6 text-sm text-muted-foreground">Cargando…</p>}
+      {!q.isLoading && rows.length === 0 && (
+        <div className="mt-6 rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">
+          Todavía no hay usuarios con alineaciones puntuadas.
+        </div>
+      )}
+      <ol className="mt-4 space-y-2">
+        {rows.map((u, i) => (
+          <li
+            key={u.userId}
+            className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-card"
+          >
+            <div className="flex items-center gap-3">
+              <span
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-display text-lg"
+                style={{
+                  background:
+                    i === 0 ? "var(--gold)" : i === 1 ? "var(--silver)" : i === 2 ? "var(--bronze)" : "var(--color-secondary)",
+                  color: i < 3 ? "#000" : "inherit",
+                }}
+              >
+                {i + 1}
+              </span>
+              <div className="min-w-0">
+                <div className="truncate font-semibold">{u.nombre}</div>
+                <div className="text-xs text-muted-foreground">{u.jornadas} jornada(s)</div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="font-display text-2xl text-primary">{u.puntos}</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
