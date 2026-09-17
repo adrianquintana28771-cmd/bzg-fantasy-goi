@@ -78,6 +78,7 @@ interface LineupRow {
   id: string; jornada_id: string; locked: boolean;
   portero: string | null; extremo_izq: string | null; extremo_der: string | null;
   lateral_izq: string | null; lateral_der: string | null; central: string | null; pivote: string | null;
+  entrenador: string | null;
 }
 
 function PlantillaPage() {
