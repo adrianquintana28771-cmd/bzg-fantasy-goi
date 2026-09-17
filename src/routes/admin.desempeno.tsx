@@ -40,6 +40,7 @@ interface ActionRow {
   puntos: number;
   grupo: string;
   solo_portero: boolean;
+  solo_entrenador: boolean;
   orden: number;
 }
 interface PlayerRow {
@@ -77,7 +78,7 @@ function Desempeno() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("club_action_types")
-        .select("id,nombre,puntos,grupo,solo_portero,orden")
+        .select("id,nombre,puntos,grupo,solo_portero,solo_entrenador,orden")
         .eq("activo", true)
         .order("orden");
       if (error) throw error;
@@ -114,6 +115,20 @@ function Desempeno() {
     },
   });
 
+  /** Los criterios que edita el super admin se refrescan en tiempo real */
+  useEffect(() => {
+    const channel = supabase
+      .channel("criterios-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "club_action_types" }, () => {
+        qc.invalidateQueries({ queryKey: ["club_action_types"] });
+        toast.info("Criterios de puntuación actualizados");
+      })
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
   useEffect(() => {
     const next: Record<string, number> = {};
     for (const r of existing.data ?? []) next[r.action_id] = r.cantidad;
@@ -124,7 +139,7 @@ function Desempeno() {
   const esPortero = !!player?.club_player_positions?.some((p) => p.position_id === "portero");
 
   const visibleActions = useMemo(
-    () => (actions.data ?? []).filter((a) => !a.solo_portero || esPortero),
+    () => (actions.data ?? []).filter((a) => !a.solo_entrenador && (!a.solo_portero || esPortero)),
     [actions.data, esPortero],
   );
 

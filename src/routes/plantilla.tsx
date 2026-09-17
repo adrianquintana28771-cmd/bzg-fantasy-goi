@@ -36,15 +36,16 @@ const POS_LABEL: Record<Posicion, string> = {
   lateral_der: "Lateral Der.",
   central: "Central",
   pivote: "Pivote",
+  entrenador: "Entrenador/a",
 };
 
 const POS_SHORT: Record<Posicion, string> = {
   portero: "PT", extremo_izq: "EI", extremo_der: "ED",
-  lateral_izq: "LI", lateral_der: "LD", central: "C", pivote: "P",
+  lateral_izq: "LI", lateral_der: "LD", central: "C", pivote: "P", entrenador: "ENT",
 };
 
 const SLOTS: Posicion[] = [
-  "portero", "extremo_izq", "extremo_der", "lateral_izq", "lateral_der", "central", "pivote",
+  "portero", "extremo_izq", "extremo_der", "lateral_izq", "lateral_der", "central", "pivote", "entrenador",
 ];
 
 const SLOT_XY: Record<Posicion, { x: number; y: number }> = {
@@ -55,6 +56,7 @@ const SLOT_XY: Record<Posicion, { x: number; y: number }> = {
   lateral_der: { x: 14, y: 30 },
   central: { x: 50, y: 22 },
   pivote: { x: 50, y: 52 },
+  entrenador: { x: 14, y: 90 },
 };
 
 
@@ -76,6 +78,7 @@ interface LineupRow {
   id: string; jornada_id: string; locked: boolean;
   portero: string | null; extremo_izq: string | null; extremo_der: string | null;
   lateral_izq: string | null; lateral_der: string | null; central: string | null; pivote: string | null;
+  entrenador: string | null;
 }
 
 function PlantillaPage() {
@@ -239,7 +242,7 @@ function Inner({ userId }: { userId: string }) {
 
   const [slotDraft, setSlotDraft] = useState<Record<Posicion, string | null>>({
     portero: null, extremo_izq: null, extremo_der: null,
-    lateral_izq: null, lateral_der: null, central: null, pivote: null,
+    lateral_izq: null, lateral_der: null, central: null, pivote: null, entrenador: null,
   });
   const [dirty, setDirty] = useState(false);
   const [pickSlot, setPickSlot] = useState<Posicion | null>(null);
@@ -255,6 +258,7 @@ function Inner({ userId }: { userId: string }) {
         lateral_der: lineup.data.lateral_der,
         central: lineup.data.central,
         pivote: lineup.data.pivote,
+        entrenador: lineup.data.entrenador,
       });
       setDirty(false);
     }
@@ -322,7 +326,7 @@ function Inner({ userId }: { userId: string }) {
     99,
     Math.round(
       (Object.values(slotDraft).filter(Boolean) as string[])
-        .reduce((acc, id) => acc + (cardById(id) ? cartaPuntos(cardById(id)!.pool.rating, cardById(id)!.pool.rareza) : 0), 0) / 7,
+        .reduce((acc, id) => acc + (cardById(id) ? cartaPuntos(cardById(id)!.pool.rating, cardById(id)!.pool.rareza) : 0), 0) / 8,
     ),
   );
 
