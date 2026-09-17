@@ -49,13 +49,14 @@ const SLOTS: Posicion[] = [
 
 const SLOT_XY: Record<Posicion, { x: number; y: number }> = {
   portero: { x: 50, y: 88 },
-  extremo_izq: { x: 12, y: 30 },
-  extremo_der: { x: 88, y: 30 },
-  lateral_izq: { x: 28, y: 55 },
-  lateral_der: { x: 72, y: 55 },
-  central: { x: 50, y: 45 },
-  pivote: { x: 50, y: 22 },
+  extremo_izq: { x: 10, y: 58 },
+  extremo_der: { x: 90, y: 58 },
+  lateral_izq: { x: 14, y: 30 },
+  lateral_der: { x: 86, y: 30 },
+  central: { x: 50, y: 22 },
+  pivote: { x: 50, y: 52 },
 };
+
 
 export const Route = createFileRoute("/plantilla")({
   head: () => ({
