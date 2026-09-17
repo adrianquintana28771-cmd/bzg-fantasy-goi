@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useFantasy } from "@/lib/fantasy/store";
 import { buildRanking } from "@/lib/fantasy/queries";
 import { PlayerCard } from "@/components/fantasy-ui";
 import { BackButton } from "@/components/back-button";
+import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_LABEL, POSITION_LABEL } from "@/lib/fantasy/types";
+
 
 export const Route = createFileRoute("/rankings")({
   head: () => ({
