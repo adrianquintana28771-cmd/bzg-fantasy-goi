@@ -1,12 +1,21 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
 import { useFantasy } from "@/lib/fantasy/store";
 import { aggregatePlayer } from "@/lib/fantasy/queries";
+import { supabase } from "@/integrations/supabase/client";
 import { CategoryBadge } from "@/components/fantasy-ui";
 import { POSITION_LABEL, ESTADO_LABEL, type PlayerEstado } from "@/lib/fantasy/types";
+
+const ESTADO_COLOR: Record<PlayerEstado, string> = {
+  disponible: "var(--color-primary)",
+  dudoso: "#d4a017",
+  no_disponible: "#dc2626",
+};
+
 
 export const Route = createFileRoute("/jugadores/$playerId")({
   component: Jugador,
