@@ -110,6 +110,9 @@ function Rankings() {
           </div>
         )}
       </div>
+      </>
+      )}
+
     </div>
   );
 }
