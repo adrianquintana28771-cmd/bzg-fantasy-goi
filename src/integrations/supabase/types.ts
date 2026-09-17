@@ -631,6 +631,35 @@ export type Database = {
         }
         Relationships: []
       }
+      player_pool_positions: {
+        Row: {
+          created_at: string
+          es_principal: boolean
+          player_id: string
+          posicion: Database["public"]["Enums"]["plantilla_posicion"]
+        }
+        Insert: {
+          created_at?: string
+          es_principal?: boolean
+          player_id: string
+          posicion: Database["public"]["Enums"]["plantilla_posicion"]
+        }
+        Update: {
+          created_at?: string
+          es_principal?: boolean
+          player_id?: string
+          posicion?: Database["public"]["Enums"]["plantilla_posicion"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_pool_positions_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_usage: {
         Row: {
           player_id: string

@@ -142,6 +142,24 @@ function Inner({ userId }: { userId: string }) {
     },
   });
 
+  /** Posiciones en las que puede jugar cada jugador (N:M) */
+  const positions = useQuery({
+    queryKey: ["pool-positions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("player_pool_positions")
+        .select("player_id, posicion");
+      if (error) throw error;
+      const map = new Map<string, Posicion[]>();
+      (data ?? []).forEach((r) => {
+        const arr = map.get(r.player_id) ?? [];
+        arr.push(r.posicion as Posicion);
+        map.set(r.player_id, arr);
+      });
+      return map;
+    },
+  });
+
   const jornada = useQuery({
     queryKey: ["jornada-activa"],
     queryFn: async (): Promise<JornadaRow | null> => {
@@ -285,8 +303,19 @@ function Inner({ userId }: { userId: string }) {
 
   const cardById = (id: string | null | undefined) => (id ? cards.find((c) => c.pool.id === id) ?? null : null);
 
+  /** Todas las posiciones en las que puede jugar (mínimo la principal) */
+  const posList = (id: string, principal: Posicion): Posicion[] => {
+    const list = positions.data?.get(id);
+    return list && list.length ? list : [principal];
+  };
+
   const eligibleForSlot = (slot: Posicion) =>
-    cards.filter((c) => c.pool.posicion === slot && c.usable && (!alignedIds.has(c.pool.id) || slotDraft[slot] === c.pool.id));
+    cards.filter(
+      (c) =>
+        posList(c.pool.id, c.pool.posicion).includes(slot) &&
+        c.usable &&
+        (!alignedIds.has(c.pool.id) || slotDraft[slot] === c.pool.id),
+    );
 
   /** Puntuación estimada de la jornada (máx. 2 dígitos) */
   const puntosJornada = Math.min(
@@ -429,7 +458,9 @@ function Inner({ userId }: { userId: string }) {
                     <div className="truncate font-semibold">{c.pool.nombre}</div>
                     <div className="font-display text-base text-primary">{cartaPuntos(c.pool.rating, c.pool.rareza)}</div>
                   </div>
-                  <div className="truncate text-[10px] uppercase tracking-wide text-muted-foreground">{POS_LABEL[c.pool.posicion]}</div>
+                  <div className="truncate text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {posList(c.pool.id, c.pool.posicion).map((p) => POS_SHORT[p]).join(" · ")}
+                  </div>
                   <div className="mt-1 flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase">{RAREZA_LABEL[c.pool.rareza]} ·x{RAREZA_MULT[c.pool.rareza]}</span>
                     {c.total > 1 && <span className="rounded bg-secondary px-1 text-[10px] font-bold">x{c.total}</span>}
@@ -491,7 +522,7 @@ function Inner({ userId }: { userId: string }) {
                 <div>
                   <div className="font-semibold">{c.pool.nombre}</div>
                   <div className="text-[10px] uppercase text-muted-foreground">
-                    {POS_LABEL[c.pool.posicion]} · {RAREZA_LABEL[c.pool.rareza]}
+                    {posList(c.pool.id, c.pool.posicion).map((p) => POS_SHORT[p]).join(" · ")} · {RAREZA_LABEL[c.pool.rareza]}
                   </div>
                 </div>
                 <div className="text-right">
