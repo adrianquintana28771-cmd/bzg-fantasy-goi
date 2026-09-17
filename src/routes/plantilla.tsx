@@ -303,8 +303,19 @@ function Inner({ userId }: { userId: string }) {
 
   const cardById = (id: string | null | undefined) => (id ? cards.find((c) => c.pool.id === id) ?? null : null);
 
+  /** Todas las posiciones en las que puede jugar (mínimo la principal) */
+  const posList = (id: string, principal: Posicion): Posicion[] => {
+    const list = positions.data?.get(id);
+    return list && list.length ? list : [principal];
+  };
+
   const eligibleForSlot = (slot: Posicion) =>
-    cards.filter((c) => c.pool.posicion === slot && c.usable && (!alignedIds.has(c.pool.id) || slotDraft[slot] === c.pool.id));
+    cards.filter(
+      (c) =>
+        posList(c.pool.id, c.pool.posicion).includes(slot) &&
+        c.usable &&
+        (!alignedIds.has(c.pool.id) || slotDraft[slot] === c.pool.id),
+    );
 
   /** Puntuación estimada de la jornada (máx. 2 dígitos) */
   const puntosJornada = Math.min(
