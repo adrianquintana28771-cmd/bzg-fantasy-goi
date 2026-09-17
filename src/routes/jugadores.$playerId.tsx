@@ -170,6 +170,9 @@ function JornadasChart({ playerId }: { playerId: string }) {
       )}
     </div>
   );
+}
+
+
 
 
 function EstadoBadge({ estado }: { estado: PlayerEstado }) {
