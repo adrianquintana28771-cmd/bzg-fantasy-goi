@@ -162,6 +162,41 @@ function Inner({ userId }: { userId: string }) {
     },
   });
 
+  const historial = useQuery({
+    queryKey: ["historial-jornadas", userId],
+    queryFn: async () => {
+      const [{ data: lineups }, { data: stats }, { data: pool }] = await Promise.all([
+        supabase.from("lineups").select("*, jornadas(numero, nombre)").eq("user_id", userId),
+        supabase.from("player_jornada_stats").select("player_id, jornada_numero, puntos"),
+        supabase.from("player_pool").select("id, nombre"),
+      ]);
+      const nameById = new Map((pool ?? []).map((p) => [p.id, p.nombre]));
+      const ptsKey = new Map(
+        (stats ?? []).map((s) => [`${s.player_id}|${s.jornada_numero}`, Number(s.puntos)]),
+      );
+      return ((lineups ?? []) as unknown as Array<LineupRow & { jornadas: { numero: number; nombre: string } | null }>)
+        .filter((l) => !!l.jornadas)
+        .map((l) => {
+          const numero = l.jornadas!.numero;
+          const alineados = SLOTS.map((slot) => {
+            const pid = l[slot];
+            return pid
+              ? { slot, id: pid, nombre: nameById.get(pid) ?? pid, puntos: ptsKey.get(`${pid}|${numero}`) ?? 0 }
+              : null;
+          }).filter(Boolean) as Array<{ slot: Posicion; id: string; nombre: string; puntos: number }>;
+          return {
+            jornadaId: l.jornada_id,
+            numero,
+            nombre: l.jornadas!.nombre,
+            alineados,
+            total: Math.min(99, Math.round(alineados.reduce((a, p) => a + p.puntos, 0))),
+          };
+        })
+        .sort((a, b) => b.numero - a.numero);
+    },
+  });
+
+
   /** Cartas agrupadas por jugador (puede haber repetidos) */
   const cards = useMemo(() => {
     const map = new Map<string, { pool: PoolRow; copias: CopyRow[] }>();
