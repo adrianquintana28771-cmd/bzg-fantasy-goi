@@ -18,33 +18,39 @@ export type Database = {
         Row: {
           activo: boolean
           created_at: string
+          es_resultado: string | null
           grupo: string
           id: string
           nombre: string
           orden: number
           puntos: number
+          solo_entrenador: boolean
           solo_portero: boolean
           updated_at: string
         }
         Insert: {
           activo?: boolean
           created_at?: string
+          es_resultado?: string | null
           grupo?: string
           id: string
           nombre: string
           orden?: number
           puntos?: number
+          solo_entrenador?: boolean
           solo_portero?: boolean
           updated_at?: string
         }
         Update: {
           activo?: boolean
           created_at?: string
+          es_resultado?: string | null
           grupo?: string
           id?: string
           nombre?: string
           orden?: number
           puntos?: number
+          solo_entrenador?: boolean
           solo_portero?: boolean
           updated_at?: string
         }
@@ -273,6 +279,7 @@ export type Database = {
           apellido2: string | null
           created_at: string
           dorsal: number | null
+          es_entrenador: boolean
           estado: Database["public"]["Enums"]["player_estado"]
           id: string
           nombre: string
@@ -287,6 +294,7 @@ export type Database = {
           apellido2?: string | null
           created_at?: string
           dorsal?: number | null
+          es_entrenador?: boolean
           estado?: Database["public"]["Enums"]["player_estado"]
           id?: string
           nombre: string
@@ -301,6 +309,7 @@ export type Database = {
           apellido2?: string | null
           created_at?: string
           dorsal?: number | null
+          es_entrenador?: boolean
           estado?: Database["public"]["Enums"]["player_estado"]
           id?: string
           nombre?: string
@@ -420,6 +429,7 @@ export type Database = {
         Row: {
           central: string | null
           created_at: string
+          entrenador: string | null
           extremo_der: string | null
           extremo_izq: string | null
           id: string
@@ -435,6 +445,7 @@ export type Database = {
         Insert: {
           central?: string | null
           created_at?: string
+          entrenador?: string | null
           extremo_der?: string | null
           extremo_izq?: string | null
           id?: string
@@ -450,6 +461,7 @@ export type Database = {
         Update: {
           central?: string | null
           created_at?: string
+          entrenador?: string | null
           extremo_der?: string | null
           extremo_izq?: string | null
           id?: string
@@ -466,6 +478,13 @@ export type Database = {
           {
             foreignKeyName: "lineups_central_fkey"
             columns: ["central"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_entrenador_fkey"
+            columns: ["entrenador"]
             isOneToOne: false
             referencedRelation: "player_pool"
             referencedColumns: ["id"]
@@ -595,6 +614,7 @@ export type Database = {
       player_pool: {
         Row: {
           apellido1: string | null
+          club_player_id: string | null
           created_at: string
           dorsal: number | null
           estado: Database["public"]["Enums"]["player_estado"]
@@ -607,6 +627,7 @@ export type Database = {
         }
         Insert: {
           apellido1?: string | null
+          club_player_id?: string | null
           created_at?: string
           dorsal?: number | null
           estado?: Database["public"]["Enums"]["player_estado"]
@@ -619,6 +640,7 @@ export type Database = {
         }
         Update: {
           apellido1?: string | null
+          club_player_id?: string | null
           created_at?: string
           dorsal?: number | null
           estado?: Database["public"]["Enums"]["player_estado"]
@@ -629,7 +651,15 @@ export type Database = {
           rating?: number
           team_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "player_pool_club_player_id_fkey"
+            columns: ["club_player_id"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       player_pool_positions: {
         Row: {
@@ -879,6 +909,7 @@ export type Database = {
               p_rating: number
             }[]
           }
+      recalc_player_stats: { Args: never; Returns: undefined }
       user_ranking: {
         Args: never
         Returns: {
@@ -904,6 +935,7 @@ export type Database = {
         | "lateral_der"
         | "central"
         | "pivote"
+        | "entrenador"
       player_estado: "disponible" | "dudoso" | "no_disponible"
     }
     CompositeTypes: {
@@ -1044,6 +1076,7 @@ export const Constants = {
         "lateral_der",
         "central",
         "pivote",
+        "entrenador",
       ],
       player_estado: ["disponible", "dudoso", "no_disponible"],
     },
