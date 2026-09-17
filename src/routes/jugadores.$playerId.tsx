@@ -108,6 +108,70 @@ function MiniStat({ label, value }: { label: string; value: number | string }) {
   );
 }
 
+function JornadasChart({ playerId }: { playerId: string }) {
+  const q = useQuery({
+    queryKey: ["player-jornada-stats", playerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("player_jornada_stats")
+        .select("jornada_numero, puntos, estado")
+        .eq("player_id", playerId)
+        .order("jornada_numero");
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        jornada: `J${r.jornada_numero}`,
+        pts: Number(r.puntos),
+        estado: r.estado as PlayerEstado,
+      }));
+    },
+  });
+  const rows = q.data ?? [];
+
+  return (
+    <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-card">
+      <h2 className="font-display text-xl">Puntuación por jornada</h2>
+      <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+        {(Object.keys(ESTADO_COLOR) as PlayerEstado[]).map((e) => (
+          <span key={e} className="inline-flex items-center gap-1">
+            <span className="h-2.5 w-2.5 rounded-sm" style={{ background: ESTADO_COLOR[e] }} />
+            {ESTADO_LABEL[e]}
+          </span>
+        ))}
+      </div>
+      {rows.length === 0 ? (
+        <p className="mt-3 text-sm text-muted-foreground">Sin jornadas puntuadas aún.</p>
+      ) : (
+        <div className="mt-4 h-56 w-full">
+          <ResponsiveContainer>
+            <BarChart data={rows}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+              <XAxis dataKey="jornada" stroke="var(--color-muted-foreground)" />
+              <YAxis stroke="var(--color-muted-foreground)" />
+              <Tooltip
+                cursor={{ fill: "var(--color-secondary)" }}
+                contentStyle={{
+                  background: "var(--color-card)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: 8,
+                }}
+                formatter={(v: number, _n, item) => [
+                  `${v} pts · ${ESTADO_LABEL[(item?.payload as { estado: PlayerEstado }).estado]}`,
+                  "Jornada",
+                ]}
+              />
+              <Bar dataKey="pts" radius={[6, 6, 0, 0]}>
+                {rows.map((r, i) => (
+                  <Cell key={i} fill={ESTADO_COLOR[r.estado]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+
+
 function EstadoBadge({ estado }: { estado: PlayerEstado }) {
   const style: Record<PlayerEstado, string> = {
     disponible: "bg-primary text-primary-foreground",
