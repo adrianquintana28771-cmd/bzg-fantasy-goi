@@ -29,6 +29,8 @@ function Rankings() {
   const [gender, setGender] = useState<string>("");
   const [position, setPosition] = useState<string>("");
   const [sortBy, setSortBy] = useState<"total" | "avg">("total");
+  const [tab, setTab] = useState<"jugadores" | "usuarios">("jugadores");
+
 
   const filteredTeams = teams.filter((t) => t.seasonId === seasonId);
   const ranking = buildRanking(players, teams, matches, stats, rules, {
