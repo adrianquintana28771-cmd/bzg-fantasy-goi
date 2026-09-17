@@ -377,6 +377,39 @@ function Inner({ userId }: { userId: string }) {
         </Court>
       </section>
 
+      {/* Historial de jornadas */}
+      <section className="rounded-2xl border border-border bg-card p-4">
+        <h2 className="mb-3 font-display text-lg">Jornadas anteriores</h2>
+        {(historial.data ?? []).length === 0 ? (
+          <p className="text-sm text-muted-foreground">Todavía no has alineado ninguna jornada.</p>
+        ) : (
+          <div className="space-y-3">
+            {(historial.data ?? []).map((h) => (
+              <div key={h.jornadaId} className="rounded-xl border border-border p-3">
+                <div className="flex items-center justify-between">
+                  <div className="font-semibold">{h.nombre}</div>
+                  <div className="text-right">
+                    <div className="font-display text-2xl text-primary">{h.total}</div>
+                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</div>
+                  </div>
+                </div>
+                <ul className="mt-2 grid grid-cols-2 gap-1 sm:grid-cols-3">
+                  {h.alineados.map((p) => (
+                    <li key={p.slot} className="flex items-center justify-between gap-1 rounded-md bg-secondary px-2 py-1 text-[11px]">
+                      <span className="truncate">
+                        <span className="font-bold">{POS_SHORT[p.slot]}</span> {p.nombre}
+                      </span>
+                      <span className={`font-semibold ${p.puntos < 0 ? "text-destructive" : "text-foreground"}`}>{p.puntos}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+
       {/* Mis jugadores */}
       <section className="rounded-2xl border border-border bg-card p-4">
         <h2 className="mb-3 font-display text-lg">Mis jugadores ({cards.length})</h2>
