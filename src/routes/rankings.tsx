@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useFantasy } from "@/lib/fantasy/store";
 import { buildRanking } from "@/lib/fantasy/queries";
 import { PlayerCard } from "@/components/fantasy-ui";
 import { BackButton } from "@/components/back-button";
+import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_LABEL, POSITION_LABEL } from "@/lib/fantasy/types";
+
 
 export const Route = createFileRoute("/rankings")({
   head: () => ({
@@ -26,6 +29,8 @@ function Rankings() {
   const [gender, setGender] = useState<string>("");
   const [position, setPosition] = useState<string>("");
   const [sortBy, setSortBy] = useState<"total" | "avg">("total");
+  const [tab, setTab] = useState<"jugadores" | "usuarios">("jugadores");
+
 
   const filteredTeams = teams.filter((t) => t.seasonId === seasonId);
   const ranking = buildRanking(players, teams, matches, stats, rules, {
@@ -52,6 +57,27 @@ function Rankings() {
           <p className="text-sm text-muted-foreground">Los mejores puntos Fantasy del club.</p>
         </div>
       </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-secondary p-1">
+        {([
+          ["jugadores", "Jugadores/as"],
+          ["usuarios", "Usuarios"],
+        ] as const).map(([k, label]) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setTab(k)}
+            className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
+              tab === k ? "bg-primary text-primary-foreground shadow-card" : "text-muted-foreground"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "usuarios" ? <UsuariosRanking /> : (
+      <>
 
       <div className="mt-6 grid grid-cols-2 gap-2 rounded-2xl border border-border bg-card p-3 shadow-card md:grid-cols-6">
         <Select value={seasonId} onChange={setSeasonId} label="Temporada">
@@ -107,6 +133,9 @@ function Rankings() {
           </div>
         )}
       </div>
+      </>
+      )}
+
     </div>
   );
 }
@@ -156,6 +185,67 @@ function PodiumSpot({
         <div className="mt-1 font-display text-3xl">{agg.totalPoints}</div>
         <div className="text-[10px] uppercase tracking-widest opacity-80">pts</div>
       </div>
+    </div>
+  );
+}
+
+function UsuariosRanking() {
+  const q = useQuery({
+    queryKey: ["user-ranking"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("user_ranking");
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        userId: r.user_id as string,
+        nombre: (r.username as string | null) ?? (r.display_name as string | null) ?? "Usuario",
+        puntos: Math.round(Number(r.puntos)),
+        jornadas: Number(r.jornadas),
+      }));
+    },
+  });
+
+  const rows = q.data ?? [];
+
+  return (
+    <div className="mt-6">
+      <p className="text-sm text-muted-foreground">
+        Cada usuario suma los puntos de los 7 jugadores/as que alineó en cada jornada.
+      </p>
+      {q.isLoading && <p className="mt-6 text-sm text-muted-foreground">Cargando…</p>}
+      {!q.isLoading && rows.length === 0 && (
+        <div className="mt-6 rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">
+          Todavía no hay usuarios con alineaciones puntuadas.
+        </div>
+      )}
+      <ol className="mt-4 space-y-2">
+        {rows.map((u, i) => (
+          <li
+            key={u.userId}
+            className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-card"
+          >
+            <div className="flex items-center gap-3">
+              <span
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-display text-lg"
+                style={{
+                  background:
+                    i === 0 ? "var(--gold)" : i === 1 ? "var(--silver)" : i === 2 ? "var(--bronze)" : "var(--color-secondary)",
+                  color: i < 3 ? "#000" : "inherit",
+                }}
+              >
+                {i + 1}
+              </span>
+              <div className="min-w-0">
+                <div className="truncate font-semibold">{u.nombre}</div>
+                <div className="text-xs text-muted-foreground">{u.jornadas} jornada(s)</div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="font-display text-2xl text-primary">{u.puntos}</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</div>
+            </div>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

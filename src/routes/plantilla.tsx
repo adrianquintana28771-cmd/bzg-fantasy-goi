@@ -49,13 +49,14 @@ const SLOTS: Posicion[] = [
 
 const SLOT_XY: Record<Posicion, { x: number; y: number }> = {
   portero: { x: 50, y: 88 },
-  extremo_izq: { x: 12, y: 30 },
-  extremo_der: { x: 88, y: 30 },
-  lateral_izq: { x: 28, y: 55 },
-  lateral_der: { x: 72, y: 55 },
-  central: { x: 50, y: 45 },
-  pivote: { x: 50, y: 22 },
+  extremo_izq: { x: 10, y: 58 },
+  extremo_der: { x: 90, y: 58 },
+  lateral_izq: { x: 14, y: 30 },
+  lateral_der: { x: 86, y: 30 },
+  central: { x: 50, y: 22 },
+  pivote: { x: 50, y: 52 },
 };
+
 
 export const Route = createFileRoute("/plantilla")({
   head: () => ({
@@ -161,6 +162,41 @@ function Inner({ userId }: { userId: string }) {
     },
   });
 
+  const historial = useQuery({
+    queryKey: ["historial-jornadas", userId],
+    queryFn: async () => {
+      const [{ data: lineups }, { data: stats }, { data: pool }] = await Promise.all([
+        supabase.from("lineups").select("*, jornadas(numero, nombre)").eq("user_id", userId),
+        supabase.from("player_jornada_stats").select("player_id, jornada_numero, puntos"),
+        supabase.from("player_pool").select("id, nombre"),
+      ]);
+      const nameById = new Map((pool ?? []).map((p) => [p.id, p.nombre]));
+      const ptsKey = new Map(
+        (stats ?? []).map((s) => [`${s.player_id}|${s.jornada_numero}`, Number(s.puntos)]),
+      );
+      return ((lineups ?? []) as unknown as Array<LineupRow & { jornadas: { numero: number; nombre: string } | null }>)
+        .filter((l) => !!l.jornadas)
+        .map((l) => {
+          const numero = l.jornadas!.numero;
+          const alineados = SLOTS.map((slot) => {
+            const pid = l[slot];
+            return pid
+              ? { slot, id: pid, nombre: nameById.get(pid) ?? pid, puntos: ptsKey.get(`${pid}|${numero}`) ?? 0 }
+              : null;
+          }).filter(Boolean) as Array<{ slot: Posicion; id: string; nombre: string; puntos: number }>;
+          return {
+            jornadaId: l.jornada_id,
+            numero,
+            nombre: l.jornadas!.nombre,
+            alineados,
+            total: Math.min(99, Math.round(alineados.reduce((a, p) => a + p.puntos, 0))),
+          };
+        })
+        .sort((a, b) => b.numero - a.numero);
+    },
+  });
+
+
   /** Cartas agrupadas por jugador (puede haber repetidos) */
   const cards = useMemo(() => {
     const map = new Map<string, { pool: PoolRow; copias: CopyRow[] }>();
@@ -238,6 +274,8 @@ function Inner({ userId }: { userId: string }) {
       toast.success("Alineación guardada");
       setDirty(false);
       qc.invalidateQueries({ queryKey: ["lineup", userId] });
+      qc.invalidateQueries({ queryKey: ["historial-jornadas", userId] });
+
     },
     onError: (e: Error) => toast.error(e.message ?? "No se pudo guardar"),
   });
@@ -340,6 +378,39 @@ function Inner({ userId }: { userId: string }) {
           })}
         </Court>
       </section>
+
+      {/* Historial de jornadas */}
+      <section className="rounded-2xl border border-border bg-card p-4">
+        <h2 className="mb-3 font-display text-lg">Jornadas anteriores</h2>
+        {(historial.data ?? []).length === 0 ? (
+          <p className="text-sm text-muted-foreground">Todavía no has alineado ninguna jornada.</p>
+        ) : (
+          <div className="space-y-3">
+            {(historial.data ?? []).map((h) => (
+              <div key={h.jornadaId} className="rounded-xl border border-border p-3">
+                <div className="flex items-center justify-between">
+                  <div className="font-semibold">{h.nombre}</div>
+                  <div className="text-right">
+                    <div className="font-display text-2xl text-primary">{h.total}</div>
+                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</div>
+                  </div>
+                </div>
+                <ul className="mt-2 grid grid-cols-2 gap-1 sm:grid-cols-3">
+                  {h.alineados.map((p) => (
+                    <li key={p.slot} className="flex items-center justify-between gap-1 rounded-md bg-secondary px-2 py-1 text-[11px]">
+                      <span className="truncate">
+                        <span className="font-bold">{POS_SHORT[p.slot]}</span> {p.nombre}
+                      </span>
+                      <span className={`font-semibold ${p.puntos < 0 ? "text-destructive" : "text-foreground"}`}>{p.puntos}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
 
       {/* Mis jugadores */}
       <section className="rounded-2xl border border-border bg-card p-4">

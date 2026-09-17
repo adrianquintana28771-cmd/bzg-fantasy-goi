@@ -554,6 +554,44 @@ export type Database = {
         }
         Relationships: []
       }
+      player_jornada_stats: {
+        Row: {
+          created_at: string
+          estado: Database["public"]["Enums"]["player_estado"]
+          id: string
+          jornada_numero: number
+          player_id: string
+          puntos: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estado?: Database["public"]["Enums"]["player_estado"]
+          id?: string
+          jornada_numero: number
+          player_id: string
+          puntos?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estado?: Database["public"]["Enums"]["player_estado"]
+          id?: string
+          jornada_numero?: number
+          player_id?: string
+          puntos?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_jornada_stats_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_pool: {
         Row: {
           apellido1: string | null
@@ -812,6 +850,16 @@ export type Database = {
               p_rating: number
             }[]
           }
+      user_ranking: {
+        Args: never
+        Returns: {
+          display_name: string
+          jornadas: number
+          puntos: number
+          user_id: string
+          username: string
+        }[]
+      }
       username_exists: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {
