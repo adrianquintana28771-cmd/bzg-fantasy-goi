@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Home, Trophy, Users, ClipboardList, Settings, LogIn, LogOut, Shield, Sparkles } from "lucide-react";
+import { Home, Trophy, Users, ClipboardList, Settings, LogIn, LogOut, Shield, Sparkles, BarChart3 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 
@@ -20,6 +20,7 @@ const BASE_NAV: NavItem[] = [
   { to: "/rankings", label: "Rankings", Icon: Trophy, color: "var(--gold)" },
   { to: "/equipos", label: "Equipos", Icon: Users, color: "var(--color-accent)" },
   { to: "/partidos", label: "Partidos", Icon: ClipboardList, color: "var(--color-destructive)" },
+  { to: "/admin/desempeno", label: "Desempeño", Icon: BarChart3, color: "var(--color-primary)", adminOnly: true },
   { to: "/admin", label: "Admin", Icon: Settings, color: "var(--color-muted-foreground)", adminOnly: true },
 ];
 
@@ -83,9 +84,9 @@ export function SiteHeader() {
 }
 
 export function BottomNav() {
-  const { isStaff, user, signOut, isSuperAdmin, isAdmin, isManager } = useAuth();
+  const { isStaff, user, signOut } = useAuth();
   const navigate = useNavigate();
-  const canPlay = isSuperAdmin || (!isAdmin && !isManager);
+  const canPlay = !isStaff;
   const nav = BASE_NAV.filter(
     (n) => (!n.adminOnly || isStaff) && (!n.authOnly || !!user) && (!n.gameOnly || canPlay),
   );

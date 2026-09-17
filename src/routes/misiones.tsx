@@ -29,7 +29,7 @@ interface MisionRow {
 }
 
 function MisionesPage() {
-  const { user, loading, isSuperAdmin, isAdmin, isManager } = useAuth();
+  const { user, loading, isStaff } = useAuth();
   const { qr } = Route.useSearch();
 
   if (loading) return <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">Cargando…</div>;
@@ -45,7 +45,7 @@ function MisionesPage() {
     );
   }
 
-  if (!isSuperAdmin && (isAdmin || isManager)) {
+  if (isStaff) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 text-center">
         <BackButton />
