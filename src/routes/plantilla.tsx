@@ -142,6 +142,24 @@ function Inner({ userId }: { userId: string }) {
     },
   });
 
+  /** Posiciones en las que puede jugar cada jugador (N:M) */
+  const positions = useQuery({
+    queryKey: ["pool-positions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("player_pool_positions")
+        .select("player_id, posicion");
+      if (error) throw error;
+      const map = new Map<string, Posicion[]>();
+      (data ?? []).forEach((r) => {
+        const arr = map.get(r.player_id) ?? [];
+        arr.push(r.posicion as Posicion);
+        map.set(r.player_id, arr);
+      });
+      return map;
+    },
+  });
+
   const jornada = useQuery({
     queryKey: ["jornada-activa"],
     queryFn: async (): Promise<JornadaRow | null> => {
