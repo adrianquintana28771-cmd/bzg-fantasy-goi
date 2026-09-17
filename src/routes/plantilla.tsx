@@ -49,10 +49,10 @@ const SLOTS: Posicion[] = [
 
 const SLOT_XY: Record<Posicion, { x: number; y: number }> = {
   portero: { x: 50, y: 88 },
-  extremo_izq: { x: 10, y: 58 },
-  extremo_der: { x: 90, y: 58 },
-  lateral_izq: { x: 14, y: 30 },
-  lateral_der: { x: 86, y: 30 },
+  extremo_izq: { x: 90, y: 58 },
+  extremo_der: { x: 10, y: 58 },
+  lateral_izq: { x: 86, y: 30 },
+  lateral_der: { x: 14, y: 30 },
   central: { x: 50, y: 22 },
   pivote: { x: 50, y: 52 },
 };
@@ -79,13 +79,13 @@ interface LineupRow {
 }
 
 function PlantillaPage() {
-  const { user, loading, isSuperAdmin, isAdmin, isManager } = useAuth();
+  const { user, loading, isStaff } = useAuth();
 
   if (loading) {
     return <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">Cargando…</div>;
   }
 
-  if (user && !isSuperAdmin && (isAdmin || isManager)) {
+  if (user && isStaff) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 text-center">
         <BackButton />
