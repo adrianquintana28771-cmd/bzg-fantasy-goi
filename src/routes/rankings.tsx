@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFantasy } from "@/lib/fantasy/store";
 import { buildRanking } from "@/lib/fantasy/queries";
 import { PlayerCard } from "@/components/fantasy-ui";
@@ -190,6 +190,7 @@ function PodiumSpot({
 }
 
 function UsuariosRanking() {
+  const queryClient = useQueryClient();
   const q = useQuery({
     queryKey: ["user-ranking"],
     queryFn: async () => {
@@ -203,6 +204,21 @@ function UsuariosRanking() {
       }));
     },
   });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("user-ranking-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "player_jornada_stats" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["user-ranking"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "lineups" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["user-ranking"] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const rows = q.data ?? [];
 
