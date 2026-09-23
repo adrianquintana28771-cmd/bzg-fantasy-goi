@@ -4,14 +4,26 @@ import { CategoryBadge, StatusBadge } from "@/components/fantasy-ui";
 import { BackButton } from "@/components/back-button";
 
 export const Route = createFileRoute("/partidos/")({
-  head: () => ({
-    meta: [
-      { title: "Partidos · BZG Fantasy Eskubaloia" },
-      { name: "description", content: "Partidos del club BZG Etxebarri con resultados y estado del acta." },
-      { property: "og:title", content: "Partidos · BZG Fantasy" },
-      { property: "og:description", content: "Partidos del club BZG Etxebarri." },
-    ],
-  }),
+  head: () => {
+    const title = "Partidos y jornadas | BZG Fantasy Eskubaloia";
+    const description =
+      "Resultados y jornadas del balonmano de Etxebarri: partidos del club BZG con marcador, categoría y estadísticas de cada acta.";
+    const url = "https://bzg-fantasy-goi.lovable.app/partidos";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: Partidos,
 });
 

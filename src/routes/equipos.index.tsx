@@ -7,14 +7,26 @@ import { CATEGORY_LABEL, type Category } from "@/lib/fantasy/types";
 import { Users } from "lucide-react";
 
 export const Route = createFileRoute("/equipos/")({
-  head: () => ({
-    meta: [
-      { title: "Equipos · BZG Fantasy Eskubaloia" },
-      { name: "description", content: "Todos los equipos del club BZG Etxebarri por categoría." },
-      { property: "og:title", content: "Equipos · BZG Fantasy" },
-      { property: "og:description", content: "Equipos del club BZG Etxebarri por categoría." },
-    ],
-  }),
+  head: () => {
+    const title = "Equipos de balonmano | BZG Fantasy Eskubaloia";
+    const description =
+      "Equipos de balonmano del club BZG Etxebarri por categoría (cadete, juvenil y senior, masculino y femenino) con sus plantillas y puntos fantasy.";
+    const url = "https://bzg-fantasy-goi.lovable.app/equipos";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: Equipos,
 });
 

@@ -18,6 +18,26 @@ const ESTADO_COLOR: Record<PlayerEstado, string> = {
 
 
 export const Route = createFileRoute("/jugadores/$playerId")({
+  head: ({ params }) => {
+    const title = "Ficha de jugador/a | BZG Fantasy Eskubaloia";
+    const description =
+      "Estadísticas de balonmano y puntuación fantasy por jornada de este jugador o jugadora del club BZG Etxebarri.";
+    const url = `https://bzg-fantasy-goi.lovable.app/jugadores/${params.playerId}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: Jugador,
   notFoundComponent: () => (
     <div className="mx-auto max-w-2xl p-10 text-center">

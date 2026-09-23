@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /auth
+Disallow: /reset-password
+Disallow: /plantilla
+Disallow: /misiones
+
+Sitemap: https://bzg-fantasy-goi.lovable.app/sitemap.xml

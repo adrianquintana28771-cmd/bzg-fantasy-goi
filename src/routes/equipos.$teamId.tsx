@@ -5,6 +5,26 @@ import { PlayerCard, CategoryBadge } from "@/components/fantasy-ui";
 import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/equipos/$teamId")({
+  head: ({ params }) => {
+    const title = "Equipo de balonmano | BZG Fantasy Eskubaloia";
+    const description =
+      "Plantilla, ranking interno y estadísticas de balonmano de este equipo del club BZG Etxebarri en el fantasy de balonmano.";
+    const url = `https://bzg-fantasy-goi.lovable.app/equipos/${params.teamId}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: EquipoDetalle,
   notFoundComponent: () => (
     <div className="mx-auto max-w-2xl p-10 text-center">

@@ -9,6 +9,26 @@ import { generateActaPDF } from "@/lib/fantasy/pdf";
 import { POSITION_LABEL } from "@/lib/fantasy/types";
 
 export const Route = createFileRoute("/partidos/$matchId")({
+  head: ({ params }) => {
+    const title = "Partido de balonmano | BZG Fantasy Eskubaloia";
+    const description =
+      "Resultado, acta y estadísticas por jugador/a de este partido de balonmano del club BZG Etxebarri.";
+    const url = `https://bzg-fantasy-goi.lovable.app/partidos/${params.matchId}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: PartidoDetalle,
   notFoundComponent: () => (
     <div className="mx-auto max-w-2xl p-10 text-center">

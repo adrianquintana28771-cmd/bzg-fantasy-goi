@@ -10,14 +10,26 @@ import { CATEGORY_LABEL, POSITION_LABEL } from "@/lib/fantasy/types";
 
 
 export const Route = createFileRoute("/rankings")({
-  head: () => ({
-    meta: [
-      { title: "Rankings · BZG Fantasy Eskubaloia" },
-      { name: "description", content: "Rankings Fantasy filtrables por equipo, categoría, jornada y posición." },
-      { property: "og:title", content: "Rankings · BZG Fantasy" },
-      { property: "og:description", content: "Rankings Fantasy del club BZG Etxebarri." },
-    ],
-  }),
+  head: () => {
+    const title = "Rankings de jugadores | BZG Fantasy Eskubaloia";
+    const description =
+      "Clasificación del fantasy de balonmano de Etxebarri: rankings de jugadores y usuarios con estadísticas por equipo, categoría, jornada y posición.";
+    const url = "https://bzg-fantasy-goi.lovable.app/rankings";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: Rankings,
 });
 
