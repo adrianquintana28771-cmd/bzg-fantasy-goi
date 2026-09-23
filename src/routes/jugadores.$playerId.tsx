@@ -93,9 +93,20 @@ function Jugador() {
           )
           .eq("player_id", player.club_player_id);
         if (error) throw error;
-        actions = (data ?? [])
-          .filter((r: any) => r.club_action_types?.activo)
-          .map((r: any) => ({
+        type Row = {
+          cantidad: number;
+          action_id: string;
+          club_matches: { jornada: number } | null;
+          club_action_types: {
+            nombre: string;
+            puntos: number;
+            orden: number;
+            activo: boolean;
+          } | null;
+        };
+        actions = ((data ?? []) as unknown as Row[])
+          .filter((r) => r.club_action_types?.activo)
+          .map((r) => ({
             jornada: r.club_matches?.jornada ?? 0,
             action_id: r.action_id,
             nombre: r.club_action_types.nombre,
