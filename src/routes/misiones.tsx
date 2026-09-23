@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/misiones")({
   head: () => ({
@@ -31,16 +32,17 @@ interface MisionRow {
 function MisionesPage() {
   const { user, loading, isStaff } = useAuth();
   const { qr } = Route.useSearch();
+  const t = useT();
 
-  if (loading) return <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">Cargando…</div>;
+  if (loading) return <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">{t("Kargatzen…", "Cargando…")}</div>;
 
   if (!user) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 text-center">
         <BackButton />
-        <h1 className="mt-4 font-display text-3xl">Misiones</h1>
-        <p className="mt-2 text-muted-foreground">Inicia sesión para completar misiones y conseguir sobres.</p>
-        <Link to="/auth" className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Entrar</Link>
+        <h1 className="mt-4 font-display text-3xl">{t("Misioak", "Misiones")}</h1>
+        <p className="mt-2 text-muted-foreground">{t("Hasi saioa misioak egiteko eta gutunazalak lortzeko.", "Inicia sesión para completar misiones y conseguir sobres.")}</p>
+        <Link to="/auth" className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">{t("Sartu", "Entrar")}</Link>
       </div>
     );
   }
@@ -49,8 +51,8 @@ function MisionesPage() {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 text-center">
         <BackButton />
-        <h1 className="mt-4 font-display text-3xl">Sección de juego</h1>
-        <p className="mt-2 text-muted-foreground">Las cuentas de administración no tienen misiones ni sobres.</p>
+        <h1 className="mt-4 font-display text-3xl">{t("Joko-atala", "Sección de juego")}</h1>
+        <p className="mt-2 text-muted-foreground">{t("Administrazio-kontuek ez dute misiorik ez gutunazalik.", "Las cuentas de administración no tienen misiones ni sobres.")}</p>
       </div>
     );
   }
@@ -60,6 +62,7 @@ function MisionesPage() {
 
 function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
   const qc = useQueryClient();
+  const t = useT();
   const navigate = useNavigate();
   const [codigo, setCodigo] = useState(initialQr ?? "");
 
@@ -94,11 +97,11 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       return data as number;
     },
     onSuccess: () => {
-      toast.success("¡Recompensa conseguida!");
+      toast.success(t("Saria lortuta!", "¡Recompensa conseguida!"));
       qc.invalidateQueries({ queryKey: ["wallet", userId] });
       qc.invalidateQueries({ queryKey: ["misiones", userId] });
     },
-    onError: (e: Error) => toast.error(e.message ?? "No se pudo reclamar"),
+    onError: (e: Error) => toast.error(e.message ?? t("Ezin izan da eskatu", "No se pudo reclamar")),
   });
 
   const qrMut = useMutation({
@@ -111,13 +114,13 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       return data;
     },
     onSuccess: () => {
-      toast.success("¡Sobre PREMIUM conseguido!");
+      toast.success(t("PREMIUM gutunazala lortuta!", "¡Sobre PREMIUM conseguido!"));
       setCodigo("");
       qc.invalidateQueries({ queryKey: ["wallet", userId] });
       qc.invalidateQueries({ queryKey: ["misiones", userId] });
     },
     onError: (e: Error) =>
-      toast.error(e.message.includes("canjeado") ? "Ya has canjeado este código" : "Código no válido"),
+      toast.error(e.message.includes("canjeado") ? t("Kode hau trukatu duzu jada", "Ya has canjeado este código") : t("Kodea ez da baliozkoa", "Código no válido")),
   });
 
   // Auto-canjea cuando se llega desde el QR del pabellón
@@ -137,31 +140,30 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       <BackButton />
 
       <header>
-        <h1 className="font-display text-3xl leading-none">Misiones</h1>
-        <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">Consigue sobres y amplía tu equipo</p>
+        <h1 className="font-display text-3xl leading-none">{t("Misioak", "Misiones")}</h1>
+        <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">{t("Lortu gutunazalak eta handitu zure taldea", "Consigue sobres y amplía tu equipo")}</p>
       </header>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-2xl border border-border bg-card p-4 text-center">
           <Package className="mx-auto h-6 w-6 text-primary" />
           <div className="mt-1 font-display text-3xl">{wallet.data?.sobres ?? 0}</div>
-          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Sobres normales</div>
+          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">{t("Gutunazal arruntak", "Sobres normales")}</div>
         </div>
         <div className="rounded-2xl border-2 border-[color:var(--gold,#d4a017)] bg-card p-4 text-center">
           <Sparkles className="mx-auto h-6 w-6 text-[color:var(--gold,#d4a017)]" />
           <div className="mt-1 font-display text-3xl">{wallet.data?.premium ?? 0}</div>
-          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Sobres premium</div>
+          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">{t("Premium gutunazalak", "Sobres premium")}</div>
         </div>
       </div>
 
       {/* QR premium */}
       <section className="rounded-2xl border-2 border-[color:var(--gold,#d4a017)]/60 bg-card p-4">
         <h2 className="flex items-center gap-2 font-display text-lg">
-          <QrCode className="h-5 w-5 text-[color:var(--gold,#d4a017)]" /> Sobre PREMIUM con QR
+          <QrCode className="h-5 w-5 text-[color:var(--gold,#d4a017)]" /> {t("PREMIUM gutunazala QRarekin", "Sobre PREMIUM con QR")}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Escanea el código QR de la pared del pabellón durante un partido, o escribe aquí el código.
-          El sobre premium lleva un jugador raro o legendario asegurado.
+          {t("Eskaneatu pabiloiko hormako QR kodea partida batean, edo idatzi kodea hemen. Premium gutunazalak jokalari arraro edo legendario bat du ziur.", "Escanea el código QR de la pared del pabellón durante un partido, o escribe aquí el código. El sobre premium lleva un jugador raro o legendario asegurado.")}
         </p>
         <div className="mt-3 flex gap-2">
           <input
@@ -175,12 +177,12 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
             disabled={qrMut.isPending}
             className="shrink-0 rounded-lg bg-[color:var(--gold,#d4a017)] px-3 py-2 text-sm font-bold text-black disabled:opacity-50"
           >
-            Canjear
+            {t("Trukatu", "Canjear")}
           </button>
         </div>
         {premium.map(({ mision, claimed }) => (
           <p key={mision.id} className="mt-2 text-xs text-muted-foreground">
-            {claimed ? "✅ Ya canjeado: " : "🎯 "} {mision.nombre}
+            {claimed ? t("✅ Trukatuta: ", "✅ Ya canjeado: ") : "🎯 "} {mision.nombre}
           </p>
         ))}
       </section>
@@ -188,7 +190,7 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       {/* Misiones normales */}
       <section className="rounded-2xl border border-border bg-card p-4">
         <h2 className="mb-3 flex items-center gap-2 font-display text-lg">
-          <Trophy className="h-5 w-5 text-[color:var(--gold,#d4a017)]" /> Misiones del club
+          <Trophy className="h-5 w-5 text-[color:var(--gold,#d4a017)]" /> {t("Klubaren misioak", "Misiones del club")}
         </h2>
         <ul className="space-y-2">
           {normales.map(({ mision, claimed }) => (
@@ -202,7 +204,7 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
                 disabled={claimed || claimMut.isPending}
                 className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-secondary px-2.5 py-1.5 text-xs font-bold disabled:opacity-40"
               >
-                {claimed ? "Hecha" : (<><Package className="h-3 w-3" /> +{mision.recompensa_sobres}</>)}
+                {claimed ? t("Eginda", "Hecha") : (<><Package className="h-3 w-3" /> +{mision.recompensa_sobres}</>)}
               </button>
             </li>
           ))}
@@ -210,7 +212,7 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       </section>
 
       <Link to="/plantilla" className="block rounded-xl bg-primary py-3 text-center font-display text-lg text-primary-foreground">
-        Ir a mi equipo
+        {t("Joan nire taldera", "Ir a mi equipo")}
       </Link>
     </div>
   );
