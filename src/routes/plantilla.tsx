@@ -5,6 +5,7 @@ import { Package, Sparkles, X, Lock, Save } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
 import campoAsset from "@/assets/campo-bzg.png.asset.json";
+import sobreAperturaAsset from "@/assets/sobre-apertura.webp.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import type { Database } from "@/integrations/supabase/types";
@@ -353,6 +354,7 @@ function Inner({ userId }: { userId: string }) {
     rating: number;
     rareza: Rareza;
   }> | null>(null);
+  const [sobreRevelado, setSobreRevelado] = useState(false);
 
   useEffect(() => {
     if (lineup.data) {
@@ -369,6 +371,20 @@ function Inner({ userId }: { userId: string }) {
       setDirty(false);
     }
   }, [lineup.data]);
+
+  useEffect(() => {
+    if (!sobreResult) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) {
+      setSobreRevelado(true);
+      return;
+    }
+
+    setSobreRevelado(false);
+    const revealTimer = window.setTimeout(() => setSobreRevelado(true), 2100);
+    return () => window.clearTimeout(revealTimer);
+  }, [sobreResult]);
 
   const openSobreMut = useMutation({
     mutationFn: async (tipo: "normal" | "premium") => {
@@ -663,29 +679,59 @@ function Inner({ userId }: { userId: string }) {
       </section>
 
       {/* Resultado del sobre */}
-      <Dialog open={!!sobreResult} onOpenChange={(o) => !o && setSobreResult(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="font-display text-2xl">
-              {t("Gutunazal berria!", "¡Nuevo sobre!")}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-3 gap-2">
-            {(sobreResult ?? []).map((p, i) => (
-              <div
-                key={`${p.id}-${i}`}
-                className={`rounded-lg border-2 p-3 text-center ${RAREZA_STYLE[p.rareza]}`}
-              >
-                <div className="font-display text-3xl text-primary">
-                  {cartaPuntos(p.rating, p.rareza)}
-                </div>
-                <div className="truncate text-xs font-semibold">{p.nombre}</div>
-                <div className="text-[10px] uppercase text-muted-foreground">
-                  {RAREZA_LABEL_EU[p.rareza]}
-                </div>
+      <Dialog
+        open={!!sobreResult}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSobreResult(null);
+            setSobreRevelado(false);
+          }
+        }}
+      >
+        <DialogContent
+          className={
+            sobreRevelado
+              ? "max-w-lg"
+              : "w-[min(94vw,52rem)] max-w-none border-0 bg-transparent p-0 shadow-none [&>button]:text-primary-foreground"
+          }
+        >
+          {sobreRevelado ? (
+            <div className="animate-in fade-in zoom-in-95 duration-300">
+              <DialogHeader>
+                <DialogTitle className="font-display text-2xl">
+                  {t("Gutunazal berria!", "¡Nuevo sobre!")}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {(sobreResult ?? []).map((p, i) => (
+                  <div
+                    key={`${p.id}-${i}`}
+                    className={`rounded-lg border-2 p-3 text-center ${RAREZA_STYLE[p.rareza]}`}
+                  >
+                    <div className="font-display text-3xl text-primary">
+                      {cartaPuntos(p.rating, p.rareza)}
+                    </div>
+                    <div className="truncate text-xs font-semibold">{p.nombre}</div>
+                    <div className="text-[10px] uppercase text-muted-foreground">
+                      {RAREZA_LABEL_EU[p.rareza]}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <>
+              <DialogTitle className="sr-only">
+                {t("Gutunazala irekitzen", "Abriendo sobre")}
+              </DialogTitle>
+              <img
+                src={sobreAperturaAsset.url}
+                alt=""
+                aria-hidden="true"
+                className="mx-auto aspect-[26/19] w-full max-w-[52rem] object-contain"
+              />
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
