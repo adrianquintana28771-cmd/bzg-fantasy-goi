@@ -4,11 +4,7 @@ import QRCode from "qrcode";
 import type { Match, Player, Team } from "./types";
 import { CATEGORY_LABEL, POSITION_LABEL } from "./types";
 
-export async function generateActaPDF(
-  match: Match,
-  team: Team,
-  players: Player[],
-): Promise<Blob> {
+export async function generateActaPDF(match: Match, team: Team, players: Player[]): Promise<Blob> {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 12;
@@ -55,17 +51,42 @@ export async function generateActaPDF(
   doc.text(match.matchCode, pageW - margin - 30 + 15, 68, { align: "center" });
 
   // Stats table
-  const head = [[
-    "#", "Jugador/a", "G", "A", "Rec", "Blq", "Prd",
-    "7m+", "7m-", "2m", "Par", "P7m", "MVP", "Observaciones",
-  ]];
+  const head = [
+    [
+      "#",
+      "Jugador/a",
+      "G",
+      "A",
+      "Rec",
+      "Blq",
+      "Prd",
+      "7m+",
+      "7m-",
+      "2m",
+      "Par",
+      "P7m",
+      "MVP",
+      "Observaciones",
+    ],
+  ];
   const body = players
     .filter((p) => p.active)
     .sort((a, b) => a.dorsal - b.dorsal)
     .map((p) => [
       String(p.dorsal),
       `${p.publicName} (${POSITION_LABEL[p.position]})`,
-      "", "", "", "", "", "", "", "", "", "", "", "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
     ]);
 
   autoTable(doc, {
@@ -83,7 +104,8 @@ export async function generateActaPDF(
     margin: { left: margin, right: margin },
   });
 
-  const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+  const finalY =
+    (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.text("Observaciones generales:", margin, finalY);

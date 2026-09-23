@@ -38,7 +38,12 @@ export function aggregatePlayer(
 ): PlayerAggregate {
   const team = teams.find((t) => t.id === player.teamId)!;
   const playerStats = stats.filter((s) => s.playerId === player.id);
-  let total = 0, played = 0, goals = 0, assists = 0, steals = 0, saves = 0;
+  let total = 0,
+    played = 0,
+    goals = 0,
+    assists = 0,
+    steals = 0,
+    saves = 0;
   const perMatch: PlayerAggregate["perMatch"] = [];
   for (const s of playerStats) {
     const m = matches.find((mm) => mm.id === s.matchId);
@@ -61,7 +66,10 @@ export function aggregatePlayer(
     matchesPlayed: played,
     totalPoints: total,
     avgPoints: played ? total / played : 0,
-    goals, assists, steals, saves,
+    goals,
+    assists,
+    steals,
+    saves,
     perMatch,
   };
 }

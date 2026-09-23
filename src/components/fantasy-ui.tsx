@@ -1,6 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { CATEGORY_LABEL, CATEGORY_LABEL_EU, POSITION_LABEL, POSITION_LABEL_EU } from "@/lib/fantasy/types";
+import {
+  CATEGORY_LABEL,
+  CATEGORY_LABEL_EU,
+  POSITION_LABEL,
+  POSITION_LABEL_EU,
+} from "@/lib/fantasy/types";
 import type { PlayerAggregate } from "@/lib/fantasy/queries";
 import { useLang } from "@/lib/i18n";
 
@@ -34,7 +39,12 @@ export function PlayerCard({ agg, rank }: { agg: PlayerAggregate; rank?: number 
       <div className="min-w-0 flex-1">
         <div className="truncate font-semibold">{player.publicName}</div>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-medium", POS_COLOR[player.position])}>
+          <span
+            className={cn(
+              "rounded px-1.5 py-0.5 text-[10px] font-medium",
+              POS_COLOR[player.position],
+            )}
+          >
             {posLabel[player.position]}
           </span>
           <span className="truncate">{team.name}</span>
@@ -73,7 +83,9 @@ export function StatusBadge({ status }: { status: string }) {
     publicado: lang === "eu" ? "Argitaratuta" : "Publicado",
   };
   return (
-    <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold", map[status])}>
+    <span
+      className={cn("inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold", map[status])}
+    >
       {label[status]}
     </span>
   );

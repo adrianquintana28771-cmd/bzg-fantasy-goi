@@ -92,7 +92,9 @@ function Home() {
             {t("Denboraldia", "Temporada")} {activeSeason?.name}
           </div>
           <h1 className="mt-4 font-display text-5xl leading-none md:text-7xl">
-            BZG Fantasy<br />Eskubaloia
+            BZG Fantasy
+            <br />
+            Eskubaloia
           </h1>
           <p className="mt-4 max-w-xl text-lg text-white/90">
             {t(
@@ -117,7 +119,8 @@ function Home() {
               to="/admin"
               className="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20"
             >
-              <ClipboardList className="h-4 w-4" /> {t("Ordezkariaren sarbidea", "Acceso delegado/a")}
+              <ClipboardList className="h-4 w-4" />{" "}
+              {t("Ordezkariaren sarbidea", "Acceso delegado/a")}
             </Link>
             <Link
               to="/admin"
@@ -151,7 +154,9 @@ function Home() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-display text-4xl text-primary">{playerOfWeek.totalPoints}</div>
+                  <div className="font-display text-4xl text-primary">
+                    {playerOfWeek.totalPoints}
+                  </div>
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
                     {t("puntu guztira", "pts totales")}
                   </div>
@@ -230,7 +235,8 @@ function Home() {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-xs text-muted-foreground">
-                          {t("J", "J")}{m.round} · {new Date(m.date).toLocaleDateString("es-ES")}
+                          {t("J", "J")}
+                          {m.round} · {new Date(m.date).toLocaleDateString("es-ES")}
                         </div>
                         <div className="mt-1 font-semibold">
                           {m.locationType === "local"

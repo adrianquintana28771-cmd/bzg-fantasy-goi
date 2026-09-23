@@ -1,5 +1,16 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Home, Trophy, Users, ClipboardList, Settings, LogIn, LogOut, Shield, Sparkles, BarChart3 } from "lucide-react";
+import {
+  Home,
+  Trophy,
+  Users,
+  ClipboardList,
+  Settings,
+  LogIn,
+  LogOut,
+  Shield,
+  Sparkles,
+  BarChart3,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 import { useState } from "react";
@@ -19,19 +30,56 @@ type NavItem = {
 
 const BASE_NAV: NavItem[] = [
   { to: "/", label: ["Hasiera", "Inicio"], Icon: Home, color: "var(--color-primary)" },
-  { to: "/plantilla", label: ["Taldea", "Equipo"], Icon: Shield, color: "var(--color-accent)", authOnly: true, gameOnly: true },
-  { to: "/misiones", label: ["Misioak", "Misiones"], Icon: Sparkles, color: "var(--gold)", authOnly: true, gameOnly: true },
+  {
+    to: "/plantilla",
+    label: ["Taldea", "Equipo"],
+    Icon: Shield,
+    color: "var(--color-accent)",
+    authOnly: true,
+    gameOnly: true,
+  },
+  {
+    to: "/misiones",
+    label: ["Misioak", "Misiones"],
+    Icon: Sparkles,
+    color: "var(--gold)",
+    authOnly: true,
+    gameOnly: true,
+  },
   { to: "/rankings", label: ["Sailkapenak", "Rankings"], Icon: Trophy, color: "var(--gold)" },
   { to: "/equipos", label: ["Taldeak", "Equipos"], Icon: Users, color: "var(--color-accent)" },
-  { to: "/partidos", label: ["Partidak", "Partidos"], Icon: ClipboardList, color: "var(--color-destructive)" },
-  { to: "/admin/desempeno", label: ["Errendimendua", "Desempeño"], Icon: BarChart3, color: "var(--color-primary)", adminOnly: true },
-  { to: "/admin", label: ["Admin", "Admin"], Icon: Settings, color: "var(--color-muted-foreground)", adminOnly: true },
+  {
+    to: "/partidos",
+    label: ["Partidak", "Partidos"],
+    Icon: ClipboardList,
+    color: "var(--color-destructive)",
+  },
+  {
+    to: "/admin/desempeno",
+    label: ["Errendimendua", "Desempeño"],
+    Icon: BarChart3,
+    color: "var(--color-primary)",
+    adminOnly: true,
+  },
+  {
+    to: "/admin",
+    label: ["Admin", "Admin"],
+    Icon: Settings,
+    color: "var(--color-muted-foreground)",
+    adminOnly: true,
+  },
 ];
 
 export function SiteHeader() {
   const { user, displayName, signOut, isStaff, isSuperAdmin, isManager, isAdmin } = useAuth();
   const t = useT();
-  const roleLabel = isSuperAdmin ? "Super admin" : isManager ? "Manager" : isAdmin ? "Admin" : t("Erabiltzailea", "Usuario");
+  const roleLabel = isSuperAdmin
+    ? "Super admin"
+    : isManager
+      ? "Manager"
+      : isAdmin
+        ? "Admin"
+        : t("Erabiltzailea", "Usuario");
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -62,7 +110,9 @@ export function SiteHeader() {
           <div className="flex items-center gap-2">
             <LangToggle />
             <div className="hidden text-right sm:block">
-              <div className="truncate text-sm font-semibold">{displayName ?? t("Erabiltzailea", "Usuario")}</div>
+              <div className="truncate text-sm font-semibold">
+                {displayName ?? t("Erabiltzailea", "Usuario")}
+              </div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 {roleLabel}
               </div>
@@ -136,7 +186,9 @@ export function BottomNav() {
                 <>
                   <span
                     className={`grid h-11 w-11 place-items-center rounded-2xl transition ${
-                      isActive ? "scale-105 shadow-card" : "bg-secondary/60 group-hover:bg-secondary"
+                      isActive
+                        ? "scale-105 shadow-card"
+                        : "bg-secondary/60 group-hover:bg-secondary"
                     }`}
                     style={isActive ? { background: color, color: "white" } : { color }}
                   >
@@ -168,7 +220,9 @@ export function BottomNav() {
               >
                 <LogOut className="h-6 w-6" strokeWidth={2.4} aria-hidden />
               </span>
-              <span className="text-[11px] font-semibold leading-none tracking-wide">{t("Irten", "Salir")}</span>
+              <span className="text-[11px] font-semibold leading-none tracking-wide">
+                {t("Irten", "Salir")}
+              </span>
             </button>
           </li>
         )}
@@ -185,10 +239,15 @@ export function SiteFooter() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="font-display text-base text-foreground">BZG Fantasy Eskubaloia</div>
-            <div>{t("Etxebarriko eskubaloiaren Fantasya", "El Fantasy del balonmano de Etxebarri")}</div>
+            <div>
+              {t("Etxebarriko eskubaloiaren Fantasya", "El Fantasy del balonmano de Etxebarri")}
+            </div>
           </div>
           <div className="text-xs">
-            {t("Klubaren barne-erabilera · Adingabeen pribatutasuna babesten dugu", "Uso interno del club · Protegemos la privacidad de menores")}
+            {t(
+              "Klubaren barne-erabilera · Adingabeen pribatutasuna babesten dugu",
+              "Uso interno del club · Protegemos la privacidad de menores",
+            )}
           </div>
         </div>
       </div>

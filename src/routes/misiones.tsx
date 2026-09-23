@@ -12,11 +12,17 @@ export const Route = createFileRoute("/misiones")({
   head: () => ({
     meta: [
       { title: "Misiones · BZG Fantasy" },
-      { name: "description", content: "Completa misiones para ganar sobres y escanea el QR del pabellón para conseguir un sobre premium." },
+      {
+        name: "description",
+        content:
+          "Completa misiones para ganar sobres y escanea el QR del pabellón para conseguir un sobre premium.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({ qr: typeof s.qr === "string" ? s.qr : undefined }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    qr: typeof s.qr === "string" ? s.qr : undefined,
+  }),
   component: MisionesPage,
 });
 
@@ -34,15 +40,30 @@ function MisionesPage() {
   const { qr } = Route.useSearch();
   const t = useT();
 
-  if (loading) return <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">{t("Kargatzen…", "Cargando…")}</div>;
+  if (loading)
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">
+        {t("Kargatzen…", "Cargando…")}
+      </div>
+    );
 
   if (!user) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 text-center">
         <BackButton />
         <h1 className="mt-4 font-display text-3xl">{t("Misioak", "Misiones")}</h1>
-        <p className="mt-2 text-muted-foreground">{t("Hasi saioa misioak egiteko eta gutunazalak lortzeko.", "Inicia sesión para completar misiones y conseguir sobres.")}</p>
-        <Link to="/auth" className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">{t("Sartu", "Entrar")}</Link>
+        <p className="mt-2 text-muted-foreground">
+          {t(
+            "Hasi saioa misioak egiteko eta gutunazalak lortzeko.",
+            "Inicia sesión para completar misiones y conseguir sobres.",
+          )}
+        </p>
+        <Link
+          to="/auth"
+          className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+        >
+          {t("Sartu", "Entrar")}
+        </Link>
       </div>
     );
   }
@@ -52,7 +73,12 @@ function MisionesPage() {
       <div className="mx-auto max-w-3xl px-4 py-10 text-center">
         <BackButton />
         <h1 className="mt-4 font-display text-3xl">{t("Joko-atala", "Sección de juego")}</h1>
-        <p className="mt-2 text-muted-foreground">{t("Administrazio-kontuek ez dute misiorik ez gutunazalik.", "Las cuentas de administración no tienen misiones ni sobres.")}</p>
+        <p className="mt-2 text-muted-foreground">
+          {t(
+            "Administrazio-kontuek ez dute misiorik ez gutunazalik.",
+            "Las cuentas de administración no tienen misiones ni sobres.",
+          )}
+        </p>
       </div>
     );
   }
@@ -74,7 +100,10 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
         .select("sobres, sobres_premium")
         .eq("user_id", userId)
         .maybeSingle();
-      return { sobres: data?.sobres ?? 0, premium: (data as { sobres_premium?: number } | null)?.sobres_premium ?? 0 };
+      return {
+        sobres: data?.sobres ?? 0,
+        premium: (data as { sobres_premium?: number } | null)?.sobres_premium ?? 0,
+      };
     },
   });
 
@@ -82,11 +111,18 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
     queryKey: ["misiones", userId],
     queryFn: async (): Promise<{ mision: MisionRow; claimed: boolean }[]> => {
       const [{ data: ms }, { data: um }] = await Promise.all([
-        supabase.from("misiones").select("id, nombre, descripcion, recompensa_sobres, tipo_sobre, requiere_qr").eq("is_active", true).order("created_at"),
+        supabase
+          .from("misiones")
+          .select("id, nombre, descripcion, recompensa_sobres, tipo_sobre, requiere_qr")
+          .eq("is_active", true)
+          .order("created_at"),
         supabase.from("user_misiones").select("mision_id").eq("user_id", userId),
       ]);
       const claimedIds = new Set((um ?? []).map((r) => r.mision_id));
-      return ((ms ?? []) as unknown as MisionRow[]).map((m) => ({ mision: m, claimed: claimedIds.has(m.id) }));
+      return ((ms ?? []) as unknown as MisionRow[]).map((m) => ({
+        mision: m,
+        claimed: claimedIds.has(m.id),
+      }));
     },
   });
 
@@ -101,15 +137,18 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       qc.invalidateQueries({ queryKey: ["wallet", userId] });
       qc.invalidateQueries({ queryKey: ["misiones", userId] });
     },
-    onError: (e: Error) => toast.error(e.message ?? t("Ezin izan da eskatu", "No se pudo reclamar")),
+    onError: (e: Error) =>
+      toast.error(e.message ?? t("Ezin izan da eskatu", "No se pudo reclamar")),
   });
 
   const qrMut = useMutation({
     mutationFn: async (code: string) => {
-      const { data, error } = await (supabase.rpc as unknown as (
-        f: string,
-        a: Record<string, unknown>,
-      ) => Promise<{ data: number | null; error: { message: string } | null }>)("claim_qr", { _codigo: code });
+      const { data, error } = await (
+        supabase.rpc as unknown as (
+          f: string,
+          a: Record<string, unknown>,
+        ) => Promise<{ data: number | null; error: { message: string } | null }>
+      )("claim_qr", { _codigo: code });
       if (error) throw new Error(error.message);
       return data;
     },
@@ -120,7 +159,11 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       qc.invalidateQueries({ queryKey: ["misiones", userId] });
     },
     onError: (e: Error) =>
-      toast.error(e.message.includes("canjeado") ? t("Kode hau trukatu duzu jada", "Ya has canjeado este código") : t("Kodea ez da baliozkoa", "Código no válido")),
+      toast.error(
+        e.message.includes("canjeado")
+          ? t("Kode hau trukatu duzu jada", "Ya has canjeado este código")
+          : t("Kodea ez da baliozkoa", "Código no válido"),
+      ),
   });
 
   // Auto-canjea cuando se llega desde el QR del pabellón
@@ -141,29 +184,39 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
 
       <header>
         <h1 className="font-display text-3xl leading-none">{t("Misioak", "Misiones")}</h1>
-        <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">{t("Lortu gutunazalak eta handitu zure taldea", "Consigue sobres y amplía tu equipo")}</p>
+        <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
+          {t("Lortu gutunazalak eta handitu zure taldea", "Consigue sobres y amplía tu equipo")}
+        </p>
       </header>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-2xl border border-border bg-card p-4 text-center">
           <Package className="mx-auto h-6 w-6 text-primary" />
           <div className="mt-1 font-display text-3xl">{wallet.data?.sobres ?? 0}</div>
-          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">{t("Gutunazal arruntak", "Sobres normales")}</div>
+          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
+            {t("Gutunazal arruntak", "Sobres normales")}
+          </div>
         </div>
         <div className="rounded-2xl border-2 border-[color:var(--gold,#d4a017)] bg-card p-4 text-center">
           <Sparkles className="mx-auto h-6 w-6 text-[color:var(--gold,#d4a017)]" />
           <div className="mt-1 font-display text-3xl">{wallet.data?.premium ?? 0}</div>
-          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">{t("Premium gutunazalak", "Sobres premium")}</div>
+          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
+            {t("Premium gutunazalak", "Sobres premium")}
+          </div>
         </div>
       </div>
 
       {/* QR premium */}
       <section className="rounded-2xl border-2 border-[color:var(--gold,#d4a017)]/60 bg-card p-4">
         <h2 className="flex items-center gap-2 font-display text-lg">
-          <QrCode className="h-5 w-5 text-[color:var(--gold,#d4a017)]" /> {t("PREMIUM gutunazala QRarekin", "Sobre PREMIUM con QR")}
+          <QrCode className="h-5 w-5 text-[color:var(--gold,#d4a017)]" />{" "}
+          {t("PREMIUM gutunazala QRarekin", "Sobre PREMIUM con QR")}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {t("Eskaneatu pabiloiko hormako QR kodea partida batean, edo idatzi kodea hemen. Premium gutunazalak jokalari arraro edo legendario bat du ziur.", "Escanea el código QR de la pared del pabellón durante un partido, o escribe aquí el código. El sobre premium lleva un jugador raro o legendario asegurado.")}
+          {t(
+            "Eskaneatu pabiloiko hormako QR kodea partida batean, edo idatzi kodea hemen. Premium gutunazalak jokalari arraro edo legendario bat du ziur.",
+            "Escanea el código QR de la pared del pabellón durante un partido, o escribe aquí el código. El sobre premium lleva un jugador raro o legendario asegurado.",
+          )}
         </p>
         <div className="mt-3 flex gap-2">
           <input
@@ -190,11 +243,15 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       {/* Misiones normales */}
       <section className="rounded-2xl border border-border bg-card p-4">
         <h2 className="mb-3 flex items-center gap-2 font-display text-lg">
-          <Trophy className="h-5 w-5 text-[color:var(--gold,#d4a017)]" /> {t("Klubaren misioak", "Misiones del club")}
+          <Trophy className="h-5 w-5 text-[color:var(--gold,#d4a017)]" />{" "}
+          {t("Klubaren misioak", "Misiones del club")}
         </h2>
         <ul className="space-y-2">
           {normales.map(({ mision, claimed }) => (
-            <li key={mision.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+            <li
+              key={mision.id}
+              className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"
+            >
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold">{mision.nombre}</div>
                 <div className="text-xs text-muted-foreground">{mision.descripcion}</div>
@@ -204,14 +261,23 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
                 disabled={claimed || claimMut.isPending}
                 className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-secondary px-2.5 py-1.5 text-xs font-bold disabled:opacity-40"
               >
-                {claimed ? t("Eginda", "Hecha") : (<><Package className="h-3 w-3" /> +{mision.recompensa_sobres}</>)}
+                {claimed ? (
+                  t("Eginda", "Hecha")
+                ) : (
+                  <>
+                    <Package className="h-3 w-3" /> +{mision.recompensa_sobres}
+                  </>
+                )}
               </button>
             </li>
           ))}
         </ul>
       </section>
 
-      <Link to="/plantilla" className="block rounded-xl bg-primary py-3 text-center font-display text-lg text-primary-foreground">
+      <Link
+        to="/plantilla"
+        className="block rounded-xl bg-primary py-3 text-center font-display text-lg text-primary-foreground"
+      >
         {t("Joan nire taldera", "Ir a mi equipo")}
       </Link>
     </div>

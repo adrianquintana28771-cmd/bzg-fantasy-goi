@@ -33,13 +33,20 @@ export async function fetchTeams(): Promise<ClubTeam[]> {
 }
 
 export async function fetchPool(): Promise<PoolPlayer[]> {
-  const { data, error } = await supabase.from("player_pool").select(POOL_SELECT).eq("rareza", "normal");
+  const { data, error } = await supabase
+    .from("player_pool")
+    .select(POOL_SELECT)
+    .eq("rareza", "normal");
   if (error) throw error;
   return (data ?? []) as unknown as PoolPlayer[];
 }
 
 export async function fetchPoolPlayer(id: string): Promise<PoolPlayer | null> {
-  const { data, error } = await supabase.from("player_pool").select(POOL_SELECT).eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("player_pool")
+    .select(POOL_SELECT)
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw error;
   return data as unknown as PoolPlayer | null;
 }

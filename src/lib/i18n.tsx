@@ -29,7 +29,9 @@ export const useT = () => useContext(LangContext).t;
 export function LangToggle({ className = "" }: { className?: string }) {
   const { lang, setLang } = useLang();
   return (
-    <div className={`inline-flex rounded-lg border border-border bg-secondary/60 p-0.5 text-xs font-bold ${className}`}>
+    <div
+      className={`inline-flex rounded-lg border border-border bg-secondary/60 p-0.5 text-xs font-bold ${className}`}
+    >
       {(["eu", "es"] as const).map((l) => (
         <button
           key={l}

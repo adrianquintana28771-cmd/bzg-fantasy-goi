@@ -12,7 +12,9 @@ export function AdminGuard({ children }: { children: ReactNode }) {
   }, [loading, user, navigate]);
 
   if (loading) {
-    return <div className="mx-auto max-w-md p-10 text-center text-muted-foreground">Cargando...</div>;
+    return (
+      <div className="mx-auto max-w-md p-10 text-center text-muted-foreground">Cargando...</div>
+    );
   }
   if (!user) return null;
   if (!isStaff) {

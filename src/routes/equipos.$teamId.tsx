@@ -38,27 +38,49 @@ function EquipoDetalle() {
   const q = useQuery({
     queryKey: ["club-equipo", teamId],
     queryFn: async () => {
-      const [teams, pool, pts] = await Promise.all([fetchTeams(), fetchPool(), fetchPointsByPlayer()]);
-      return { team: teams.find((t) => t.id === teamId), pool: pool.filter((p) => p.team_id === teamId), pts };
+      const [teams, pool, pts] = await Promise.all([
+        fetchTeams(),
+        fetchPool(),
+        fetchPointsByPlayer(),
+      ]);
+      return {
+        team: teams.find((t) => t.id === teamId),
+        pool: pool.filter((p) => p.team_id === teamId),
+        pts,
+      };
     },
   });
 
-  if (q.isLoading) return <p className="p-10 text-center text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>;
+  if (q.isLoading)
+    return (
+      <p className="p-10 text-center text-sm text-muted-foreground">
+        {t("Kargatzen…", "Cargando…")}
+      </p>
+    );
   const team = q.data?.team;
   if (!team)
     return (
       <div className="mx-auto max-w-2xl p-10 text-center">
-        <h1 className="font-display text-3xl">{t("Taldea ez da aurkitu", "Equipo no encontrado")}</h1>
-        <Link to="/equipos" className="mt-4 inline-block text-primary hover:underline">{t("Atzera", "Volver")}</Link>
+        <h1 className="font-display text-3xl">
+          {t("Taldea ez da aurkitu", "Equipo no encontrado")}
+        </h1>
+        <Link to="/equipos" className="mt-4 inline-block text-primary hover:underline">
+          {t("Atzera", "Volver")}
+        </Link>
       </div>
     );
   const pts = q.data!.pts;
   const ranking = [...q.data!.pool].sort((a, b) => (pts[b.id] ?? 0) - (pts[a.id] ?? 0));
-  const total = round2(ranking.filter((p) => !p.club?.es_entrenador).reduce((a, p) => a + (pts[p.id] ?? 0), 0));
+  const total = round2(
+    ranking.filter((p) => !p.club?.es_entrenador).reduce((a, p) => a + (pts[p.id] ?? 0), 0),
+  );
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <Link to="/equipos" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link
+        to="/equipos"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> {t("Taldeak", "Equipos")}
       </Link>
       <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
@@ -73,7 +95,9 @@ function EquipoDetalle() {
         </div>
         <div className="rounded-xl bg-primary/10 p-4 text-right">
           <div className="font-display text-3xl text-primary">{total}</div>
-          <div className="text-xs uppercase tracking-widest text-muted-foreground">{t("puntu guztira", "pts totales")}</div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground">
+            {t("puntu guztira", "pts totales")}
+          </div>
         </div>
       </div>
 
@@ -86,7 +110,9 @@ function EquipoDetalle() {
             params={{ playerId: p.id }}
             className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card transition hover:shadow-elevated"
           >
-            <span className="w-6 text-center font-display text-lg text-muted-foreground">{i + 1}</span>
+            <span className="w-6 text-center font-display text-lg text-muted-foreground">
+              {i + 1}
+            </span>
             <div className="min-w-0 flex-1">
               <div className="truncate font-semibold">{p.nombre}</div>
               <div className="text-xs text-muted-foreground">
