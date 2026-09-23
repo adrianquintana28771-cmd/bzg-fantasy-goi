@@ -18,7 +18,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PartidosIndexRouteImport } from './routes/partidos.index'
 import { Route as EquiposIndexRouteImport } from './routes/equipos.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as PartidosMatchIdRouteImport } from './routes/partidos.$matchId'
 import { Route as JugadoresPlayerIdRouteImport } from './routes/jugadores.$playerId'
 import { Route as EquiposTeamIdRouteImport } from './routes/equipos.$teamId'
 import { Route as AdminReglasRouteImport } from './routes/admin.reglas'
@@ -69,11 +68,6 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PartidosMatchIdRoute = PartidosMatchIdRouteImport.update({
-  id: '/partidos/$matchId',
-  path: '/partidos/$matchId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const JugadoresPlayerIdRoute = JugadoresPlayerIdRouteImport.update({
   id: '/jugadores/$playerId',
   path: '/jugadores/$playerId',
@@ -106,7 +100,6 @@ export interface FileRoutesByFullPath {
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
-  '/partidos/$matchId': typeof PartidosMatchIdRoute
   '/admin/': typeof AdminIndexRoute
   '/equipos/': typeof EquiposIndexRoute
   '/partidos/': typeof PartidosIndexRoute
@@ -122,7 +115,6 @@ export interface FileRoutesByTo {
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
-  '/partidos/$matchId': typeof PartidosMatchIdRoute
   '/admin': typeof AdminIndexRoute
   '/equipos': typeof EquiposIndexRoute
   '/partidos': typeof PartidosIndexRoute
@@ -139,7 +131,6 @@ export interface FileRoutesById {
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
-  '/partidos/$matchId': typeof PartidosMatchIdRoute
   '/admin/': typeof AdminIndexRoute
   '/equipos/': typeof EquiposIndexRoute
   '/partidos/': typeof PartidosIndexRoute
@@ -157,7 +148,6 @@ export interface FileRouteTypes {
     | '/admin/reglas'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
-    | '/partidos/$matchId'
     | '/admin/'
     | '/equipos/'
     | '/partidos/'
@@ -173,7 +163,6 @@ export interface FileRouteTypes {
     | '/admin/reglas'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
-    | '/partidos/$matchId'
     | '/admin'
     | '/equipos'
     | '/partidos'
@@ -189,7 +178,6 @@ export interface FileRouteTypes {
     | '/admin/reglas'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
-    | '/partidos/$matchId'
     | '/admin/'
     | '/equipos/'
     | '/partidos/'
@@ -206,7 +194,6 @@ export interface RootRouteChildren {
   AdminReglasRoute: typeof AdminReglasRoute
   EquiposTeamIdRoute: typeof EquiposTeamIdRoute
   JugadoresPlayerIdRoute: typeof JugadoresPlayerIdRoute
-  PartidosMatchIdRoute: typeof PartidosMatchIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   EquiposIndexRoute: typeof EquiposIndexRoute
   PartidosIndexRoute: typeof PartidosIndexRoute
@@ -277,13 +264,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/partidos/$matchId': {
-      id: '/partidos/$matchId'
-      path: '/partidos/$matchId'
-      fullPath: '/partidos/$matchId'
-      preLoaderRoute: typeof PartidosMatchIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/jugadores/$playerId': {
       id: '/jugadores/$playerId'
       path: '/jugadores/$playerId'
@@ -326,7 +306,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminReglasRoute: AdminReglasRoute,
   EquiposTeamIdRoute: EquiposTeamIdRoute,
   JugadoresPlayerIdRoute: JugadoresPlayerIdRoute,
-  PartidosMatchIdRoute: PartidosMatchIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   EquiposIndexRoute: EquiposIndexRoute,
   PartidosIndexRoute: PartidosIndexRoute,
