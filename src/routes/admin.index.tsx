@@ -9,7 +9,8 @@ import {
   ShieldAlert,
   BarChart3,
 } from "lucide-react";
-import { useFantasy } from "@/lib/fantasy/store";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { BackButton } from "@/components/back-button";
 import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
@@ -30,7 +31,22 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function Admin() {
-  const { seasons, teams, players, matches, stats, actaFiles } = useFantasy((s) => s);
+  const { data: counts } = useQuery({
+    queryKey: ["admin-counts"],
+    queryFn: async () => {
+      const count = async (
+        table: "club_teams" | "club_players" | "club_matches" | "club_match_actions",
+      ) => (await supabase.from(table).select("*", { count: "exact", head: true })).count ?? 0;
+      const [teams, players, matches, actions, season] = await Promise.all([
+        count("club_teams"),
+        count("club_players"),
+        count("club_matches"),
+        count("club_match_actions"),
+        supabase.from("club_seasons").select("nombre").eq("is_active", true).maybeSingle(),
+      ]);
+      return { teams, players, matches, actions, season: season.data?.nombre ?? "—" };
+    },
+  });
   const {
     isSuperAdmin,
     isManager,
@@ -40,7 +56,6 @@ function Admin() {
     canManagePlayers,
     canManageAll,
   } = useAuth();
-  const active = seasons.find((s) => s.isActive);
   const roleLabel = isSuperAdmin ? "super_admin" : isManager ? "manager" : isAdmin ? "admin" : "";
   const roleDescription = isSuperAdmin
     ? "Puedes gestionar todo: reglas, partidos, jugadores/as y estadísticas."
@@ -68,17 +83,17 @@ function Admin() {
       <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={Calendar}
-          label="Temporadas"
-          value={seasons.length}
-          sub={`Activa: ${active?.name ?? "—"}`}
+          label="Temporada"
+          value={1}
+          sub={`Activa: ${counts?.season ?? "—"}`}
         />
-        <StatCard icon={Users} label="Equipos" value={teams.length} />
-        <StatCard icon={Users} label="Jugadores/as" value={players.length} />
+        <StatCard icon={Users} label="Equipos" value={counts?.teams ?? 0} />
+        <StatCard icon={Users} label="Jugadores/as" value={counts?.players ?? 0} />
         <StatCard
           icon={ClipboardList}
           label="Partidos"
-          value={matches.length}
-          sub={`${stats.length} stats · ${Object.keys(actaFiles).length} actas`}
+          value={counts?.matches ?? 0}
+          sub={`${counts?.actions ?? 0} acciones registradas`}
         />
       </div>
 
