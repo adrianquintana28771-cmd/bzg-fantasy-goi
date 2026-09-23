@@ -109,9 +109,9 @@ function Jugador() {
           .map((r) => ({
             jornada: r.club_matches?.jornada ?? 0,
             action_id: r.action_id,
-            nombre: r.club_action_types.nombre,
-            puntos: Number(r.club_action_types.puntos),
-            orden: r.club_action_types.orden,
+            nombre: r.club_action_types!.nombre,
+            puntos: Number(r.club_action_types!.puntos),
+            orden: r.club_action_types!.orden,
             cantidad: r.cantidad,
           }));
       }
