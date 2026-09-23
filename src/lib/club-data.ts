@@ -70,6 +70,7 @@ export type RankedPlayer = {
   team: ClubTeam | null;
   puntos: number;
   jornadas: number;
+  porJornada: Record<number, number>;
 };
 
 /** Ranking público de jugadores/as con datos reales (una fila por persona). */
@@ -80,10 +81,11 @@ export async function fetchPlayerRanking(): Promise<RankedPlayer[]> {
     supabase.from("player_jornada_stats").select("player_id,puntos,jornada_numero"),
   ]);
   if (stats.error) throw stats.error;
-  const agg: Record<string, { puntos: number; jornadas: Set<number> }> = {};
+  const agg: Record<string, { puntos: number; jornadas: Set<number>; por: Record<number, number> }> = {};
   for (const r of stats.data ?? []) {
-    const a = (agg[r.player_id] ??= { puntos: 0, jornadas: new Set() });
+    const a = (agg[r.player_id] ??= { puntos: 0, jornadas: new Set(), por: {} });
     a.puntos += Number(r.puntos);
+    a.por[r.jornada_numero] = round2((a.por[r.jornada_numero] ?? 0) + Number(r.puntos));
     if (Number(r.puntos) !== 0) a.jornadas.add(r.jornada_numero);
   }
   const teamById = new Map(teams.map((t) => [t.id, t]));
@@ -97,6 +99,7 @@ export async function fetchPlayerRanking(): Promise<RankedPlayer[]> {
       team: (p.team_id && teamById.get(p.team_id)) || null,
       puntos: round2(agg[p.id]?.puntos ?? 0),
       jornadas: agg[p.id]?.jornadas.size ?? 0,
+      porJornada: agg[p.id]?.por ?? {},
     }))
     .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre));
 }

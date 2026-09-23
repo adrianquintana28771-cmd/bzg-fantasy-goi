@@ -7,6 +7,7 @@ import { BackButton } from "@/components/back-button";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
+import { JornadaBar, useCalendarJornadas, type JornadaSel } from "@/components/jornada-bar";
 
 export const Route = createFileRoute("/rankings")({
   head: () => {
@@ -44,16 +45,25 @@ function Rankings() {
   const [teamId, setTeamId] = useState<string>("");
   const [gender, setGender] = useState<string>("");
   const [tab, setTab] = useState<"jugadores" | "usuarios">("jugadores");
+  const [jor, setJor] = useState<JornadaSel>("total");
+  const { data: jornadas = [] } = useCalendarJornadas();
 
   const teams = [
     ...new Map(ranking.flatMap((r) => (r.team ? [[r.team.id, r.team]] : []))).values(),
   ].sort((a, b) => a.nombre.localeCompare(b.nombre));
-  const sorted = ranking.filter(
-    (r) =>
-      (!category || r.team?.categoria === category) &&
-      (!gender || r.team?.sexo === gender) &&
-      (!teamId || r.team?.id === teamId),
-  );
+  const sorted = ranking
+    .filter(
+      (r) =>
+        (!category || r.team?.categoria === category) &&
+        (!gender || r.team?.sexo === gender) &&
+        (!teamId || r.team?.id === teamId),
+    )
+    .map((r) =>
+      jor === "total"
+        ? r
+        : { ...r, puntos: r.porJornada[jor] ?? 0, jornadas: r.porJornada[jor] ? 1 : 0 },
+    )
+    .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre));
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -85,8 +95,12 @@ function Rankings() {
         ))}
       </div>
 
+      <div className="mt-4">
+        <JornadaBar jornadas={jornadas} value={jor} onChange={setJor} />
+      </div>
+
       {tab === "usuarios" ? (
-        <UsuariosRanking />
+        <UsuariosRanking jor={jor} />
       ) : (
         <>
           <h2 className="sr-only">{t("Jokalarien sailkapena", "Ranking de jugadores/as")}</h2>
@@ -163,15 +177,23 @@ function Select({
   );
 }
 
-function UsuariosRanking() {
+function UsuariosRanking({ jor }: { jor: JornadaSel }) {
   const t = useT();
   const queryClient = useQueryClient();
   const q = useQuery({
     queryKey: ["user-ranking"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("user_ranking");
-      if (error) throw error;
-      return (data ?? []).map((r) => ({
+      const [tot, por] = await Promise.all([
+        supabase.rpc("user_ranking"),
+        supabase.rpc("user_ranking_by_jornada"),
+      ]);
+      if (tot.error) throw tot.error;
+      if (por.error) throw por.error;
+      const porUser: Record<string, Record<number, number>> = {};
+      for (const r of por.data ?? []) {
+        (porUser[r.user_id] ??= {})[r.jornada] = Number(r.puntos);
+      }
+      return (tot.data ?? []).map((r) => ({
         userId: r.user_id as string,
         nombre:
           (r.username as string | null) ??
@@ -179,6 +201,7 @@ function UsuariosRanking() {
           t("Erabiltzailea", "Usuario"),
         puntos: Math.round(Number(r.puntos)),
         jornadas: Number(r.jornadas),
+        porJornada: porUser[r.user_id] ?? {},
       }));
     },
   });
@@ -202,7 +225,17 @@ function UsuariosRanking() {
     };
   }, [queryClient]);
 
-  const rows = q.data ?? [];
+  const rows = (q.data ?? [])
+    .map((u) =>
+      jor === "total"
+        ? u
+        : {
+            ...u,
+            puntos: Math.round(u.porJornada[jor] ?? 0),
+            jornadas: jor in u.porJornada ? 1 : 0,
+          },
+    )
+    .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre));
 
   return (
     <div className="mt-6">
