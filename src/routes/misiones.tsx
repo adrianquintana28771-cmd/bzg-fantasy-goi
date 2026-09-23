@@ -290,7 +290,8 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
         </div>
         {premium.map(({ mision, claimed }) => (
           <p key={mision.id} className="mt-2 text-xs text-muted-foreground">
-            {claimed ? t("✅ Trukatuta: ", "✅ Ya canjeado: ") : "🎯 "} {mision.nombre}
+            {claimed ? t("✅ Trukatuta: ", "✅ Ya canjeado: ") : "🎯 "}{" "}
+            {t("Animatu pabiloian", "Ánimo en el pabellón")}
           </p>
         ))}
       </section>
