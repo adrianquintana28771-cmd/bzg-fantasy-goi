@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { CategoryBadge } from "@/components/fantasy-ui";
+import { JornadaBar, useCalendarJornadas, type JornadaSel } from "@/components/jornada-bar";
 import {
   POSITION_LABEL,
   POSITION_LABEL_EU,
@@ -236,17 +237,15 @@ function Jugador() {
 
 function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] }) {
   const t = useT();
+  const { data: calendar = [] } = useCalendarJornadas();
   const jornadas = useMemo(
     () =>
-      Array.from(new Set([...stats.map((s) => s.jornada), ...actions.map((a) => a.jornada)])).sort(
-        (a, b) => a - b,
-      ),
-    [stats, actions],
+      Array.from(
+        new Set([...calendar, ...stats.map((s) => s.jornada), ...actions.map((a) => a.jornada)]),
+      ).sort((a, b) => a - b),
+    [calendar, stats, actions],
   );
-  const [sel, setSel] = useState<number | "total">(
-    jornadas.length ? jornadas[jornadas.length - 1] : "total",
-  );
-  const current = sel === "total" || jornadas.includes(sel) ? sel : "total";
+  const [current, setSel] = useState<JornadaSel>("total");
 
   const ptsFor = (j: number) => stats.find((s) => s.jornada === j)?.puntos ?? 0;
   const estadoFor = (j: number) => stats.find((s) => s.jornada === j)?.estado ?? "disponible";
@@ -275,13 +274,6 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
   const extra = round2(totalPts - accionesPts);
   const noDisp = current !== "total" && estadoFor(current) === "no_disponible";
 
-  const chip = (active: boolean) =>
-    `shrink-0 rounded-xl border px-3 py-2 text-center transition ${
-      active
-        ? "border-primary bg-primary text-primary-foreground"
-        : "border-border bg-secondary text-foreground"
-    }`;
-
   return (
     <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
       <h2 className="px-5 pt-5 font-display text-xl">
@@ -293,23 +285,20 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
         </p>
       ) : (
         <>
-          <div className="mt-3 flex gap-2 overflow-x-auto px-5 pb-3">
-            <button className={chip(current === "total")} onClick={() => setSel("total")}>
-              <div className="text-[10px] font-semibold uppercase">{t("Guztira", "Total")}</div>
-              <div className="font-display text-lg">
-                {round2(stats.reduce((a, s) => a + s.puntos, 0))}
-              </div>
-            </button>
-            {jornadas.map((j) => (
-              <button key={j} className={chip(current === j)} onClick={() => setSel(j)}>
-                <div className="text-[10px] font-semibold uppercase">J{j}</div>
-                <div className="font-display text-lg">{round2(ptsFor(j))}</div>
-                <div
-                  className="mt-1 h-1 w-8 rounded-full"
-                  style={{ background: ESTADO_COLOR[estadoFor(j)] }}
-                />
-              </button>
-            ))}
+          <div className="mt-3 px-5">
+            <JornadaBar
+              jornadas={jornadas}
+              value={current}
+              onChange={setSel}
+              extra={(j) =>
+                j !== "total" && stats.some((s) => s.jornada === j) ? (
+                  <div
+                    className="mx-auto mt-1 h-1 w-6 rounded-full"
+                    style={{ background: ESTADO_COLOR[estadoFor(j)] }}
+                  />
+                ) : null
+              }
+            />
           </div>
 
           <div className="border-t border-border px-5 py-3 text-center font-display text-lg">
