@@ -45,8 +45,9 @@ function Rankings() {
   const [gender, setGender] = useState<string>("");
   const [tab, setTab] = useState<"jugadores" | "usuarios">("jugadores");
 
-  const teams = [...new Map(ranking.flatMap((r) => (r.team ? [[r.team.id, r.team]] : []))).values()]
-    .sort((a, b) => a.nombre.localeCompare(b.nombre));
+  const teams = [
+    ...new Map(ranking.flatMap((r) => (r.team ? [[r.team.id, r.team]] : []))).values(),
+  ].sort((a, b) => a.nombre.localeCompare(b.nombre));
   const sorted = ranking.filter(
     (r) =>
       (!category || r.team?.categoria === category) &&
@@ -92,11 +93,13 @@ function Rankings() {
           <div className="mt-6 grid grid-cols-1 gap-2 rounded-2xl border border-border bg-card p-3 shadow-card sm:grid-cols-3">
             <Select value={category} onChange={setCategory} label={t("Kategoria", "Categoría")}>
               <option value="">{t("Guztiak", "Todas")}</option>
-              {(["senior", "juvenil", "cadete"] as const).map((k) => [k, CAT_LABEL[k]]).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
+              {(["senior", "juvenil", "cadete"] as const)
+                .map((k) => [k, CAT_LABEL[k]])
+                .map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
             </Select>
             <Select value={gender} onChange={setGender} label={t("Generoa", "Género")}>
               <option value="">{t("Guztiak", "Todos")}</option>
