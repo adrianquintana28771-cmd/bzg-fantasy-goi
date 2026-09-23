@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { LogIn, UserPlus, ArrowLeft } from "lucide-react";
+import { loginWithUsername } from "@/lib/auth.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -174,9 +175,10 @@ function LoginForm() {
     }
     setBusy(true);
     try {
-      const { data: mail } = await rpc<string>("email_for_username", { _username: parsed.data.username });
-      const email = mail ?? emailForUsername(parsed.data.username);
-      const { error } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
+      const res = await loginWithUsername({ data: { username: parsed.data.username, password: parsed.data.password } });
+      const { error } = res.ok
+        ? await supabase.auth.setSession({ access_token: res.access_token, refresh_token: res.refresh_token })
+        : { error: new Error("fail") };
       if (error) {
         registerFailedAttempt();
         toast.error("Usuario o contraseña incorrectos");

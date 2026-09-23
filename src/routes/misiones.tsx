@@ -25,7 +25,7 @@ interface MisionRow {
   descripcion: string;
   recompensa_sobres: number;
   tipo_sobre: string;
-  codigo_qr: string | null;
+  requiere_qr: boolean | null;
 }
 
 function MisionesPage() {
@@ -79,7 +79,7 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
     queryKey: ["misiones", userId],
     queryFn: async (): Promise<{ mision: MisionRow; claimed: boolean }[]> => {
       const [{ data: ms }, { data: um }] = await Promise.all([
-        supabase.from("misiones").select("id, nombre, descripcion, recompensa_sobres, tipo_sobre, codigo_qr").eq("is_active", true).order("created_at"),
+        supabase.from("misiones").select("id, nombre, descripcion, recompensa_sobres, tipo_sobre, requiere_qr").eq("is_active", true).order("created_at"),
         supabase.from("user_misiones").select("mision_id").eq("user_id", userId),
       ]);
       const claimedIds = new Set((um ?? []).map((r) => r.mision_id));
