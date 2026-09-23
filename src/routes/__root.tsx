@@ -16,6 +16,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { LangProvider } from "@/lib/i18n";
 import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 import { Toaster } from "@/components/ui/sonner";
+import { GuidedTour } from "@/components/guided-tour";
 
 function NotFoundComponent() {
   return (
@@ -148,6 +149,7 @@ function RootComponent() {
             </div>
             <BottomNav />
           </div>
+           <GuidedTour />
           <Toaster richColors position="top-center" />
         </AuthProvider>
       </LangProvider>
