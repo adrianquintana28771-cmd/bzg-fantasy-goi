@@ -1,3 +1,6 @@
+# Pendiente
+
+- [x] Traducir Misiones al euskera y configurar tutorial, Federación y web BZG como las tres primeras misiones.
 # Roadmap
 - [x] Mini-tutorial guiado para nuevas visitas, usuarios y administración
 - [ ] Viernes: reiniciar sobres/cartas de usuarios como recién registrados (esperando aviso del usuario)

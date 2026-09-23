@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Package, QrCode, Sparkles, Trophy } from "lucide-react";
+import { BookOpen, ExternalLink, Package, QrCode, Sparkles, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
+import { openGuidedTour, TOUR_COMPLETED_EVENT } from "@/components/guided-tour";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
@@ -34,6 +36,39 @@ interface MisionRow {
   tipo_sobre: string;
   requiere_qr: boolean | null;
 }
+
+const TUTORIAL_MISSION_ID = "a8d4a001-7985-4f2a-a23b-b2079a97bd01";
+const FEDERATION_MISSION_ID = "a8d4a002-7985-4f2a-a23b-b2079a97bd02";
+const BZG_MISSION_ID = "a8d4a003-7985-4f2a-a23b-b2079a97bd03";
+
+const missionCopy: Record<
+  string,
+  { title: [string, string]; description: [string, string]; url?: string }
+> = {
+  [TUTORIAL_MISSION_ID]: {
+    title: ["Osatu tutoriala", "Completa el tutorial"],
+    description: [
+      "Ikusi tutorial gidatua amaierara arte.",
+      "Mira el tutorial guiado hasta el final.",
+    ],
+  },
+  [FEDERATION_MISSION_ID]: {
+    title: ["Bisitatu Federazioa", "Visita la Federación"],
+    description: [
+      "Bisitatu Federazioa emaitzak eta jardunaldiak ikusteko.",
+      "Visita la Federación para ver los resultados y sus jornadas",
+    ],
+    url: "https://www.fvbm.eus/index?del=0",
+  },
+  [BZG_MISSION_ID]: {
+    title: ["Bisitatu BerdeZuriGorri!", "¡Visita BerdeZuriGorri!"],
+    description: [
+      "Bisitatu BerdeZuriGorriren webgune ofiziala!",
+      "Visita la pagina oficial de BerdeZuriGorri!!",
+    ],
+    url: "https://www.bzg.eus/",
+  },
+};
 
 function MisionesPage() {
   const { user, loading, isStaff } = useAuth();
@@ -141,6 +176,26 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       toast.error(e.message ?? t("Ezin izan da eskatu", "No se pudo reclamar")),
   });
 
+  useEffect(() => {
+    const tutorial = (misiones.data ?? []).find(
+      ({ mision }) => mision.id === TUTORIAL_MISSION_ID,
+    );
+    const claimCompletedTutorial = () => {
+      if (
+        tutorial &&
+        !tutorial.claimed &&
+        window.localStorage.getItem("bzg_tour_v1_player") === "done" &&
+        !claimMut.isPending
+      ) {
+        claimMut.mutate(TUTORIAL_MISSION_ID);
+      }
+    };
+
+    claimCompletedTutorial();
+    window.addEventListener(TOUR_COMPLETED_EVENT, claimCompletedTutorial);
+    return () => window.removeEventListener(TOUR_COMPLETED_EVENT, claimCompletedTutorial);
+  }, [misiones.data, claimMut.isPending]);
+
   const qrMut = useMutation({
     mutationFn: async (code: string) => {
       const { data, error } = await (
@@ -235,7 +290,8 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
         </div>
         {premium.map(({ mision, claimed }) => (
           <p key={mision.id} className="mt-2 text-xs text-muted-foreground">
-            {claimed ? t("✅ Trukatuta: ", "✅ Ya canjeado: ") : "🎯 "} {mision.nombre}
+            {claimed ? t("✅ Trukatuta: ", "✅ Ya canjeado: ") : "🎯 "}{" "}
+            {t("Animatu pabiloian", "Ánimo en el pabellón")}
           </p>
         ))}
       </section>
@@ -247,30 +303,49 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
           {t("Klubaren misioak", "Misiones del club")}
         </h2>
         <ul className="space-y-2">
-          {normales.map(({ mision, claimed }) => (
-            <li
-              key={mision.id}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"
-            >
-              <div className="min-w-0">
-                <div className="truncate text-sm font-semibold">{mision.nombre}</div>
-                <div className="text-xs text-muted-foreground">{mision.descripcion}</div>
-              </div>
-              <button
-                onClick={() => claimMut.mutate(mision.id)}
-                disabled={claimed || claimMut.isPending}
-                className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-secondary px-2.5 py-1.5 text-xs font-bold disabled:opacity-40"
-              >
-                {claimed ? (
-                  t("Eginda", "Hecha")
-                ) : (
-                  <>
-                    <Package className="h-3 w-3" /> +{mision.recompensa_sobres}
-                  </>
-                )}
-              </button>
-            </li>
-          ))}
+          {normales.map(({ mision, claimed }) => {
+            const copy = missionCopy[mision.id];
+            const isTutorial = mision.id === TUTORIAL_MISSION_ID;
+            const actionLabel = isTutorial
+              ? t("Tutoriala ikusi", "Ver tutorial")
+              : t("Webgunea bisitatu", "Visitar web");
+
+            return (
+              <li key={mision.id} className="rounded-lg border border-border p-3">
+                <div className="text-sm font-semibold">
+                  {copy ? t(copy.title[0], copy.title[1]) : mision.nombre}
+                </div>
+                <div className="mt-1 text-xs leading-5 text-muted-foreground">
+                  {copy ? t(copy.description[0], copy.description[1]) : mision.descripcion}
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-primary">
+                    <Package className="h-3.5 w-3.5" /> +{mision.recompensa_sobres}
+                  </span>
+                  {claimed ? (
+                    <span className="text-xs font-bold text-muted-foreground">
+                      {t("Eginda", "Hecha")}
+                    </span>
+                  ) : isTutorial ? (
+                    <Button type="button" size="sm" variant="secondary" onClick={openGuidedTour}>
+                      <BookOpen aria-hidden /> {actionLabel}
+                    </Button>
+                  ) : (
+                    <Button asChild size="sm" variant="secondary">
+                      <a
+                        href={copy?.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => claimMut.mutate(mision.id)}
+                      >
+                        {actionLabel} <ExternalLink aria-hidden />
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </section>
 

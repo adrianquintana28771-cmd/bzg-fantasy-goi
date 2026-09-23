@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
 
 const TOUR_EVENT = "bzg:open-tour";
+export const TOUR_COMPLETED_EVENT = "bzg:tour-completed";
 const TOUR_VERSION = "v1";
 
 type TourStep = {
@@ -221,7 +222,7 @@ export function GuidedTour() {
     cardRef.current?.focus();
     const handleKeyboard = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        finish();
+        dismiss();
         return;
       }
       if (event.key !== "Tab" || !cardRef.current) return;
@@ -249,8 +250,14 @@ export function GuidedTour() {
     return () => window.removeEventListener("keydown", handleKeyboard);
   });
 
-  function finish() {
+  function dismiss() {
+    window.localStorage.setItem(storageKey, "skipped");
+    setOpen(false);
+  }
+
+  function complete() {
     window.localStorage.setItem(storageKey, "done");
+    window.dispatchEvent(new Event(TOUR_COMPLETED_EVENT));
     setOpen(false);
   }
 
@@ -291,7 +298,7 @@ export function GuidedTour() {
           <span className="text-xs font-bold uppercase text-primary">
             {t("Urratsa", "Paso")} {step + 1} / {steps.length}
           </span>
-          <Button type="button" variant="ghost" size="sm" onClick={finish}>
+          <Button type="button" variant="ghost" size="sm" onClick={dismiss}>
             {t("Saltatu", "Omitir")}
           </Button>
         </div>
@@ -323,7 +330,7 @@ export function GuidedTour() {
           </div>
           <Button
             type="button"
-            onClick={() => (isLast ? finish() : setStep((value) => value + 1))}
+            onClick={() => (isLast ? complete() : setStep((value) => value + 1))}
           >
             {isLast ? t("Amaitu", "Terminar") : t("Hurrengoa", "Siguiente")}
             {!isLast && <ChevronRight aria-hidden />}
