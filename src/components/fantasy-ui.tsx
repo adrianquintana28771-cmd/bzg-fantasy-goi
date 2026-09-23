@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { CATEGORY_LABEL, POSITION_LABEL } from "@/lib/fantasy/types";
+import { CATEGORY_LABEL, CATEGORY_LABEL_EU, POSITION_LABEL, POSITION_LABEL_EU } from "@/lib/fantasy/types";
 import type { PlayerAggregate } from "@/lib/fantasy/queries";
+import { useLang } from "@/lib/i18n";
 
 const POS_COLOR: Record<string, string> = {
   portero: "bg-warning/20 text-warning-foreground",
@@ -13,7 +14,9 @@ const POS_COLOR: Record<string, string> = {
 };
 
 export function PlayerCard({ agg, rank }: { agg: PlayerAggregate; rank?: number }) {
+  const { lang } = useLang();
   const { player, team } = agg;
+  const posLabel = lang === "eu" ? POSITION_LABEL_EU : POSITION_LABEL;
   return (
     <Link
       to="/jugadores/$playerId"
@@ -32,7 +35,7 @@ export function PlayerCard({ agg, rank }: { agg: PlayerAggregate; rank?: number 
         <div className="truncate font-semibold">{player.publicName}</div>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-medium", POS_COLOR[player.position])}>
-            {POSITION_LABEL[player.position]}
+            {posLabel[player.position]}
           </span>
           <span className="truncate">{team.name}</span>
         </div>
@@ -46,14 +49,17 @@ export function PlayerCard({ agg, rank }: { agg: PlayerAggregate; rank?: number 
 }
 
 export function CategoryBadge({ category }: { category: keyof typeof CATEGORY_LABEL }) {
+  const { lang } = useLang();
+  const label = lang === "eu" ? CATEGORY_LABEL_EU : CATEGORY_LABEL;
   return (
     <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
-      {CATEGORY_LABEL[category]}
+      {label[category]}
     </span>
   );
 }
 
 export function StatusBadge({ status }: { status: string }) {
+  const { lang } = useLang();
   const map: Record<string, string> = {
     pendiente: "bg-muted text-muted-foreground",
     estadisticas: "bg-warning/25 text-warning-foreground",
@@ -61,10 +67,10 @@ export function StatusBadge({ status }: { status: string }) {
     publicado: "bg-success/20 text-success",
   };
   const label: Record<string, string> = {
-    pendiente: "Pendiente",
-    estadisticas: "Con estadísticas",
-    validado: "Validado",
-    publicado: "Publicado",
+    pendiente: lang === "eu" ? "Zain" : "Pendiente",
+    estadisticas: lang === "eu" ? "Estatistikekin" : "Con estadísticas",
+    validado: lang === "eu" ? "Balidatuta" : "Validado",
+    publicado: lang === "eu" ? "Argitaratuta" : "Publicado",
   };
   return (
     <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold", map[status])}>

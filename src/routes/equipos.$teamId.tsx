@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { CategoryBadge } from "@/components/fantasy-ui";
 import { ArrowLeft } from "lucide-react";
-import { POSITION_LABEL, type Category } from "@/lib/fantasy/types";
+import { POSITION_LABEL, POSITION_LABEL_EU, type Category } from "@/lib/fantasy/types";
+import { useT, useLang } from "@/lib/i18n";
 import { fetchPool, fetchPointsByPlayer, fetchTeams, round2 } from "@/lib/club-data";
 
 export const Route = createFileRoute("/equipos/$teamId")({
@@ -30,6 +31,9 @@ export const Route = createFileRoute("/equipos/$teamId")({
 });
 
 function EquipoDetalle() {
+  const t = useT();
+  const { lang } = useLang();
+  const POS_LABEL = lang === "eu" ? POSITION_LABEL_EU : POSITION_LABEL;
   const { teamId } = Route.useParams();
   const q = useQuery({
     queryKey: ["club-equipo", teamId],
@@ -39,13 +43,13 @@ function EquipoDetalle() {
     },
   });
 
-  if (q.isLoading) return <p className="p-10 text-center text-sm text-muted-foreground">Cargando…</p>;
+  if (q.isLoading) return <p className="p-10 text-center text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>;
   const team = q.data?.team;
   if (!team)
     return (
       <div className="mx-auto max-w-2xl p-10 text-center">
-        <h1 className="font-display text-3xl">Equipo no encontrado</h1>
-        <Link to="/equipos" className="mt-4 inline-block text-primary hover:underline">Volver</Link>
+        <h1 className="font-display text-3xl">{t("Taldea ez da aurkitu", "Equipo no encontrado")}</h1>
+        <Link to="/equipos" className="mt-4 inline-block text-primary hover:underline">{t("Atzera", "Volver")}</Link>
       </div>
     );
   const pts = q.data!.pts;
@@ -55,7 +59,7 @@ function EquipoDetalle() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <Link to="/equipos" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Equipos
+        <ArrowLeft className="h-4 w-4" /> {t("Taldeak", "Equipos")}
       </Link>
       <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -69,11 +73,11 @@ function EquipoDetalle() {
         </div>
         <div className="rounded-xl bg-primary/10 p-4 text-right">
           <div className="font-display text-3xl text-primary">{total}</div>
-          <div className="text-xs uppercase tracking-widest text-muted-foreground">pts totales</div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground">{t("puntu guztira", "pts totales")}</div>
         </div>
       </div>
 
-      <h2 className="mt-8 font-display text-2xl">Ranking interno</h2>
+      <h2 className="mt-8 font-display text-2xl">{t("Barne sailkapena", "Ranking interno")}</h2>
       <div className="mt-3 space-y-2">
         {ranking.map((p, i) => (
           <Link
@@ -86,7 +90,7 @@ function EquipoDetalle() {
             <div className="min-w-0 flex-1">
               <div className="truncate font-semibold">{p.nombre}</div>
               <div className="text-xs text-muted-foreground">
-                {POSITION_LABEL[p.posicion as keyof typeof POSITION_LABEL] ?? p.posicion}
+                {POS_LABEL[p.posicion as keyof typeof POS_LABEL] ?? p.posicion}
               </div>
             </div>
             <span className="font-display text-xl text-primary">{round2(pts[p.id] ?? 0)}</span>

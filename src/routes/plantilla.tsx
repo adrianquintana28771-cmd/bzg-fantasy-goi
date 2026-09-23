@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import type { Database } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useT } from "@/lib/i18n";
 
 type Posicion = Database["public"]["Enums"]["plantilla_posicion"];
 type Rareza = "normal" | "raro" | "legendario";
@@ -16,7 +17,7 @@ type Rareza = "normal" | "raro" | "legendario";
 const MAX_USOS = 3;
 
 const RAREZA_MULT: Record<Rareza, number> = { normal: 1, raro: 1.3, legendario: 1.5 };
-const RAREZA_LABEL: Record<Rareza, string> = { normal: "Normal", raro: "Raro", legendario: "Legendario" };
+const RAREZA_LABEL_EU: Record<Rareza, string> = { normal: "Normala", raro: "Bitxia", legendario: "Legendarioa" };
 const RAREZA_STYLE: Record<Rareza, string> = {
   normal: "border-border bg-background",
   raro: "border-sky-500/60 bg-sky-500/10",
@@ -29,14 +30,14 @@ function cartaPuntos(rating: number, rareza: Rareza) {
 }
 
 const POS_LABEL: Record<Posicion, string> = {
-  portero: "Portero",
-  extremo_izq: "Extremo Izq.",
-  extremo_der: "Extremo Der.",
-  lateral_izq: "Lateral Izq.",
-  lateral_der: "Lateral Der.",
-  central: "Central",
-  pivote: "Pivote",
-  entrenador: "Entrenador/a",
+  portero: "Atezaina",
+  extremo_izq: "Hegaleko ezk.",
+  extremo_der: "Hegaleko esk.",
+  lateral_izq: "Atzelari ezk.",
+  lateral_der: "Atzelari esk.",
+  central: "Erdikoa",
+  pivote: "Pibota",
+  entrenador: "Entrenatzailea",
 };
 
 const POS_SHORT: Record<Posicion, string> = {
@@ -84,21 +85,24 @@ interface LineupRow {
 function PlantillaPage() {
   const { user, loading, isStaff } = useAuth();
 
+  const t = useT();
   if (loading) {
-    return <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">Cargando…</div>;
+    return <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">{t("Kargatzen…", "Cargando…")}</div>;
   }
 
   if (user && isStaff) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 text-center">
         <BackButton />
-        <h1 className="mt-4 font-display text-3xl">Sección de juego</h1>
+        <h1 className="mt-4 font-display text-3xl">{t("Jokoaren atala", "Sección de juego")}</h1>
         <p className="mt-2 text-muted-foreground">
-          Las cuentas de administración no tienen equipo, sobres ni misiones. Tu trabajo es registrar
-          el desempeño de los jugadores/as.
+          {t(
+            "Administrazio kontuek ez dute talderik, gutunazalik edo misiorik. Zure lana jokalarien errendimendua erregistratzea da.",
+            "Las cuentas de administración no tienen equipo, sobres ni misiones. Tu trabajo es registrar el desempeño de los jugadores/as.",
+          )}
         </p>
         <Link to="/admin/desempeno" className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-          Ir a Desempeño
+          {t("Joan Errendimendura", "Ir a Desempeño")}
         </Link>
       </div>
     );
@@ -108,9 +112,9 @@ function PlantillaPage() {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 text-center">
         <BackButton />
-        <h1 className="mt-4 font-display text-3xl">Mi equipo</h1>
-        <p className="mt-2 text-muted-foreground">Inicia sesión para crear tu equipo y alinear a tus jugadores.</p>
-        <Link to="/auth" className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Entrar</Link>
+        <h1 className="mt-4 font-display text-3xl">{t("Nire taldea", "Mi equipo")}</h1>
+        <p className="mt-2 text-muted-foreground">{t("Hasi saioa zure taldea sortzeko eta zure jokalariak lerrokatzeko.", "Inicia sesión para crear tu equipo y alinear a tus jugadores.")}</p>
+        <Link to="/auth" className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">{t("Sartu", "Entrar")}</Link>
       </div>
     );
   }
@@ -119,6 +123,7 @@ function PlantillaPage() {
 }
 
 function Inner({ userId }: { userId: string }) {
+  const t = useT();
   const qc = useQueryClient();
 
   const wallet = useQuery({
@@ -281,25 +286,25 @@ function Inner({ userId }: { userId: string }) {
       qc.invalidateQueries({ queryKey: ["wallet", userId] });
       qc.invalidateQueries({ queryKey: ["inventory", userId] });
     },
-    onError: (e: Error) => toast.error(e.message.includes("premium") ? "No tienes sobres premium" : "No tienes sobres disponibles"),
+    onError: (e: Error) => toast.error(e.message.includes("premium") ? t("Ez duzu gutunazal premiumik", "No tienes sobres premium") : t("Ez duzu gutunazalik eskuragarri", "No tienes sobres disponibles")),
   });
 
   const saveLineupMut = useMutation({
     mutationFn: async () => {
-      if (!jornada.data) throw new Error("No hay jornada activa");
+      if (!jornada.data) throw new Error(t("Ez dago jardunaldi aktiborik", "No hay jornada activa"));
       const { error } = await supabase
         .from("lineups")
         .upsert({ user_id: userId, jornada_id: jornada.data.id, ...slotDraft }, { onConflict: "user_id,jornada_id" });
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Alineación guardada");
+      toast.success(t("Alineazioa gorde da", "Alineación guardada"));
       setDirty(false);
       qc.invalidateQueries({ queryKey: ["lineup", userId] });
       qc.invalidateQueries({ queryKey: ["historial-jornadas", userId] });
 
     },
-    onError: (e: Error) => toast.error(e.message ?? "No se pudo guardar"),
+    onError: (e: Error) => toast.error(e.message ?? t("Ezin izan da gorde", "No se pudo guardar")),
   });
 
   const alignedIds = new Set(Object.values(slotDraft).filter(Boolean) as string[]);
@@ -336,14 +341,14 @@ function Inner({ userId }: { userId: string }) {
 
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl leading-none">Mi equipo</h1>
+          <h1 className="font-display text-3xl leading-none">{t("Nire taldea", "Mi equipo")}</h1>
           <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
-            {jornada.data ? `${jornada.data.nombre} · ${jornada.data.is_locked ? "bloqueada" : "activa"}` : "Sin jornada activa"}
+            {jornada.data ? `${jornada.data.nombre} · ${jornada.data.is_locked ? t("blokeatuta", "bloqueada") : t("aktiboa", "activa")}` : t("Jardunaldi aktiborik ez", "Sin jornada activa")}
           </p>
         </div>
         <div className="rounded-xl bg-primary/10 px-4 py-2 text-center">
           <div className="font-display text-2xl text-primary">{puntosJornada}</div>
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">pts jornada</div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{t("jardunaldiko ptak", "pts jornada")}</div>
         </div>
       </header>
 
@@ -354,24 +359,24 @@ function Inner({ userId }: { userId: string }) {
           disabled={openSobreMut.isPending || (wallet.data?.sobres ?? 0) <= 0}
           className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card p-3 text-sm font-semibold disabled:opacity-40"
         >
-          <Package className="h-5 w-5 text-primary" /> Sobre normal ({wallet.data?.sobres ?? 0})
+          <Package className="h-5 w-5 text-primary" /> {t("Gutunazal normala", "Sobre normal")} ({wallet.data?.sobres ?? 0})
         </button>
         <button
           onClick={() => openSobreMut.mutate("premium")}
           disabled={openSobreMut.isPending || (wallet.data?.premium ?? 0) <= 0}
           className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[color:var(--gold,#d4a017)] bg-card p-3 text-sm font-bold disabled:opacity-40"
         >
-          <Sparkles className="h-5 w-5 text-[color:var(--gold,#d4a017)]" /> Premium ({wallet.data?.premium ?? 0})
+          <Sparkles className="h-5 w-5 text-[color:var(--gold,#d4a017)]" /> {t("Premiuma", "Premium")} ({wallet.data?.premium ?? 0})
         </button>
       </section>
 
       {/* Medio campo */}
       <section className="overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="font-display text-lg">Alineación de la jornada</h2>
+          <h2 className="font-display text-lg">{t("Jardunaldiko alineazioa", "Alineación de la jornada")}</h2>
           {locked ? (
             <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-              <Lock className="h-3.5 w-3.5" /> Bloqueada
+              <Lock className="h-3.5 w-3.5" /> {t("Blokeatuta", "Bloqueada")}
             </span>
           ) : (
             <button
@@ -379,7 +384,7 @@ function Inner({ userId }: { userId: string }) {
               disabled={!dirty || saveLineupMut.isPending || !jornada.data}
               className="inline-flex items-center gap-1.5 rounded-lg bg-[color:var(--gold,#d4a017)] px-3 py-1.5 text-xs font-bold text-black disabled:opacity-40"
             >
-              <Save className="h-3.5 w-3.5" /> Guardar
+              <Save className="h-3.5 w-3.5" /> {t("Gorde", "Guardar")}
             </button>
           )}
         </div>
@@ -414,9 +419,9 @@ function Inner({ userId }: { userId: string }) {
 
       {/* Historial de jornadas */}
       <section className="rounded-2xl border border-border bg-card p-4">
-        <h2 className="mb-3 font-display text-lg">Jornadas anteriores</h2>
+        <h2 className="mb-3 font-display text-lg">{t("Aurreko jardunaldiak", "Jornadas anteriores")}</h2>
         {(historial.data ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground">Todavía no has alineado ninguna jornada.</p>
+          <p className="text-sm text-muted-foreground">{t("Oraindik ez duzu jardunaldirik lerrokatu.", "Todavía no has alineado ninguna jornada.")}</p>
         ) : (
           <div className="space-y-3">
             {(historial.data ?? []).map((h) => (
@@ -447,10 +452,10 @@ function Inner({ userId }: { userId: string }) {
 
       {/* Mis jugadores */}
       <section className="rounded-2xl border border-border bg-card p-4">
-        <h2 className="mb-3 font-display text-lg">Mis jugadores ({cards.length})</h2>
+        <h2 className="mb-3 font-display text-lg">{t("Nire jokalariak", "Mis jugadores")} ({cards.length})</h2>
         {cards.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Todavía no tienes jugadores. Completa <Link to="/misiones" search={{ qr: undefined }} className="text-primary underline">misiones</Link> para conseguir sobres.
+            {t("Oraindik ez duzu jokalaririk. Osatu", "Todavía no tienes jugadores. Completa")} <Link to="/misiones" search={{ qr: undefined }} className="text-primary underline">{t("misioak", "misiones")}</Link> {t("gutunazalak lortzeko.", "para conseguir sobres.")}
           </p>
         ) : (
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -466,11 +471,11 @@ function Inner({ userId }: { userId: string }) {
                     {posList(c.pool.id, c.pool.posicion).map((p) => POS_SHORT[p]).join(" · ")}
                   </div>
                   <div className="mt-1 flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase">{RAREZA_LABEL[c.pool.rareza]} ·x{RAREZA_MULT[c.pool.rareza]}</span>
+                    <span className="text-[10px] font-bold uppercase">{RAREZA_LABEL_EU[c.pool.rareza]} ·x{RAREZA_MULT[c.pool.rareza]}</span>
                     {c.total > 1 && <span className="rounded bg-secondary px-1 text-[10px] font-bold">x{c.total}</span>}
                   </div>
                   <div className={`text-[10px] font-semibold ${c.usosRestantes <= 1 ? "text-destructive" : "text-muted-foreground"}`}>
-                    Usos {c.usosRestantes}/{MAX_USOS}
+                    {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
                   </div>
                 </li>
               );
@@ -483,14 +488,14 @@ function Inner({ userId }: { userId: string }) {
       <Dialog open={!!sobreResult} onOpenChange={(o) => !o && setSobreResult(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-display text-2xl">¡Nuevo sobre!</DialogTitle>
+            <DialogTitle className="font-display text-2xl">{t("Gutunazal berria!", "¡Nuevo sobre!")}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-3 gap-2">
             {(sobreResult ?? []).map((p, i) => (
               <div key={`${p.id}-${i}`} className={`rounded-lg border-2 p-3 text-center ${RAREZA_STYLE[p.rareza]}`}>
                 <div className="font-display text-3xl text-primary">{cartaPuntos(p.rating, p.rareza)}</div>
                 <div className="truncate text-xs font-semibold">{p.nombre}</div>
-                <div className="text-[10px] uppercase text-muted-foreground">{RAREZA_LABEL[p.rareza]}</div>
+                <div className="text-[10px] uppercase text-muted-foreground">{RAREZA_LABEL_EU[p.rareza]}</div>
               </div>
             ))}
           </div>
@@ -501,7 +506,7 @@ function Inner({ userId }: { userId: string }) {
       <Dialog open={!!pickSlot} onOpenChange={(o) => !o && setPickSlot(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Elegir {pickSlot ? POS_LABEL[pickSlot] : ""}</DialogTitle>
+            <DialogTitle>{t("Aukeratu", "Elegir")} {pickSlot ? POS_LABEL[pickSlot] : ""}</DialogTitle>
           </DialogHeader>
           <div className="max-h-[60vh] space-y-2 overflow-y-auto">
             {pickSlot && slotDraft[pickSlot] && (
@@ -509,12 +514,12 @@ function Inner({ userId }: { userId: string }) {
                 onClick={() => { setSlotDraft((d) => ({ ...d, [pickSlot!]: null })); setDirty(true); setPickSlot(null); }}
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-2 text-xs font-semibold text-destructive"
               >
-                <X className="h-3 w-3" /> Quitar del hueco
+                <X className="h-3 w-3" /> {t("Kendu hutsunetik", "Quitar del hueco")}
               </button>
             )}
             {pickSlot && eligibleForSlot(pickSlot).length === 0 && (
               <p className="py-6 text-center text-sm text-muted-foreground">
-                No tienes jugadores para este hueco. Abre un sobre.
+                {t("Ez duzu jokalaririk hutsune honetarako. Ireki gutunazal bat.", "No tienes jugadores para este hueco. Abre un sobre.")}
               </p>
             )}
             {pickSlot && eligibleForSlot(pickSlot).map((c) => (
@@ -526,12 +531,12 @@ function Inner({ userId }: { userId: string }) {
                 <div>
                   <div className="font-semibold">{c.pool.nombre}</div>
                   <div className="text-[10px] uppercase text-muted-foreground">
-                    {posList(c.pool.id, c.pool.posicion).map((p) => POS_SHORT[p]).join(" · ")} · {RAREZA_LABEL[c.pool.rareza]}
+                    {posList(c.pool.id, c.pool.posicion).map((p) => POS_SHORT[p]).join(" · ")} · {RAREZA_LABEL_EU[c.pool.rareza]}
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-display text-lg text-primary">{cartaPuntos(c.pool.rating, c.pool.rareza)}</div>
-                  <div className="text-[10px] text-muted-foreground">Usos {c.usosRestantes}/{MAX_USOS}</div>
+                  <div className="text-[10px] text-muted-foreground">{t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}</div>
                 </div>
               </button>
             ))}

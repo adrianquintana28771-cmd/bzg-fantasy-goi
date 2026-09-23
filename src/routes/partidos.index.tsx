@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useFantasy } from "@/lib/fantasy/store";
 import { CategoryBadge, StatusBadge } from "@/components/fantasy-ui";
 import { BackButton } from "@/components/back-button";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/partidos/")({
   head: () => {
@@ -28,14 +29,15 @@ export const Route = createFileRoute("/partidos/")({
 });
 
 function Partidos() {
+  const t = useT();
   const { matches, teams } = useFantasy((s) => s);
   const sorted = [...matches].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <BackButton />
-      <h1 className="mt-3 font-display text-4xl">Partidos</h1>
-      <p className="text-sm text-muted-foreground">Resultados, estado y acta de cada partido.</p>
+      <h1 className="mt-3 font-display text-4xl">{t("Partidak", "Partidos")}</h1>
+      <p className="text-sm text-muted-foreground">{t("Emaitzak, egoera eta partida bakoitzaren akta.", "Resultados, estado y acta de cada partido.")}</p>
 
       <div className="mt-6 space-y-2">
         {sorted.map((m) => {
@@ -50,7 +52,7 @@ function Partidos() {
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-xs text-muted-foreground">
-                    J{m.round} · {new Date(m.date).toLocaleDateString("es-ES")} · {m.locationType === "local" ? "Local" : "Visitante"}
+                    {t("J", "J")}{m.round} · {new Date(m.date).toLocaleDateString("es-ES")} · {m.locationType === "local" ? t("Etxean", "Local") : t("Kanpoan", "Visitante")}
                   </div>
                   <div className="mt-1 font-semibold">
                     {m.locationType === "local"

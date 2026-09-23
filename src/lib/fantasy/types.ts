@@ -150,3 +150,33 @@ export interface ScoringRule {
   active: boolean;
   isNegative: boolean;
 }
+
+export const CATEGORY_LABEL_EU: Record<Category, string> = {
+  benjamin: "Benjamin",
+  alevin: "Alebin",
+  infantil: "Infantil",
+  cadete: "Kadete",
+  juvenil: "Jubenil",
+  senior: "Nagusia",
+};
+
+export const POSITION_LABEL_EU: Record<Position, string> = {
+  portero: "Atezaina",
+  extremo: "Hegalekoa",
+  lateral: "Atzelaria",
+  central: "Erdikoa",
+  pivote: "Pibota",
+  universal: "Unibertsala",
+};
+
+export const ESTADO_LABEL_EU: Record<PlayerEstado, string> = {
+  disponible: "Eskuragarri",
+  dudoso: "Zalantzazkoa",
+  no_disponible: "Ez eskuragarri",
+};
+
+export const RAREZA_LABEL_EU: Record<Rareza, string> = {
+  normal: "Normala",
+  raro: "Bitxia",
+  legendario: "Legendarioa",
+};

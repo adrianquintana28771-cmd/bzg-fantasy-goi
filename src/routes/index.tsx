@@ -3,7 +3,8 @@ import { Trophy, Users, ClipboardList, Shield, ArrowRight, Sparkles } from "luci
 import { useFantasy } from "@/lib/fantasy/store";
 import { buildRanking } from "@/lib/fantasy/queries";
 import { PlayerCard, StatusBadge, CategoryBadge } from "@/components/fantasy-ui";
-import { CATEGORY_LABEL } from "@/lib/fantasy/types";
+import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
+import { useT, useLang } from "@/lib/i18n";
 
 const SITE = "https://bzg-fantasy-goi.lovable.app";
 const HOME_TITLE = "BZG Fantasy Eskubaloia | Fantasy de balonmano de Etxebarri";
@@ -53,6 +54,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const t = useT();
+  const { lang } = useLang();
+  const CAT_LABEL = lang === "eu" ? CATEGORY_LABEL_EU : CATEGORY_LABEL;
   const { seasons, teams, players, matches, stats, rules } = useFantasy((s) => s);
   const activeSeason = seasons.find((s) => s.isActive);
   const ranking = buildRanking(players, teams, matches, stats, rules, {
@@ -85,39 +89,41 @@ function Home() {
         <div className="relative mx-auto max-w-6xl px-4 py-16 text-primary-foreground md:py-24">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
             <Sparkles className="h-3.5 w-3.5" />
-            Temporada {activeSeason?.name}
+            {t("Denboraldia", "Temporada")} {activeSeason?.name}
           </div>
           <h1 className="mt-4 font-display text-5xl leading-none md:text-7xl">
             BZG Fantasy<br />Eskubaloia
           </h1>
           <p className="mt-4 max-w-xl text-lg text-white/90">
-            El Fantasy del balonmano de Etxebarri. Sigue a tus jugadores/as, revisa
-            rankings y disfruta cada jornada con toda la familia.
+            {t(
+              "Etxebarriko eskubaloiaren Fantasya. Jarraitu zure jokalariei, begiratu\n            sailkapenak eta gozatu jardunaldi bakoitzaz familia osoarekin.",
+              "El Fantasy del balonmano de Etxebarri. Sigue a tus jugadores/as, revisa\n            rankings y disfruta cada jornada con toda la familia.",
+            )}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               to="/rankings"
               className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 font-semibold text-primary shadow-lg transition hover:-translate-y-0.5"
             >
-              <Trophy className="h-4 w-4" /> Ver rankings
+              <Trophy className="h-4 w-4" /> {t("Ikusi sailkapenak", "Ver rankings")}
             </Link>
             <Link
               to="/equipos"
               className="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20"
             >
-              <Users className="h-4 w-4" /> Ver equipos
+              <Users className="h-4 w-4" /> {t("Ikusi taldeak", "Ver equipos")}
             </Link>
             <Link
               to="/admin"
               className="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20"
             >
-              <ClipboardList className="h-4 w-4" /> Acceso delegado/a
+              <ClipboardList className="h-4 w-4" /> {t("Ordezkariaren sarbidea", "Acceso delegado/a")}
             </Link>
             <Link
               to="/admin"
               className="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20"
             >
-              <Shield className="h-4 w-4" /> Administración
+              <Shield className="h-4 w-4" /> {t("Administrazioa", "Administración")}
             </Link>
           </div>
         </div>
@@ -130,7 +136,7 @@ function Home() {
             <div className="rounded-2xl border border-border bg-card p-5 shadow-card md:col-span-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-widest text-primary">
-                  Jugador/a de la jornada
+                  {t("Jardunaldiko jokalaria", "Jugador/a de la jornada")}
                 </span>
                 <Trophy className="h-5 w-5 text-gold" style={{ color: "var(--gold)" }} />
               </div>
@@ -141,21 +147,21 @@ function Home() {
                 <div className="flex-1">
                   <div className="font-display text-2xl">{playerOfWeek.player.publicName}</div>
                   <div className="text-sm text-muted-foreground">
-                    {playerOfWeek.team.name} · {CATEGORY_LABEL[playerOfWeek.team.category]}
+                    {playerOfWeek.team.name} · {CAT_LABEL[playerOfWeek.team.category]}
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-display text-4xl text-primary">{playerOfWeek.totalPoints}</div>
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                    pts totales
+                    {t("puntu guztira", "pts totales")}
                   </div>
                 </div>
               </div>
               <div className="mt-4 grid grid-cols-4 gap-2 text-center">
-                <Stat label="Goles" value={playerOfWeek.goals} />
-                <Stat label="Asist." value={playerOfWeek.assists} />
-                <Stat label="Recup." value={playerOfWeek.steals} />
-                <Stat label="Paradas" value={playerOfWeek.saves} />
+                <Stat label={t("Golak", "Goles")} value={playerOfWeek.goals} />
+                <Stat label={t("Asist.", "Asist.")} value={playerOfWeek.assists} />
+                <Stat label={t("Berresk.", "Recup.")} value={playerOfWeek.steals} />
+                <Stat label={t("Geldiketak", "Paradas")} value={playerOfWeek.saves} />
               </div>
             </div>
           )}
@@ -164,7 +170,7 @@ function Home() {
             <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-widest text-accent">
-                  Equipo destacado
+                  {t("Talde nabarmendua", "Equipo destacado")}
                 </span>
                 <Users className="h-5 w-5 text-accent" />
               </div>
@@ -175,7 +181,7 @@ function Home() {
               <div className="mt-4 rounded-xl bg-secondary p-4 text-center">
                 <div className="font-display text-4xl text-primary">{topTeam.pts}</div>
                 <div className="text-xs uppercase tracking-widest text-muted-foreground">
-                  puntos Fantasy acumulados
+                  {t("Fantasy puntu metatuak", "puntos Fantasy acumulados")}
                 </div>
               </div>
               <Link
@@ -183,7 +189,7 @@ function Home() {
                 params={{ teamId: topTeam.team.id }}
                 className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
               >
-                Ver plantilla <ArrowRight className="h-3.5 w-3.5" />
+                {t("Ikusi taldea", "Ver plantilla")} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           )}
@@ -193,9 +199,9 @@ function Home() {
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div>
             <div className="mb-3 flex items-baseline justify-between">
-              <h2 className="font-display text-2xl">Top 5 Fantasy</h2>
+              <h2 className="font-display text-2xl">{t("Top 5 Fantasy", "Top 5 Fantasy")}</h2>
               <Link to="/rankings" className="text-sm font-medium text-primary hover:underline">
-                Ver ranking completo
+                {t("Ikusi sailkapen osoa", "Ver ranking completo")}
               </Link>
             </div>
             <div className="space-y-2">
@@ -206,9 +212,9 @@ function Home() {
           </div>
           <div>
             <div className="mb-3 flex items-baseline justify-between">
-              <h2 className="font-display text-2xl">Últimos partidos</h2>
+              <h2 className="font-display text-2xl">{t("Azken partidak", "Últimos partidos")}</h2>
               <Link to="/partidos" className="text-sm font-medium text-primary hover:underline">
-                Ver todos
+                {t("Ikusi guztiak", "Ver todos")}
               </Link>
             </div>
             <div className="space-y-2">
@@ -224,7 +230,7 @@ function Home() {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-xs text-muted-foreground">
-                          J{m.round} · {new Date(m.date).toLocaleDateString("es-ES")}
+                          {t("J", "J")}{m.round} · {new Date(m.date).toLocaleDateString("es-ES")}
                         </div>
                         <div className="mt-1 font-semibold">
                           {m.locationType === "local"

@@ -2,10 +2,14 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Home, Trophy, Users, ClipboardList, Settings, LogIn, LogOut, Shield, Sparkles, BarChart3 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
+import { useState } from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { AuthPanel } from "@/components/auth-panel";
+import { LangToggle, useT } from "@/lib/i18n";
 
 type NavItem = {
   to: string;
-  label: string;
+  label: [string, string];
   Icon: typeof Home;
   color: string;
   adminOnly?: boolean;
@@ -14,20 +18,22 @@ type NavItem = {
 };
 
 const BASE_NAV: NavItem[] = [
-  { to: "/", label: "Inicio", Icon: Home, color: "var(--color-primary)" },
-  { to: "/plantilla", label: "Equipo", Icon: Shield, color: "var(--color-accent)", authOnly: true, gameOnly: true },
-  { to: "/misiones", label: "Misiones", Icon: Sparkles, color: "var(--gold)", authOnly: true, gameOnly: true },
-  { to: "/rankings", label: "Rankings", Icon: Trophy, color: "var(--gold)" },
-  { to: "/equipos", label: "Equipos", Icon: Users, color: "var(--color-accent)" },
-  { to: "/partidos", label: "Partidos", Icon: ClipboardList, color: "var(--color-destructive)" },
-  { to: "/admin/desempeno", label: "Desempeño", Icon: BarChart3, color: "var(--color-primary)", adminOnly: true },
-  { to: "/admin", label: "Admin", Icon: Settings, color: "var(--color-muted-foreground)", adminOnly: true },
+  { to: "/", label: ["Hasiera", "Inicio"], Icon: Home, color: "var(--color-primary)" },
+  { to: "/plantilla", label: ["Taldea", "Equipo"], Icon: Shield, color: "var(--color-accent)", authOnly: true, gameOnly: true },
+  { to: "/misiones", label: ["Misioak", "Misiones"], Icon: Sparkles, color: "var(--gold)", authOnly: true, gameOnly: true },
+  { to: "/rankings", label: ["Sailkapenak", "Rankings"], Icon: Trophy, color: "var(--gold)" },
+  { to: "/equipos", label: ["Taldeak", "Equipos"], Icon: Users, color: "var(--color-accent)" },
+  { to: "/partidos", label: ["Partidak", "Partidos"], Icon: ClipboardList, color: "var(--color-destructive)" },
+  { to: "/admin/desempeno", label: ["Errendimendua", "Desempeño"], Icon: BarChart3, color: "var(--color-primary)", adminOnly: true },
+  { to: "/admin", label: ["Admin", "Admin"], Icon: Settings, color: "var(--color-muted-foreground)", adminOnly: true },
 ];
 
 export function SiteHeader() {
   const { user, displayName, signOut, isStaff, isSuperAdmin, isManager, isAdmin } = useAuth();
-  const roleLabel = isSuperAdmin ? "Super admin" : isManager ? "Manager" : isAdmin ? "Admin" : "Usuario";
+  const t = useT();
+  const roleLabel = isSuperAdmin ? "Super admin" : isManager ? "Manager" : isAdmin ? "Admin" : t("Erabiltzailea", "Usuario");
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
   async function handleSignOut() {
     await signOut();
@@ -54,29 +60,40 @@ export function SiteHeader() {
 
         {user ? (
           <div className="flex items-center gap-2">
+            <LangToggle />
             <div className="hidden text-right sm:block">
-              <div className="truncate text-sm font-semibold">{displayName ?? "Usuario"}</div>
+              <div className="truncate text-sm font-semibold">{displayName ?? t("Erabiltzailea", "Usuario")}</div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 {roleLabel}
               </div>
             </div>
             <button
               onClick={handleSignOut}
-              aria-label="Cerrar sesión"
+              aria-label={t("Saioa itxi", "Cerrar sesión")}
               className="inline-flex items-center gap-1 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground hover:bg-secondary"
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Salir</span>
+              <span className="hidden sm:inline">{t("Irten", "Salir")}</span>
             </button>
           </div>
         ) : (
-          <Link
-            to="/auth"
-            className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-card hover:-translate-y-0.5"
-          >
-            <LogIn className="h-4 w-4" />
-            <span>Entrar</span>
-          </Link>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <button className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-card hover:-translate-y-0.5">
+                <LogIn className="h-4 w-4" />
+                <span>{t("Sartu", "Entrar")}</span>
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
+              <SheetHeader className="flex-row items-center justify-between space-y-0 pr-8">
+                <SheetTitle className="font-display">BZG Fantasy</SheetTitle>
+                <LangToggle />
+              </SheetHeader>
+              <div className="mt-4">
+                <AuthPanel onDone={() => setOpen(false)} />
+              </div>
+            </SheetContent>
+          </Sheet>
         )}
       </div>
     </header>
@@ -85,6 +102,7 @@ export function SiteHeader() {
 
 export function BottomNav() {
   const { isStaff, user, signOut } = useAuth();
+  const t = useT();
   const navigate = useNavigate();
   const canPlay = !isStaff;
   const nav = BASE_NAV.filter(
@@ -99,7 +117,7 @@ export function BottomNav() {
 
   return (
     <nav
-      aria-label="Navegación principal"
+      aria-label={t("Nabigazio nagusia", "Navegación principal")}
       className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.15)]"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
@@ -129,7 +147,7 @@ export function BottomNav() {
                       isActive ? "text-foreground" : "text-muted-foreground"
                     }`}
                   >
-                    {label}
+                    {t(label[0], label[1])}
                   </span>
                 </>
               )}
@@ -141,7 +159,7 @@ export function BottomNav() {
             <button
               type="button"
               onClick={handleSignOut}
-              aria-label="Cerrar sesión"
+              aria-label={t("Saioa itxi", "Cerrar sesión")}
               className="group flex w-full flex-col items-center justify-center gap-1 px-1 py-2 text-muted-foreground transition hover:text-foreground"
             >
               <span
@@ -150,7 +168,7 @@ export function BottomNav() {
               >
                 <LogOut className="h-6 w-6" strokeWidth={2.4} aria-hidden />
               </span>
-              <span className="text-[11px] font-semibold leading-none tracking-wide">Salir</span>
+              <span className="text-[11px] font-semibold leading-none tracking-wide">{t("Irten", "Salir")}</span>
             </button>
           </li>
         )}
@@ -160,16 +178,17 @@ export function BottomNav() {
 }
 
 export function SiteFooter() {
+  const t = useT();
   return (
     <footer className="mt-16 border-t border-border bg-secondary/40">
       <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="font-display text-base text-foreground">BZG Fantasy Eskubaloia</div>
-            <div>El Fantasy del balonmano de Etxebarri</div>
+            <div>{t("Etxebarriko eskubaloiaren Fantasya", "El Fantasy del balonmano de Etxebarri")}</div>
           </div>
           <div className="text-xs">
-            Uso interno del club · Protegemos la privacidad de menores · v0.1 MVP
+            {t("Klubaren barne-erabilera · Adingabeen pribatutasuna babesten dugu", "Uso interno del club · Protegemos la privacidad de menores")}
           </div>
         </div>
       </div>
