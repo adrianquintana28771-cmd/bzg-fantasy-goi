@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trophy, Users, ClipboardList, Shield, ArrowRight, Sparkles } from "lucide-react";
-import { useFantasy } from "@/lib/fantasy/store";
-import { buildRanking } from "@/lib/fantasy/queries";
-import { PlayerCard, StatusBadge, CategoryBadge } from "@/components/fantasy-ui";
+import { Trophy, Users, Shield, ArrowRight, Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchPlayerRanking, round2, type RankedPlayer } from "@/lib/club-data";
+import { RankedPlayerRow } from "@/components/ranked-player-row";
+import { CategoryBadge } from "@/components/fantasy-ui";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
 
@@ -57,25 +59,34 @@ function Home() {
   const t = useT();
   const { lang } = useLang();
   const CAT_LABEL = lang === "eu" ? CATEGORY_LABEL_EU : CATEGORY_LABEL;
-  const { seasons, teams, players, matches, stats, rules } = useFantasy((s) => s);
-  const activeSeason = seasons.find((s) => s.isActive);
-  const ranking = buildRanking(players, teams, matches, stats, rules, {
-    seasonId: activeSeason?.id,
+  const { data: ranking = [] } = useQuery({
+    queryKey: ["player-ranking"],
+    queryFn: fetchPlayerRanking,
+  });
+  const { data: matches = [] } = useQuery({
+    queryKey: ["home-next-matches"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("club_matches")
+        .select("id,jornada,rival,fecha,hora,es_local,club_teams(nombre)")
+        .gte("fecha", new Date().toISOString().slice(0, 10))
+        .neq("rival", "Descansa")
+        .order("fecha")
+        .limit(4);
+      if (error) throw error;
+      return data ?? [];
+    },
   });
   const top5 = ranking.slice(0, 5);
-  const playerOfWeek = ranking[0];
-  const teamTotals = teams
-    .filter((t) => t.seasonId === activeSeason?.id)
-    .map((t) => ({
-      team: t,
-      pts: buildRanking(players, teams, matches, stats, rules, { teamId: t.id }).reduce(
-        (a, p) => a + p.totalPoints,
-        0,
-      ),
-    }))
-    .sort((a, b) => b.pts - a.pts);
-  const topTeam = teamTotals[0];
-  const recent = [...matches].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4);
+  const playerOfWeek = ranking[0]?.puntos ? ranking[0] : undefined;
+  const totals = new Map<string, { team: NonNullable<RankedPlayer["team"]>; pts: number }>();
+  for (const r of ranking)
+    if (r.team) {
+      const e = totals.get(r.team.id) ?? { team: r.team, pts: 0 };
+      e.pts = round2(e.pts + r.puntos);
+      totals.set(r.team.id, e);
+    }
+  const topTeam = [...totals.values()].sort((x, y) => y.pts - x.pts)[0];
 
   return (
     <div>
@@ -89,10 +100,12 @@ function Home() {
         <div className="relative mx-auto max-w-6xl px-4 py-16 text-primary-foreground md:py-24">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
             <Sparkles className="h-3.5 w-3.5" />
-            {t("Denboraldia", "Temporada")} {activeSeason?.name}
+            {t("Denboraldia", "Temporada")} 2026-2027
           </div>
           <h1 className="mt-4 font-display text-5xl leading-none md:text-7xl">
-            BZG Fantasy<br />Eskubaloia
+            BZG Fantasy
+            <br />
+            Eskubaloia
           </h1>
           <p className="mt-4 max-w-xl text-lg text-white/90">
             {t(
@@ -117,12 +130,6 @@ function Home() {
               to="/admin"
               className="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20"
             >
-              <ClipboardList className="h-4 w-4" /> {t("Ordezkariaren sarbidea", "Acceso delegado/a")}
-            </Link>
-            <Link
-              to="/admin"
-              className="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20"
-            >
               <Shield className="h-4 w-4" /> {t("Administrazioa", "Administración")}
             </Link>
           </div>
@@ -141,27 +148,21 @@ function Home() {
                 <Trophy className="h-5 w-5 text-gold" style={{ color: "var(--gold)" }} />
               </div>
               <div className="mt-3 flex items-center gap-4">
-                <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 font-display text-3xl text-primary-foreground">
-                  {playerOfWeek.player.dorsal}
-                </div>
                 <div className="flex-1">
-                  <div className="font-display text-2xl">{playerOfWeek.player.publicName}</div>
+                  <div className="font-display text-2xl">{playerOfWeek.nombre}</div>
                   <div className="text-sm text-muted-foreground">
-                    {playerOfWeek.team.name} · {CAT_LABEL[playerOfWeek.team.category]}
+                    {playerOfWeek.team?.nombre}
+                    {playerOfWeek.team
+                      ? ` · ${CAT_LABEL[playerOfWeek.team.categoria as keyof typeof CAT_LABEL]}`
+                      : ""}
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-display text-4xl text-primary">{playerOfWeek.totalPoints}</div>
+                  <div className="font-display text-4xl text-primary">{playerOfWeek.puntos}</div>
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
                     {t("puntu guztira", "pts totales")}
                   </div>
                 </div>
-              </div>
-              <div className="mt-4 grid grid-cols-4 gap-2 text-center">
-                <Stat label={t("Golak", "Goles")} value={playerOfWeek.goals} />
-                <Stat label={t("Asist.", "Asist.")} value={playerOfWeek.assists} />
-                <Stat label={t("Berresk.", "Recup.")} value={playerOfWeek.steals} />
-                <Stat label={t("Geldiketak", "Paradas")} value={playerOfWeek.saves} />
               </div>
             </div>
           )}
@@ -174,9 +175,9 @@ function Home() {
                 </span>
                 <Users className="h-5 w-5 text-accent" />
               </div>
-              <div className="mt-3 font-display text-2xl">{topTeam.team.name}</div>
+              <div className="mt-3 font-display text-2xl">{topTeam.team.nombre}</div>
               <div className="mt-1 text-sm text-muted-foreground">
-                <CategoryBadge category={topTeam.team.category} />
+                <CategoryBadge category={topTeam.team.categoria as keyof typeof CAT_LABEL} />
               </div>
               <div className="mt-4 rounded-xl bg-secondary p-4 text-center">
                 <div className="font-display text-4xl text-primary">{topTeam.pts}</div>
@@ -205,50 +206,37 @@ function Home() {
               </Link>
             </div>
             <div className="space-y-2">
-              {top5.map((agg, i) => (
-                <PlayerCard key={agg.player.id} agg={agg} rank={i + 1} />
+              {top5.map((p, i) => (
+                <RankedPlayerRow key={p.id} p={p} rank={i + 1} />
               ))}
             </div>
           </div>
           <div>
             <div className="mb-3 flex items-baseline justify-between">
-              <h2 className="font-display text-2xl">{t("Azken partidak", "Últimos partidos")}</h2>
+              <h2 className="font-display text-2xl">
+                {t("Hurrengo partidak", "Próximos partidos")}
+              </h2>
               <Link to="/partidos" className="text-sm font-medium text-primary hover:underline">
                 {t("Ikusi guztiak", "Ver todos")}
               </Link>
             </div>
             <div className="space-y-2">
-              {recent.map((m) => {
-                const team = teams.find((t) => t.id === m.teamId)!;
+              {matches.map((m) => {
+                const team = m.club_teams?.nombre ?? "BZG";
+                const [y, mo, d] = m.fecha.split("-");
                 return (
                   <Link
                     key={m.id}
-                    to="/partidos/$matchId"
-                    params={{ matchId: m.id }}
+                    to="/partidos"
                     className="block rounded-xl border border-border bg-card p-4 shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated"
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-xs text-muted-foreground">
-                          {t("J", "J")}{m.round} · {new Date(m.date).toLocaleDateString("es-ES")}
-                        </div>
-                        <div className="mt-1 font-semibold">
-                          {m.locationType === "local"
-                            ? `${team.name} vs ${m.opponent}`
-                            : `${m.opponent} vs ${team.name}`}
-                        </div>
-                        <div className="mt-1 flex items-center gap-2">
-                          <CategoryBadge category={team.category} />
-                          <StatusBadge status={m.status} />
-                        </div>
-                      </div>
-                      <div className="text-right font-display">
-                        <div className="text-3xl leading-none text-foreground">
-                          {m.locationType === "local"
-                            ? `${m.goalsFor}-${m.goalsAgainst}`
-                            : `${m.goalsAgainst}-${m.goalsFor}`}
-                        </div>
-                      </div>
+                    <div className="text-xs text-muted-foreground">
+                      {t("J", "J")}
+                      {m.jornada} · {`${d}/${mo}/${y}`}
+                      {m.hora ? ` · ${m.hora}` : ""}
+                    </div>
+                    <div className="mt-1 font-semibold">
+                      {m.es_local ? `${team} vs ${m.rival}` : `${m.rival} vs ${team}`}
                     </div>
                   </Link>
                 );
@@ -257,15 +245,6 @@ function Home() {
           </div>
         </div>
       </section>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-lg bg-secondary/60 p-2">
-      <div className="font-display text-xl text-foreground">{value}</div>
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
     </div>
   );
 }

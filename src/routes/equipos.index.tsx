@@ -40,7 +40,11 @@ function Equipos() {
   const q = useQuery({
     queryKey: ["club-equipos"],
     queryFn: async () => {
-      const [teams, pool, pts] = await Promise.all([fetchTeams(), fetchPool(), fetchPointsByPlayer()]);
+      const [teams, pool, pts] = await Promise.all([
+        fetchTeams(),
+        fetchPool(),
+        fetchPointsByPlayer(),
+      ]);
       return { teams, pool, pts };
     },
   });
@@ -57,8 +61,12 @@ function Equipos() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <BackButton />
       <h1 className="mt-3 font-display text-4xl">{t("Taldeak", "Equipos")}</h1>
-      <p className="text-sm text-muted-foreground">{t("BZG Etxebarriko eskubaloi taldeak", "Equipos de balonmano del BZG Etxebarri")}</p>
-      {q.isLoading && <p className="mt-6 text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>}
+      <p className="text-sm text-muted-foreground">
+        {t("BZG Etxebarriko eskubaloi taldeak", "Equipos de balonmano del BZG Etxebarri")}
+      </p>
+      {q.isLoading && (
+        <p className="mt-6 text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>
+      )}
 
       <div className="mt-8 space-y-10">
         {grouped.map(({ category, teams: cts }) => (
@@ -91,10 +99,14 @@ function Equipos() {
                       </div>
                     </div>
                     <div className="mt-4 flex items-end justify-between">
-                      <div className="text-sm text-muted-foreground">{roster.length} {t("jokalari", "jugadores/as")}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {roster.length} {t("jokalari", "jugadores/as")}
+                      </div>
                       <div className="text-right">
                         <div className="font-display text-2xl text-primary">{teamPts}</div>
-                        <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{t("taldearen ptak", "pts equipo")}</div>
+                        <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                          {t("taldearen ptak", "pts equipo")}
+                        </div>
                       </div>
                     </div>
                   </Link>

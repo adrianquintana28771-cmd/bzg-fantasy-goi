@@ -127,29 +127,29 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LangProvider>
-      <AuthProvider>
-        <div className="relative flex min-h-screen flex-col bg-background pb-24">
-          <div
-            aria-hidden
-            className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center"
-          >
-            <img
-              src={escudoAsset.url}
-              alt=""
-              className="w-[70%] max-w-none opacity-40 drop-shadow-md contrast-125 sm:w-[55%] lg:w-[35%]"
-            />
+        <AuthProvider>
+          <div className="relative flex min-h-screen flex-col bg-background pb-24">
+            <div
+              aria-hidden
+              className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center"
+            >
+              <img
+                src={escudoAsset.url}
+                alt=""
+                className="w-[70%] max-w-none opacity-40 drop-shadow-md contrast-125 sm:w-[55%] lg:w-[35%]"
+              />
+            </div>
+            <div className="relative z-10 flex min-h-screen flex-1 flex-col">
+              <SiteHeader />
+              <main className="flex-1">
+                <Outlet />
+              </main>
+              <SiteFooter />
+            </div>
+            <BottomNav />
           </div>
-          <div className="relative z-10 flex min-h-screen flex-1 flex-col">
-          <SiteHeader />
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          <SiteFooter />
-          </div>
-          <BottomNav />
-        </div>
-        <Toaster richColors position="top-center" />
-      </AuthProvider>
+          <Toaster richColors position="top-center" />
+        </AuthProvider>
       </LangProvider>
     </QueryClientProvider>
   );

@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BackButton } from "@/components/back-button";
-import { useT } from "@/lib/i18n";
+import { useT, useLang } from "@/lib/i18n";
+import { CATEGORY_LABEL, CATEGORY_LABEL_EU, type Category } from "@/lib/fantasy/types";
 
 export const Route = createFileRoute("/partidos/")({
   head: () => {
@@ -45,25 +46,34 @@ const CAT_ORDER: Record<string, number> = { senior: 0, juvenil: 1, cadete: 2 };
 
 function Partidos() {
   const t = useT();
+  const { lang } = useLang();
+  const CAT = lang === "eu" ? CATEGORY_LABEL_EU : CATEGORY_LABEL;
   const { data = [], isLoading } = useQuery({
     queryKey: ["partidos-publicos"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("club_matches")
-        .select("id,jornada,rival,fecha,hora,es_local,goles_favor,goles_contra,club_teams(nombre,categoria,sexo)")
+        .select(
+          "id,jornada,rival,fecha,hora,es_local,goles_favor,goles_contra,club_teams(nombre,categoria,sexo)",
+        )
         .order("jornada");
       if (error) throw error;
       return (data ?? []) as unknown as Match[];
     },
   });
 
-  const jornadas = useMemo(() => [...new Set(data.map((m) => m.jornada))].sort((a, b) => a - b), [data]);
+  const jornadas = useMemo(
+    () => [...new Set(data.map((m) => m.jornada))].sort((a, b) => a - b),
+    [data],
+  );
   const [jor, setJor] = useState<number | null>(null);
 
   useEffect(() => {
     if (jor !== null || !jornadas.length) return;
     const today = new Date().toISOString().slice(0, 10);
-    const next = data.filter((m) => m.fecha >= today).sort((a, b) => a.fecha.localeCompare(b.fecha))[0];
+    const next = data
+      .filter((m) => m.fecha >= today)
+      .sort((a, b) => a.fecha.localeCompare(b.fecha))[0];
     setJor(next?.jornada ?? jornadas[jornadas.length - 1]);
   }, [jornadas, data, jor]);
 
@@ -71,7 +81,8 @@ function Partidos() {
     .filter((m) => m.jornada === jor)
     .sort(
       (a, b) =>
-        (CAT_ORDER[a.club_teams?.categoria ?? ""] ?? 9) - (CAT_ORDER[b.club_teams?.categoria ?? ""] ?? 9) ||
+        (CAT_ORDER[a.club_teams?.categoria ?? ""] ?? 9) -
+          (CAT_ORDER[b.club_teams?.categoria ?? ""] ?? 9) ||
         (a.club_teams?.sexo ?? "").localeCompare(b.club_teams?.sexo ?? ""),
     );
 
@@ -80,7 +91,10 @@ function Partidos() {
       <BackButton />
       <h1 className="mt-3 font-display text-4xl">{t("Partidak", "Partidos")}</h1>
       <p className="text-sm text-muted-foreground">
-        {t("Aukeratu jardunaldia eta ikusi talde bakoitzaren partida.", "Elige la jornada y mira el partido de cada equipo.")}
+        {t(
+          "Aukeratu jardunaldia eta ikusi talde bakoitzaren partida.",
+          "Elige la jornada y mira el partido de cada equipo.",
+        )}
       </p>
 
       <h2 className="sr-only">{t("Jardunaldiak", "Jornadas")}</h2>
@@ -90,18 +104,25 @@ function Partidos() {
             key={j}
             onClick={() => setJor(j)}
             className={`shrink-0 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-              j === jor ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted"
+              j === jor
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card hover:bg-muted"
             }`}
           >
-            {t("J", "J")}{j}
+            {t("J", "J")}
+            {j}
           </button>
         ))}
       </div>
 
       <div className="mt-4 space-y-2">
-        {isLoading && <p className="text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>}
+        {isLoading && (
+          <p className="text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>
+        )}
         {!isLoading && list.length === 0 && (
-          <p className="text-sm text-muted-foreground">{t("Ez dago partidarik.", "No hay partidos.")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("Ez dago partidarik.", "No hay partidos.")}
+          </p>
         )}
         {list.map((m) => {
           const team = m.club_teams?.nombre ?? "BZG";
@@ -114,13 +135,22 @@ function Partidos() {
                 <div className="min-w-0">
                   <div className="text-xs text-muted-foreground">
                     {`${d}/${mo}/${y}`}
-                    {m.hora ? ` · ${m.hora}` : ""}{rest ? "" : " · "}{rest ? "" : m.es_local ? t("Etxean", "Local") : t("Kanpoan", "Visitante")}
+                    {m.hora ? ` · ${m.hora}` : ""}
+                    {rest ? "" : " · "}
+                    {rest ? "" : m.es_local ? t("Etxean", "Local") : t("Kanpoan", "Visitante")}
                   </div>
                   <div className="mt-1 font-semibold">
-                    {rest ? `${team} · ${t("Atseden", "Descansa")}` : m.es_local ? `${team} vs ${m.rival}` : `${m.rival} vs ${team}`}
+                    {rest
+                      ? `${team} · ${t("Atseden", "Descansa")}`
+                      : m.es_local
+                        ? `${team} vs ${m.rival}`
+                        : `${m.rival} vs ${team}`}
                   </div>
                   <div className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
-                    {m.club_teams?.categoria} · {m.club_teams?.sexo}
+                    {CAT[m.club_teams?.categoria as Category]} ·{" "}
+                    {m.club_teams?.sexo === "femenino"
+                      ? t("Emakumezkoa", "Femenino")
+                      : t("Gizonezkoa", "Masculino")}
                   </div>
                 </div>
                 <div className="text-right font-display text-3xl leading-none">

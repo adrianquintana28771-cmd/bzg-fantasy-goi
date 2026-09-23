@@ -27,12 +27,18 @@ function AuthPage() {
   return (
     <div className="mx-auto max-w-md px-4 py-8">
       <div className="flex items-center justify-between">
-        <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-4 w-4" /> {t("Hasiera", "Inicio")}
         </Link>
         <LangToggle />
       </div>
-      <div className="mt-4 rounded-2xl border border-border bg-card p-6 shadow-card" style={{ background: "var(--gradient-card)" }}>
+      <div
+        className="mt-4 rounded-2xl border border-border bg-card p-6 shadow-card"
+        style={{ background: "var(--gradient-card)" }}
+      >
         <AuthPanel />
       </div>
     </div>

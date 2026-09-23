@@ -12,7 +12,10 @@ export const Route = createFileRoute("/admin/desempeno")({
   head: () => ({
     meta: [
       { title: "Desempeño de jugadores/as · BZG Fantasy" },
-      { name: "description", content: "Formulario para registrar el desempeño de cada jugador/a en cada partido." },
+      {
+        name: "description",
+        content: "Formulario para registrar el desempeño de cada jugador/a en cada partido.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -66,7 +69,9 @@ function Desempeno() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("club_matches")
-        .select("id,rival,fecha,jornada,es_local,goles_favor,goles_contra,team_id,club_teams(nombre,categoria,sexo)")
+        .select(
+          "id,rival,fecha,jornada,es_local,goles_favor,goles_contra,team_id,club_teams(nombre,categoria,sexo)",
+        )
         .order("fecha", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as MatchRow[];
@@ -94,7 +99,9 @@ function Desempeno() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("club_player_teams")
-        .select("dorsal,club_players(id,nombre,alias,club_player_positions(position_id,es_principal))")
+        .select(
+          "dorsal,club_players(id,nombre,alias,club_player_positions(position_id,es_principal))",
+        )
         .eq("team_id", match!.team_id);
       if (error) throw error;
       return (data ?? []) as unknown as PlayerRow[];
@@ -144,8 +151,7 @@ function Desempeno() {
   );
 
   const total = useMemo(
-    () =>
-      visibleActions.reduce((acc, a) => acc + (counts[a.id] ?? 0) * Number(a.puntos), 0),
+    () => visibleActions.reduce((acc, a) => acc + (counts[a.id] ?? 0) * Number(a.puntos), 0),
     [visibleActions, counts],
   );
 
@@ -250,7 +256,9 @@ function Desempeno() {
                 );
               })}
               {roster.data?.length === 0 && (
-                <span className="text-sm text-muted-foreground">Este equipo aún no tiene jugadores/as.</span>
+                <span className="text-sm text-muted-foreground">
+                  Este equipo aún no tiene jugadores/as.
+                </span>
               )}
             </div>
           </div>
@@ -267,8 +275,12 @@ function Desempeno() {
               </div>
             </div>
             <div className="text-right">
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Puntos</div>
-              <div className={`font-display text-3xl ${total >= 0 ? "text-primary" : "text-destructive"}`}>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Puntos
+              </div>
+              <div
+                className={`font-display text-3xl ${total >= 0 ? "text-primary" : "text-destructive"}`}
+              >
                 {total}
               </div>
             </div>
@@ -302,7 +314,9 @@ function Desempeno() {
                         >
                           <Minus className="h-4 w-4" />
                         </button>
-                        <span className="w-8 text-center font-display text-xl">{counts[a.id] ?? 0}</span>
+                        <span className="w-8 text-center font-display text-xl">
+                          {counts[a.id] ?? 0}
+                        </span>
                         <button
                           type="button"
                           aria-label={`Sumar ${a.nombre}`}

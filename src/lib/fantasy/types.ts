@@ -1,10 +1,4 @@
-export type Category =
-  | "benjamin"
-  | "alevin"
-  | "infantil"
-  | "cadete"
-  | "juvenil"
-  | "senior";
+export type Category = "benjamin" | "alevin" | "infantil" | "cadete" | "juvenil" | "senior";
 
 export const CATEGORY_LABEL: Record<Category, string> = {
   benjamin: "Benjamín",

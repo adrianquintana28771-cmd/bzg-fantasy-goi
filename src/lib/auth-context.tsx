@@ -44,15 +44,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const client = supabase as unknown as {
       from: (t: string) => {
         select: (c: string) => {
-          eq: (col: string, val: string) => Promise<{ data: Array<Record<string, unknown>> | null }> & {
+          eq: (
+            col: string,
+            val: string,
+          ) => Promise<{ data: Array<Record<string, unknown>> | null }> & {
             maybeSingle: () => Promise<{ data: Record<string, unknown> | null }>;
           };
         };
       };
     };
     const [rolesRes, profileRes] = await Promise.all([
-      client.from("user_roles").select("role").eq("user_id", userId) as unknown as Promise<{ data: Array<{ role: AppRole }> | null }>,
-      (client.from("profiles").select("display_name, dni").eq("id", userId) as unknown as { maybeSingle: () => Promise<{ data: { display_name: string | null; dni: string } | null }> }).maybeSingle(),
+      client.from("user_roles").select("role").eq("user_id", userId) as unknown as Promise<{
+        data: Array<{ role: AppRole }> | null;
+      }>,
+      (
+        client.from("profiles").select("display_name, dni").eq("id", userId) as unknown as {
+          maybeSingle: () => Promise<{ data: { display_name: string | null; dni: string } | null }>;
+        }
+      ).maybeSingle(),
     ]);
     setRoles((rolesRes.data ?? []).map((r) => r.role));
     setDisplayName(profileRes.data?.display_name ?? profileRes.data?.dni ?? null);

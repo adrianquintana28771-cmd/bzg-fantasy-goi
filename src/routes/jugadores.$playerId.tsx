@@ -3,11 +3,25 @@ import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
-  BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { CategoryBadge } from "@/components/fantasy-ui";
-import { POSITION_LABEL, POSITION_LABEL_EU, ESTADO_LABEL, ESTADO_LABEL_EU, type PlayerEstado, type Category } from "@/lib/fantasy/types";
+import {
+  POSITION_LABEL,
+  POSITION_LABEL_EU,
+  ESTADO_LABEL,
+  ESTADO_LABEL_EU,
+  type PlayerEstado,
+  type Category,
+} from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
 import { fetchPoolPlayer, fetchTeams, round2 } from "@/lib/club-data";
 
@@ -41,7 +55,14 @@ export const Route = createFileRoute("/jugadores/$playerId")({
   component: Jugador,
 });
 
-type ActionRow = { jornada: number; action_id: string; nombre: string; puntos: number; cantidad: number; orden: number };
+type ActionRow = {
+  jornada: number;
+  action_id: string;
+  nombre: string;
+  puntos: number;
+  cantidad: number;
+  orden: number;
+};
 type JStat = { jornada: number; puntos: number; estado: PlayerEstado };
 
 function Jugador() {
@@ -67,17 +88,30 @@ function Jugador() {
       if (player.club_player_id) {
         const { data, error } = await supabase
           .from("club_match_actions")
-          .select("cantidad,action_id,club_matches(jornada),club_action_types(nombre,puntos,orden,activo)")
+          .select(
+            "cantidad,action_id,club_matches(jornada),club_action_types(nombre,puntos,orden,activo)",
+          )
           .eq("player_id", player.club_player_id);
         if (error) throw error;
-        actions = (data ?? [])
-          .filter((r: any) => r.club_action_types?.activo)
-          .map((r: any) => ({
+        type Row = {
+          cantidad: number;
+          action_id: string;
+          club_matches: { jornada: number } | null;
+          club_action_types: {
+            nombre: string;
+            puntos: number;
+            orden: number;
+            activo: boolean;
+          } | null;
+        };
+        actions = ((data ?? []) as unknown as Row[])
+          .filter((r) => r.club_action_types?.activo)
+          .map((r) => ({
             jornada: r.club_matches?.jornada ?? 0,
             action_id: r.action_id,
-            nombre: r.club_action_types.nombre,
-            puntos: Number(r.club_action_types.puntos),
-            orden: r.club_action_types.orden,
+            nombre: r.club_action_types!.nombre,
+            puntos: Number(r.club_action_types!.puntos),
+            orden: r.club_action_types!.orden,
             cantidad: r.cantidad,
           }));
       }
@@ -90,12 +124,21 @@ function Jugador() {
     },
   });
 
-  if (q.isLoading) return <p className="p-10 text-center text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>;
+  if (q.isLoading)
+    return (
+      <p className="p-10 text-center text-sm text-muted-foreground">
+        {t("Kargatzen…", "Cargando…")}
+      </p>
+    );
   if (!q.data)
     return (
       <div className="mx-auto max-w-2xl p-10 text-center">
-        <h1 className="font-display text-3xl">{t("Jokalaria ez da aurkitu", "Jugador/a no encontrado/a")}</h1>
-        <Link to="/equipos" className="mt-4 inline-block text-primary hover:underline">{t("Atzera", "Volver")}</Link>
+        <h1 className="font-display text-3xl">
+          {t("Jokalaria ez da aurkitu", "Jugador/a no encontrado/a")}
+        </h1>
+        <Link to="/equipos" className="mt-4 inline-block text-primary hover:underline">
+          {t("Atzera", "Volver")}
+        </Link>
       </div>
     );
 
@@ -116,12 +159,18 @@ function Jugador() {
           <ArrowLeft className="h-4 w-4" /> {team.nombre}
         </Link>
       ) : (
-        <Link to="/equipos" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <Link
+          to="/equipos"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-4 w-4" /> {t("Taldeak", "Equipos")}
         </Link>
       )}
 
-      <div className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6" style={{ background: "var(--gradient-card)" }}>
+      <div
+        className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6"
+        style={{ background: "var(--gradient-card)" }}
+      >
         <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-elevated">
           <div className="grid h-full w-full place-items-center">
             <span className="font-display text-[8rem] leading-none text-primary-foreground/90">
@@ -131,13 +180,17 @@ function Jugador() {
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent p-3">
             <EstadoBadge estado={estado} />
             {dorsal != null && (
-              <span className="rounded bg-black/40 px-2 py-0.5 text-[11px] font-semibold text-white">#{dorsal}</span>
+              <span className="rounded bg-black/40 px-2 py-0.5 text-[11px] font-semibold text-white">
+                #{dorsal}
+              </span>
             )}
           </div>
         </div>
 
         <div className="mt-4 text-center">
-          <h1 className="font-display text-2xl leading-tight sm:text-3xl">{player.club?.nombre ?? player.nombre}</h1>
+          <h1 className="font-display text-2xl leading-tight sm:text-3xl">
+            {player.club?.nombre ?? player.nombre}
+          </h1>
           {(player.club?.apellido1 || player.club?.apellido2) && (
             <p className="text-sm text-muted-foreground">
               {[player.club?.apellido1, player.club?.apellido2].filter(Boolean).join(" ")}
@@ -148,7 +201,11 @@ function Jugador() {
             <span className="rounded bg-primary/15 px-2 py-0.5 font-medium text-primary">
               {POS_LABEL[player.posicion as keyof typeof POS_LABEL] ?? player.posicion}
             </span>
-            {team && <span className="rounded bg-secondary px-2 py-0.5 text-muted-foreground">{team.nombre}</span>}
+            {team && (
+              <span className="rounded bg-secondary px-2 py-0.5 text-muted-foreground">
+                {team.nombre}
+              </span>
+            )}
             <span className="rounded bg-[color:var(--gold,#d4a017)]/20 px-2 py-0.5 font-bold text-foreground">
               {total} pts
             </span>
@@ -167,7 +224,11 @@ function Jugador() {
       <JornadasChart rows={stats} />
 
       <p className="mt-4 text-xs text-muted-foreground">
-        🔒 {t("Adingabeen datu pertsonalak babestuta daude.", "Los datos personales de menores están protegidos.")}
+        🔒{" "}
+        {t(
+          "Adingabeen datu pertsonalak babestuta daude.",
+          "Los datos personales de menores están protegidos.",
+        )}
       </p>
     </div>
   );
@@ -176,23 +237,38 @@ function Jugador() {
 function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] }) {
   const t = useT();
   const jornadas = useMemo(
-    () => Array.from(new Set([...stats.map((s) => s.jornada), ...actions.map((a) => a.jornada)])).sort((a, b) => a - b),
+    () =>
+      Array.from(new Set([...stats.map((s) => s.jornada), ...actions.map((a) => a.jornada)])).sort(
+        (a, b) => a - b,
+      ),
     [stats, actions],
   );
-  const [sel, setSel] = useState<number | "total">(jornadas.length ? jornadas[jornadas.length - 1] : "total");
+  const [sel, setSel] = useState<number | "total">(
+    jornadas.length ? jornadas[jornadas.length - 1] : "total",
+  );
   const current = sel === "total" || jornadas.includes(sel) ? sel : "total";
 
   const ptsFor = (j: number) => stats.find((s) => s.jornada === j)?.puntos ?? 0;
   const estadoFor = (j: number) => stats.find((s) => s.jornada === j)?.estado ?? "disponible";
 
   const filtered = current === "total" ? actions : actions.filter((a) => a.jornada === current);
-  const grouped = new Map<string, { nombre: string; puntos: number; cantidad: number; orden: number }>();
+  const grouped = new Map<
+    string,
+    { nombre: string; puntos: number; cantidad: number; orden: number }
+  >();
   for (const a of filtered) {
-    const g = grouped.get(a.action_id) ?? { nombre: a.nombre, puntos: a.puntos, cantidad: 0, orden: a.orden };
+    const g = grouped.get(a.action_id) ?? {
+      nombre: a.nombre,
+      puntos: a.puntos,
+      cantidad: 0,
+      orden: a.orden,
+    };
     g.cantidad += a.cantidad;
     grouped.set(a.action_id, g);
   }
-  const rows = [...grouped.values()].filter((r) => r.cantidad > 0).sort((a, b) => a.orden - b.orden);
+  const rows = [...grouped.values()]
+    .filter((r) => r.cantidad > 0)
+    .sort((a, b) => a.orden - b.orden);
   const totalPts =
     current === "total" ? round2(stats.reduce((a, s) => a + s.puntos, 0)) : round2(ptsFor(current));
   const accionesPts = round2(rows.reduce((a, r) => a + r.cantidad * r.puntos, 0));
@@ -201,32 +277,45 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
 
   const chip = (active: boolean) =>
     `shrink-0 rounded-xl border px-3 py-2 text-center transition ${
-      active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-secondary text-foreground"
+      active
+        ? "border-primary bg-primary text-primary-foreground"
+        : "border-border bg-secondary text-foreground"
     }`;
 
   return (
     <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-      <h2 className="px-5 pt-5 font-display text-xl">{t("Jardunaldiko errendimendua", "Desempeño por jornada")}</h2>
+      <h2 className="px-5 pt-5 font-display text-xl">
+        {t("Jardunaldiko errendimendua", "Desempeño por jornada")}
+      </h2>
       {jornadas.length === 0 ? (
-        <p className="px-5 pb-5 pt-2 text-sm text-muted-foreground">{t("Oraindik ez du jardunaldirik jokatu.", "Aún no ha jugado ninguna jornada.")}</p>
+        <p className="px-5 pb-5 pt-2 text-sm text-muted-foreground">
+          {t("Oraindik ez du jardunaldirik jokatu.", "Aún no ha jugado ninguna jornada.")}
+        </p>
       ) : (
         <>
           <div className="mt-3 flex gap-2 overflow-x-auto px-5 pb-3">
             <button className={chip(current === "total")} onClick={() => setSel("total")}>
               <div className="text-[10px] font-semibold uppercase">{t("Guztira", "Total")}</div>
-              <div className="font-display text-lg">{round2(stats.reduce((a, s) => a + s.puntos, 0))}</div>
+              <div className="font-display text-lg">
+                {round2(stats.reduce((a, s) => a + s.puntos, 0))}
+              </div>
             </button>
             {jornadas.map((j) => (
               <button key={j} className={chip(current === j)} onClick={() => setSel(j)}>
                 <div className="text-[10px] font-semibold uppercase">J{j}</div>
                 <div className="font-display text-lg">{round2(ptsFor(j))}</div>
-                <div className="mt-1 h-1 w-8 rounded-full" style={{ background: ESTADO_COLOR[estadoFor(j)] }} />
+                <div
+                  className="mt-1 h-1 w-8 rounded-full"
+                  style={{ background: ESTADO_COLOR[estadoFor(j)] }}
+                />
               </button>
             ))}
           </div>
 
           <div className="border-t border-border px-5 py-3 text-center font-display text-lg">
-            {current === "total" ? t("Jardunaldi guztiak", "Todas las jornadas") : `${t("Jardunaldia", "Jornada")} ${current}`}
+            {current === "total"
+              ? t("Jardunaldi guztiak", "Todas las jornadas")
+              : `${t("Jardunaldia", "Jornada")} ${current}`}
           </div>
           <div className="grid grid-cols-[4rem_1fr_4rem] border-t border-border bg-secondary/60 px-5 py-2 text-[11px] uppercase tracking-wide text-muted-foreground">
             <span>{t("Kop.", "Cantidad")}</span>
@@ -234,18 +323,30 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
             <span className="text-right">{t("Puntuak", "Puntos")}</span>
           </div>
           {noDisp && (
-            <p className="border-t border-border px-5 py-3 text-sm text-destructive">{t("Jardunaldi honetan ez eskuragarri: 0 puntu.", "No disponible esta jornada: puntúa 0.")}</p>
+            <p className="border-t border-border px-5 py-3 text-sm text-destructive">
+              {t(
+                "Jardunaldi honetan ez eskuragarri: 0 puntu.",
+                "No disponible esta jornada: puntúa 0.",
+              )}
+            </p>
           )}
           {rows.length === 0 && extra === 0 && !noDisp && (
-            <p className="border-t border-border px-5 py-3 text-sm text-muted-foreground">{t("Ez dago ekintzarik erregistratuta.", "Sin acciones registradas.")}</p>
+            <p className="border-t border-border px-5 py-3 text-sm text-muted-foreground">
+              {t("Ez dago ekintzarik erregistratuta.", "Sin acciones registradas.")}
+            </p>
           )}
           {rows.map((r) => {
             const p = round2(r.cantidad * r.puntos);
             return (
-              <div key={r.nombre} className="grid grid-cols-[4rem_1fr_4rem] items-center border-t border-border px-5 py-3">
+              <div
+                key={r.nombre}
+                className="grid grid-cols-[4rem_1fr_4rem] items-center border-t border-border px-5 py-3"
+              >
                 <span className="font-display text-lg">{r.cantidad}</span>
                 <span className="text-center text-sm font-semibold">{r.nombre}</span>
-                <span className={`text-right font-display text-lg ${p > 0 ? "text-primary" : p < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                <span
+                  className={`text-right font-display text-lg ${p > 0 ? "text-primary" : p < 0 ? "text-destructive" : "text-muted-foreground"}`}
+                >
                   {p > 0 ? `+${p}` : p}
                 </span>
               </div>
@@ -254,15 +355,21 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
           {extra !== 0 && !noDisp && (
             <div className="grid grid-cols-[4rem_1fr_4rem] items-center border-t border-border px-5 py-3">
               <span className="font-display text-lg">–</span>
-              <span className="text-center text-sm font-semibold">{t("Partidaren emaitza", "Resultado del partido")}</span>
-              <span className={`text-right font-display text-lg ${extra > 0 ? "text-primary" : "text-destructive"}`}>
+              <span className="text-center text-sm font-semibold">
+                {t("Partidaren emaitza", "Resultado del partido")}
+              </span>
+              <span
+                className={`text-right font-display text-lg ${extra > 0 ? "text-primary" : "text-destructive"}`}
+              >
                 {extra > 0 ? `+${extra}` : extra}
               </span>
             </div>
           )}
           <div className="flex items-center justify-between bg-primary px-5 py-3 text-primary-foreground">
             <span className="text-xs font-bold uppercase tracking-wide">
-              {current === "total" ? t("Denboraldiko guztira", "Total temporada") : t("Jardunaldiko guztira", "Total jornada")}
+              {current === "total"
+                ? t("Denboraldiko guztira", "Total temporada")
+                : t("Jardunaldiko guztira", "Total jornada")}
             </span>
             <span className="font-display text-xl">{totalPts}</span>
           </div>
@@ -288,7 +395,9 @@ function JornadasChart({ rows }: { rows: JStat[] }) {
   const data = rows.map((r) => ({ jornada: `J${r.jornada}`, pts: r.puntos, estado: r.estado }));
   return (
     <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-card">
-      <h2 className="font-display text-xl">{t("Jardunaldiko puntuazioa", "Puntuación por jornada")}</h2>
+      <h2 className="font-display text-xl">
+        {t("Jardunaldiko puntuazioa", "Puntuación por jornada")}
+      </h2>
       <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
         {(Object.keys(ESTADO_COLOR) as PlayerEstado[]).map((e) => (
           <span key={e} className="inline-flex items-center gap-1">
@@ -298,7 +407,9 @@ function JornadasChart({ rows }: { rows: JStat[] }) {
         ))}
       </div>
       {data.length === 0 ? (
-        <p className="mt-3 text-sm text-muted-foreground">{t("Oraindik puntuatutako jardunaldirik ez.", "Sin jornadas puntuadas aún.")}</p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          {t("Oraindik puntuatutako jardunaldirik ez.", "Sin jornadas puntuadas aún.")}
+        </p>
       ) : (
         <div className="mt-4 h-56 w-full">
           <ResponsiveContainer>
@@ -308,7 +419,11 @@ function JornadasChart({ rows }: { rows: JStat[] }) {
               <YAxis stroke="var(--color-muted-foreground)" />
               <Tooltip
                 cursor={{ fill: "var(--color-secondary)" }}
-                contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 8 }}
+                contentStyle={{
+                  background: "var(--color-card)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: 8,
+                }}
                 formatter={(v: number, _n, item) => [
                   `${v} pts · ${EST_LABEL[(item?.payload as { estado: PlayerEstado }).estado]}`,
                   t("Jardunaldia", "Jornada"),
@@ -336,7 +451,9 @@ function EstadoBadge({ estado }: { estado: PlayerEstado }) {
     no_disponible: "bg-destructive text-white",
   };
   return (
-    <span className={`rounded-md px-2 py-1 text-[11px] font-bold uppercase tracking-wide shadow ${style[estado]}`}>
+    <span
+      className={`rounded-md px-2 py-1 text-[11px] font-bold uppercase tracking-wide shadow ${style[estado]}`}
+    >
       {EST_LABEL[estado]}
     </span>
   );

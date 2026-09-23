@@ -1,6 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Calendar, Users, ClipboardList, Settings, FileText, Trophy, ShieldAlert, BarChart3 } from "lucide-react";
-import { useFantasy } from "@/lib/fantasy/store";
+import {
+  Calendar,
+  Users,
+  ClipboardList,
+  Settings,
+  FileText,
+  Trophy,
+  ShieldAlert,
+  BarChart3,
+} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { BackButton } from "@/components/back-button";
 import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
@@ -21,9 +31,31 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function Admin() {
-  const { seasons, teams, players, matches, stats, actaFiles } = useFantasy((s) => s);
-  const { isSuperAdmin, isManager, isAdmin, canEditStats, canEditMatches, canManagePlayers, canManageAll } = useAuth();
-  const active = seasons.find((s) => s.isActive);
+  const { data: counts } = useQuery({
+    queryKey: ["admin-counts"],
+    queryFn: async () => {
+      const count = async (
+        table: "club_teams" | "club_players" | "club_matches" | "club_match_actions",
+      ) => (await supabase.from(table).select("*", { count: "exact", head: true })).count ?? 0;
+      const [teams, players, matches, actions, season] = await Promise.all([
+        count("club_teams"),
+        count("club_players"),
+        count("club_matches"),
+        count("club_match_actions"),
+        supabase.from("club_seasons").select("nombre").eq("is_active", true).maybeSingle(),
+      ]);
+      return { teams, players, matches, actions, season: season.data?.nombre ?? "—" };
+    },
+  });
+  const {
+    isSuperAdmin,
+    isManager,
+    isAdmin,
+    canEditStats,
+    canEditMatches,
+    canManagePlayers,
+    canManageAll,
+  } = useAuth();
   const roleLabel = isSuperAdmin ? "super_admin" : isManager ? "manager" : isAdmin ? "admin" : "";
   const roleDescription = isSuperAdmin
     ? "Puedes gestionar todo: reglas, partidos, jugadores/as y estadísticas."
@@ -44,13 +76,25 @@ function Admin() {
       </div>
 
       <h1 className="mt-6 font-display text-4xl">Panel de administración</h1>
-      <p className="text-sm text-muted-foreground">Accede a las secciones que tu rol permite gestionar.</p>
+      <p className="text-sm text-muted-foreground">
+        Accede a las secciones que tu rol permite gestionar.
+      </p>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={Calendar} label="Temporadas" value={seasons.length} sub={`Activa: ${active?.name ?? "—"}`} />
-        <StatCard icon={Users} label="Equipos" value={teams.length} />
-        <StatCard icon={Users} label="Jugadores/as" value={players.length} />
-        <StatCard icon={ClipboardList} label="Partidos" value={matches.length} sub={`${stats.length} stats · ${Object.keys(actaFiles).length} actas`} />
+        <StatCard
+          icon={Calendar}
+          label="Temporada"
+          value={1}
+          sub={`Activa: ${counts?.season ?? "—"}`}
+        />
+        <StatCard icon={Users} label="Equipos" value={counts?.teams ?? 0} />
+        <StatCard icon={Users} label="Jugadores/as" value={counts?.players ?? 0} />
+        <StatCard
+          icon={ClipboardList}
+          label="Partidos"
+          value={counts?.matches ?? 0}
+          sub={`${counts?.actions ?? 0} acciones registradas`}
+        />
       </div>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -97,8 +141,10 @@ function Admin() {
       {canManageAll && (
         <p className="mt-10 text-sm text-muted-foreground">
           Los criterios de puntuación se gestionan en{" "}
-          <Link to="/admin/reglas" className="text-primary underline">Criterios de puntuación</Link>. Al
-          cambiarlos se recalculan automáticamente todas las jornadas ya jugadas.
+          <Link to="/admin/reglas" className="text-primary underline">
+            Criterios de puntuación
+          </Link>
+          . Al cambiarlos se recalculan automáticamente todas las jornadas ya jugadas.
         </p>
       )}
     </div>
@@ -106,7 +152,10 @@ function Admin() {
 }
 
 function StatCard({
-  icon: Icon, label, value, sub,
+  icon: Icon,
+  label,
+  value,
+  sub,
 }: {
   icon: typeof Calendar;
   label: string;
@@ -116,7 +165,9 @@ function StatCard({
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</span>
+        <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          {label}
+        </span>
         <Icon className="h-4 w-4 text-primary" />
       </div>
       <div className="mt-2 font-display text-4xl text-foreground">{value}</div>
@@ -126,7 +177,10 @@ function StatCard({
 }
 
 function Section({
-  icon: Icon, title, description, to,
+  icon: Icon,
+  title,
+  description,
+  to,
 }: {
   icon: typeof FileText;
   title: string;

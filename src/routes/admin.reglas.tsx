@@ -11,7 +11,10 @@ export const Route = createFileRoute("/admin/reglas")({
   head: () => ({
     meta: [
       { title: "Criterios de puntuación · Admin BZG" },
-      { name: "description", content: "Crea y edita los criterios de puntuación del Fantasy del club." },
+      {
+        name: "description",
+        content: "Crea y edita los criterios de puntuación del Fantasy del club.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -34,7 +37,9 @@ function SuperOnly({ children }: { children: React.ReactNode }) {
         <p className="mt-2 text-sm text-muted-foreground">
           Editar los criterios de puntuación está reservado al rol super_admin.
         </p>
-        <Link to="/admin" className="mt-6 inline-block text-primary hover:underline">Volver al panel</Link>
+        <Link to="/admin" className="mt-6 inline-block text-primary hover:underline">
+          Volver al panel
+        </Link>
       </div>
     );
   }
@@ -57,7 +62,12 @@ const GRUPOS = ["ataque", "defensa", "portero", "entrenador", "negativo", "bonus
 
 function Reglas() {
   const qc = useQueryClient();
-  const [nuevo, setNuevo] = useState({ nombre: "", puntos: 1, grupo: "ataque", solo_portero: false });
+  const [nuevo, setNuevo] = useState({
+    nombre: "",
+    puntos: 1,
+    grupo: "ataque",
+    solo_portero: false,
+  });
 
   const criterios = useQuery({
     queryKey: ["criterios"],
@@ -142,7 +152,10 @@ function Reglas() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <Link to="/admin" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link
+        to="/admin"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> Admin
       </Link>
       <h1 className="mt-3 font-display text-4xl">Criterios de puntuación</h1>
@@ -173,7 +186,11 @@ function Reglas() {
             onChange={(e) => setNuevo((n) => ({ ...n, grupo: e.target.value }))}
             className="rounded-lg border border-input bg-background px-3 py-2 text-sm capitalize"
           >
-            {GRUPOS.map((g) => <option key={g} value={g}>{g}</option>)}
+            {GRUPOS.map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
           </select>
           <button
             onClick={() => crear.mutate()}
@@ -194,18 +211,30 @@ function Reglas() {
         </label>
       </div>
 
-      <Bloque titulo="Entrenadores/as (según el resultado)" items={entrenador} guardar={guardar} borrar={borrar} fijo />
+      <Bloque
+        titulo="Entrenadores/as (según el resultado)"
+        items={entrenador}
+        guardar={guardar}
+        borrar={borrar}
+        fijo
+      />
       <Bloque titulo="Jugadores/as" items={jugadores} guardar={guardar} borrar={borrar} />
     </div>
   );
 }
 
 function Bloque({
-  titulo, items, guardar, borrar, fijo,
+  titulo,
+  items,
+  guardar,
+  borrar,
+  fijo,
 }: {
   titulo: string;
   items: Criterio[];
-  guardar: { mutate: (v: { id: string; puntos?: number; nombre?: string; activo?: boolean }) => void };
+  guardar: {
+    mutate: (v: { id: string; puntos?: number; nombre?: string; activo?: boolean }) => void;
+  };
   borrar: { mutate: (id: string) => void };
   fijo?: boolean;
 }) {
@@ -213,7 +242,9 @@ function Bloque({
     <div className="mt-8">
       <h2 className="font-display text-2xl">{titulo}</h2>
       <div className="mt-3 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-        {items.map((c) => <Fila key={c.id} c={c} guardar={guardar} borrar={borrar} fijo={fijo} />)}
+        {items.map((c) => (
+          <Fila key={c.id} c={c} guardar={guardar} borrar={borrar} fijo={fijo} />
+        ))}
         {items.length === 0 && <p className="p-4 text-sm text-muted-foreground">Sin criterios.</p>}
       </div>
     </div>
@@ -221,10 +252,15 @@ function Bloque({
 }
 
 function Fila({
-  c, guardar, borrar, fijo,
+  c,
+  guardar,
+  borrar,
+  fijo,
 }: {
   c: Criterio;
-  guardar: { mutate: (v: { id: string; puntos?: number; nombre?: string; activo?: boolean }) => void };
+  guardar: {
+    mutate: (v: { id: string; puntos?: number; nombre?: string; activo?: boolean }) => void;
+  };
   borrar: { mutate: (id: string) => void };
   fijo?: boolean;
 }) {
@@ -239,9 +275,13 @@ function Fila({
           onChange={() => guardar.mutate({ id: c.id, activo: !c.activo })}
           className="h-4 w-4 accent-[var(--color-primary)]"
         />
-        <span className={`truncate ${c.activo ? "font-medium" : "text-muted-foreground line-through"}`}>
+        <span
+          className={`truncate ${c.activo ? "font-medium" : "text-muted-foreground line-through"}`}
+        >
           {c.nombre}
-          {c.solo_portero && <span className="ml-2 rounded bg-secondary px-1 text-[10px] uppercase">portero</span>}
+          {c.solo_portero && (
+            <span className="ml-2 rounded bg-secondary px-1 text-[10px] uppercase">portero</span>
+          )}
         </span>
       </label>
       <div className="flex items-center gap-2">
