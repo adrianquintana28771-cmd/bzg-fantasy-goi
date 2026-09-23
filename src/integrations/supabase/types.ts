@@ -151,6 +151,7 @@ export type Database = {
           fecha: string
           goles_contra: number
           goles_favor: number
+          hora: string | null
           id: string
           jornada: number
           rival: string
@@ -164,6 +165,7 @@ export type Database = {
           fecha: string
           goles_contra?: number
           goles_favor?: number
+          hora?: string | null
           id?: string
           jornada?: number
           rival: string
@@ -177,6 +179,7 @@ export type Database = {
           fecha?: string
           goles_contra?: number
           goles_favor?: number
+          hora?: string | null
           id?: string
           jornada?: number
           rival?: string
