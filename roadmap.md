@@ -1,6 +1,7 @@
 # Pendiente
 
 - [x] Traducir Misiones al euskera y configurar tutorial, Federación y web BZG como las tres primeras misiones.
+- [x] Dar a cada cuenta nueva 3 sobres normales y 1 premium.
 # Roadmap
 - [x] Mini-tutorial guiado para nuevas visitas, usuarios y administración
 - [ ] Viernes: reiniciar sobres/cartas de usuarios como recién registrados (esperando aviso del usuario)
