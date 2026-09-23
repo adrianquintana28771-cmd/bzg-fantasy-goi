@@ -549,6 +549,7 @@ export type Database = {
           is_active: boolean
           nombre: string
           recompensa_sobres: number
+          requiere_qr: boolean | null
           tipo_sobre: string
         }
         Insert: {
@@ -559,6 +560,7 @@ export type Database = {
           is_active?: boolean
           nombre: string
           recompensa_sobres?: number
+          requiere_qr?: boolean | null
           tipo_sobre?: string
         }
         Update: {
@@ -569,6 +571,7 @@ export type Database = {
           is_active?: boolean
           nombre?: string
           recompensa_sobres?: number
+          requiere_qr?: boolean | null
           tipo_sobre?: string
         }
         Relationships: []
@@ -889,26 +892,16 @@ export type Database = {
         }
         Returns: boolean
       }
-      open_sobre:
-        | {
-            Args: never
-            Returns: {
-              p_id: string
-              p_nombre: string
-              p_posicion: Database["public"]["Enums"]["plantilla_posicion"]
-              p_rating: number
-            }[]
-          }
-        | {
-            Args: { _tipo?: string }
-            Returns: {
-              p_id: string
-              p_nombre: string
-              p_posicion: Database["public"]["Enums"]["plantilla_posicion"]
-              p_rareza: Database["public"]["Enums"]["card_rareza"]
-              p_rating: number
-            }[]
-          }
+      open_sobre: {
+        Args: { _tipo?: string }
+        Returns: {
+          p_id: string
+          p_nombre: string
+          p_posicion: Database["public"]["Enums"]["plantilla_posicion"]
+          p_rareza: Database["public"]["Enums"]["card_rareza"]
+          p_rating: number
+        }[]
+      }
       recalc_player_stats: { Args: never; Returns: undefined }
       user_ranking: {
         Args: never
