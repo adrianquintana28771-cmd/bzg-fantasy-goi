@@ -5,7 +5,50 @@ import { buildRanking } from "@/lib/fantasy/queries";
 import { PlayerCard, StatusBadge, CategoryBadge } from "@/components/fantasy-ui";
 import { CATEGORY_LABEL } from "@/lib/fantasy/types";
 
+const SITE = "https://bzg-fantasy-goi.lovable.app";
+const HOME_TITLE = "BZG Fantasy Eskubaloia | Fantasy de balonmano de Etxebarri";
+const HOME_DESC =
+  "BZG Fantasy Eskubaloia: sigue los rankings, jugadores, equipos, partidos y estadísticas del fantasy de balonmano de Etxebarri.";
+
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: HOME_TITLE },
+      { name: "description", content: HOME_DESC },
+      { property: "og:title", content: HOME_TITLE },
+      { property: "og:description", content: HOME_DESC },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: `${SITE}/` },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: HOME_TITLE },
+      { name: "twitter:description", content: HOME_DESC },
+    ],
+    links: [{ rel: "canonical", href: `${SITE}/` }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SportsOrganization",
+          name: "BZG Etxebarri · Berdezurigorri",
+          sport: "Balonmano",
+          url: SITE,
+          areaServed: "Etxebarri, Bizkaia",
+          description: HOME_DESC,
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "BZG Fantasy Eskubaloia",
+          url: SITE,
+          inLanguage: "es-ES",
+        }),
+      },
+    ],
+  }),
   component: Home,
 });
 
