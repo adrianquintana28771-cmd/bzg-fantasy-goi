@@ -10,6 +10,7 @@ import {
   Shield,
   Sparkles,
   BarChart3,
+  CircleHelp,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
@@ -17,6 +18,8 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AuthPanel } from "@/components/auth-panel";
 import { LangToggle, useT } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
+import { openGuidedTour } from "@/components/guided-tour";
 
 type NavItem = {
   to: string;
@@ -109,6 +112,17 @@ export function SiteHeader() {
         {user ? (
           <div className="flex items-center gap-2">
             <LangToggle />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="min-h-11 min-w-11"
+              onClick={openGuidedTour}
+              aria-label={t("Laguntza-ibilbidea ireki", "Abrir tutorial guiado")}
+              title={t("Laguntza", "Ayuda")}
+            >
+              <CircleHelp aria-hidden />
+            </Button>
             <div className="hidden text-right sm:block">
               <div className="truncate text-sm font-semibold">
                 {displayName ?? t("Erabiltzailea", "Usuario")}
@@ -127,12 +141,24 @@ export function SiteHeader() {
             </button>
           </div>
         ) : (
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="min-h-11 min-w-11"
+              onClick={openGuidedTour}
+              aria-label={t("Laguntza-ibilbidea ireki", "Abrir tutorial guiado")}
+              title={t("Laguntza", "Ayuda")}
+            >
+              <CircleHelp aria-hidden />
+            </Button>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <button className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-card hover:-translate-y-0.5">
+              <Button data-tour="login" className="h-auto rounded-lg px-3 py-2 shadow-card hover:-translate-y-0.5">
                 <LogIn className="h-4 w-4" />
                 <span>{t("Sartu", "Entrar")}</span>
-              </button>
+              </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
               <SheetHeader className="flex-row items-center justify-between space-y-0 pr-8">
@@ -144,6 +170,7 @@ export function SiteHeader() {
               </div>
             </SheetContent>
           </Sheet>
+          </div>
         )}
       </div>
     </header>
@@ -179,6 +206,23 @@ export function BottomNav() {
           <li key={to}>
             <Link
               to={to}
+              data-tour={
+                to === "/plantilla"
+                  ? "nav-team"
+                  : to === "/misiones"
+                    ? "nav-missions"
+                    : to === "/rankings"
+                      ? "nav-rankings"
+                      : to === "/equipos"
+                        ? "nav-teams"
+                        : to === "/partidos"
+                          ? "nav-matches"
+                          : to === "/admin/desempeno"
+                            ? "nav-performance"
+                            : to === "/admin"
+                              ? "nav-admin"
+                              : undefined
+              }
               activeOptions={{ exact: to === "/" }}
               className="group flex flex-col items-center justify-center gap-1 px-1 py-2 text-muted-foreground transition data-[status=active]:text-foreground"
             >
