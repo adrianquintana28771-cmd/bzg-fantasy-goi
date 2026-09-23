@@ -916,6 +916,16 @@ export type Database = {
           username: string
         }[]
       }
+      user_ranking_by_jornada: {
+        Args: never
+        Returns: {
+          display_name: string
+          jornada: number
+          puntos: number
+          user_id: string
+          username: string
+        }[]
+      }
       username_exists: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {
