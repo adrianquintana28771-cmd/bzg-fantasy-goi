@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader, SiteFooter, BottomNav } from "@/components/site-chrome";
 import { AuthProvider } from "@/lib/auth-context";
+import { LangProvider } from "@/lib/i18n";
 import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -108,7 +109,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="eu">
       <head>
         <HeadContent />
       </head>
@@ -125,6 +126,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <LangProvider>
       <AuthProvider>
         <div className="relative flex min-h-screen flex-col bg-background pb-24">
           <div
@@ -148,6 +150,7 @@ function RootComponent() {
         </div>
         <Toaster richColors position="top-center" />
       </AuthProvider>
+      </LangProvider>
     </QueryClientProvider>
   );
 }
