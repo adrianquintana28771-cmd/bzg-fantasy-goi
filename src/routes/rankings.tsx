@@ -92,7 +92,7 @@ function Rankings() {
           <div className="mt-6 grid grid-cols-1 gap-2 rounded-2xl border border-border bg-card p-3 shadow-card sm:grid-cols-3">
             <Select value={category} onChange={setCategory} label={t("Kategoria", "Categoría")}>
               <option value="">{t("Guztiak", "Todas")}</option>
-              {Object.entries(CAT_LABEL).map(([k, v]) => (
+              {(["senior", "juvenil", "cadete"] as const).map((k) => [k, CAT_LABEL[k]]).map(([k, v]) => (
                 <option key={k} value={k}>
                   {v}
                 </option>
