@@ -6,7 +6,6 @@ import {
   POSITION_LABEL,
   POSITION_LABEL_EU,
 } from "@/lib/fantasy/types";
-import type { PlayerAggregate } from "@/lib/fantasy/queries";
 import { useLang } from "@/lib/i18n";
 
 export function CategoryBadge({ category }: { category: keyof typeof CATEGORY_LABEL }) {
