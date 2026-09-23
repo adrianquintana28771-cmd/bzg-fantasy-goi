@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BackButton } from "@/components/back-button";
-import { useT } from "@/lib/i18n";
+import { useT, useLang } from "@/lib/i18n";
+import { CATEGORY_LABEL, CATEGORY_LABEL_EU, type Category } from "@/lib/fantasy/types";
 
 export const Route = createFileRoute("/partidos/")({
   head: () => {
@@ -45,6 +46,8 @@ const CAT_ORDER: Record<string, number> = { senior: 0, juvenil: 1, cadete: 2 };
 
 function Partidos() {
   const t = useT();
+  const { lang } = useLang();
+  const CAT = lang === "eu" ? CATEGORY_LABEL_EU : CATEGORY_LABEL;
   const { data = [], isLoading } = useQuery({
     queryKey: ["partidos-publicos"],
     queryFn: async () => {
@@ -144,7 +147,10 @@ function Partidos() {
                         : `${m.rival} vs ${team}`}
                   </div>
                   <div className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
-                    {m.club_teams?.categoria} · {m.club_teams?.sexo}
+                    {CAT[m.club_teams?.categoria as Category]} ·{" "}
+                    {m.club_teams?.sexo === "femenino"
+                      ? t("Emakumezkoa", "Femenino")
+                      : t("Gizonezkoa", "Masculino")}
                   </div>
                 </div>
                 <div className="text-right font-display text-3xl leading-none">
