@@ -106,6 +106,7 @@ function Partidos() {
         {list.map((m) => {
           const team = m.club_teams?.nombre ?? "BZG";
           const played = m.goles_favor + m.goles_contra > 0;
+          const rest = m.rival.toLowerCase() === "descansa";
           const [y, mo, d] = m.fecha.split("-");
           return (
             <div key={m.id} className="rounded-xl border border-border bg-card p-4 shadow-card">
@@ -113,10 +114,10 @@ function Partidos() {
                 <div className="min-w-0">
                   <div className="text-xs text-muted-foreground">
                     {`${d}/${mo}/${y}`}
-                    {m.hora ? ` · ${m.hora}` : ""} · {m.es_local ? t("Etxean", "Local") : t("Kanpoan", "Visitante")}
+                    {m.hora ? ` · ${m.hora}` : ""}{rest ? "" : " · "}{rest ? "" : m.es_local ? t("Etxean", "Local") : t("Kanpoan", "Visitante")}
                   </div>
                   <div className="mt-1 font-semibold">
-                    {m.es_local ? `${team} vs ${m.rival}` : `${m.rival} vs ${team}`}
+                    {rest ? `${team} · ${t("Atseden", "Descansa")}` : m.es_local ? `${team} vs ${m.rival}` : `${m.rival} vs ${team}`}
                   </div>
                   <div className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
                     {m.club_teams?.categoria} · {m.club_teams?.sexo}
