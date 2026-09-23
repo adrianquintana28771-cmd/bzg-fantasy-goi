@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Mini-tutorial guiado para nuevas visitas, usuarios y administración
 - [ ] Viernes: reiniciar sobres/cartas de usuarios como recién registrados (esperando aviso del usuario)
 - [x] BZG Berde (senior femenino) con 15 jugadoras
 - [x] Ficha jugador: desempeño por jornada + total (datos reales)
