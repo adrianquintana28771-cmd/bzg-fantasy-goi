@@ -6,7 +6,8 @@ import { buildRanking } from "@/lib/fantasy/queries";
 import { PlayerCard } from "@/components/fantasy-ui";
 import { BackButton } from "@/components/back-button";
 import { supabase } from "@/integrations/supabase/client";
-import { CATEGORY_LABEL, POSITION_LABEL } from "@/lib/fantasy/types";
+import { CATEGORY_LABEL, CATEGORY_LABEL_EU, POSITION_LABEL, POSITION_LABEL_EU } from "@/lib/fantasy/types";
+import { useT, useLang } from "@/lib/i18n";
 
 
 export const Route = createFileRoute("/rankings")({
@@ -34,6 +35,10 @@ export const Route = createFileRoute("/rankings")({
 });
 
 function Rankings() {
+  const t = useT();
+  const { lang } = useLang();
+  const CAT_LABEL = lang === "eu" ? CATEGORY_LABEL_EU : CATEGORY_LABEL;
+  const POS_LABEL = lang === "eu" ? POSITION_LABEL_EU : POSITION_LABEL;
   const { seasons, teams, players, matches, stats, rules } = useFantasy((s) => s);
   const [seasonId, setSeasonId] = useState(seasons.find((s) => s.isActive)?.id ?? seasons[0].id);
   const [category, setCategory] = useState<string>("");
@@ -65,15 +70,15 @@ function Rankings() {
       <BackButton />
       <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-4xl">Rankings</h1>
-          <p className="text-sm text-muted-foreground">Los mejores puntos Fantasy del club.</p>
+          <h1 className="font-display text-4xl">{t("Sailkapenak", "Rankings")}</h1>
+          <p className="text-sm text-muted-foreground">{t("Klubeko Fantasy puntu onenak.", "Los mejores puntos Fantasy del club.")}</p>
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-secondary p-1">
         {([
-          ["jugadores", "Jugadores/as"],
-          ["usuarios", "Usuarios"],
+          ["jugadores", t("Jokalariak", "Jugadores/as")],
+          ["usuarios", t("Erabiltzaileak", "Usuarios")],
         ] as const).map(([k, label]) => (
           <button
             key={k}
@@ -92,38 +97,38 @@ function Rankings() {
       <>
 
       <div className="mt-6 grid grid-cols-2 gap-2 rounded-2xl border border-border bg-card p-3 shadow-card md:grid-cols-6">
-        <Select value={seasonId} onChange={setSeasonId} label="Temporada">
+        <Select value={seasonId} onChange={setSeasonId} label={t("Denboraldia", "Temporada")}>
           {seasons.map((s) => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </Select>
-        <Select value={category} onChange={setCategory} label="Categoría">
-          <option value="">Todas</option>
-          {Object.entries(CATEGORY_LABEL).map(([k, v]) => (
+        <Select value={category} onChange={setCategory} label={t("Kategoria", "Categoría")}>
+          <option value="">{t("Guztiak", "Todas")}</option>
+          {Object.entries(CAT_LABEL).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
           ))}
         </Select>
-        <Select value={gender} onChange={setGender} label="Género">
-          <option value="">Todos</option>
-          <option value="masculino">Masculino</option>
-          <option value="femenino">Femenino</option>
-          <option value="mixto">Mixto</option>
+        <Select value={gender} onChange={setGender} label={t("Generoa", "Género")}>
+          <option value="">{t("Guztiak", "Todos")}</option>
+          <option value="masculino">{t("Gizonezkoa", "Masculino")}</option>
+          <option value="femenino">{t("Emakumezkoa", "Femenino")}</option>
+          <option value="mixto">{t("Mistoa", "Mixto")}</option>
         </Select>
-        <Select value={teamId} onChange={setTeamId} label="Equipo">
-          <option value="">Todos</option>
-          {filteredTeams.map((t) => (
-            <option key={t.id} value={t.id}>{t.name}</option>
+        <Select value={teamId} onChange={setTeamId} label={t("Taldea", "Equipo")}>
+          <option value="">{t("Guztiak", "Todos")}</option>
+          {filteredTeams.map((tm) => (
+            <option key={tm.id} value={tm.id}>{tm.name}</option>
           ))}
         </Select>
-        <Select value={position} onChange={setPosition} label="Posición">
-          <option value="">Todas</option>
-          {Object.entries(POSITION_LABEL).map(([k, v]) => (
+        <Select value={position} onChange={setPosition} label={t("Posizioa", "Posición")}>
+          <option value="">{t("Guztiak", "Todas")}</option>
+          {Object.entries(POS_LABEL).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
           ))}
         </Select>
-        <Select value={sortBy} onChange={(v) => setSortBy(v as "total" | "avg")} label="Ordenar por">
-          <option value="total">Puntos totales</option>
-          <option value="avg">Media por partido</option>
+        <Select value={sortBy} onChange={(v) => setSortBy(v as "total" | "avg")} label={t("Ordenatu honela", "Ordenar por")}>
+          <option value="total">{t("Puntu guztira", "Puntos totales")}</option>
+          <option value="avg">{t("Partidako batez bestekoa", "Media por partido")}</option>
         </Select>
       </div>
 
@@ -141,7 +146,7 @@ function Rankings() {
         ))}
         {sorted.length === 0 && (
           <div className="rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">
-            No hay jugadores/as con los filtros seleccionados.
+            {t("Ez dago jokalaririk aukeratutako iragazkiekin.", "No hay jugadores/as con los filtros seleccionados.")}
           </div>
         )}
       </div>
@@ -202,6 +207,7 @@ function PodiumSpot({
 }
 
 function UsuariosRanking() {
+  const t = useT();
   const queryClient = useQueryClient();
   const q = useQuery({
     queryKey: ["user-ranking"],
@@ -210,7 +216,7 @@ function UsuariosRanking() {
       if (error) throw error;
       return (data ?? []).map((r) => ({
         userId: r.user_id as string,
-        nombre: (r.username as string | null) ?? (r.display_name as string | null) ?? "Usuario",
+        nombre: (r.username as string | null) ?? (r.display_name as string | null) ?? t("Erabiltzailea", "Usuario"),
         puntos: Math.round(Number(r.puntos)),
         jornadas: Number(r.jornadas),
       }));
@@ -237,12 +243,15 @@ function UsuariosRanking() {
   return (
     <div className="mt-6">
       <p className="text-sm text-muted-foreground">
-        Cada usuario suma los puntos de los 7 jugadores/as que alineó en cada jornada.
+        {t(
+          "Erabiltzaile bakoitzak jardunaldi bakoitzean lerrokatutako 7 jokalarien puntuak batzen ditu.",
+          "Cada usuario suma los puntos de los 7 jugadores/as que alineó en cada jornada.",
+        )}
       </p>
-      {q.isLoading && <p className="mt-6 text-sm text-muted-foreground">Cargando…</p>}
+      {q.isLoading && <p className="mt-6 text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>}
       {!q.isLoading && rows.length === 0 && (
         <div className="mt-6 rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">
-          Todavía no hay usuarios con alineaciones puntuadas.
+          {t("Oraindik ez dago alineazio puntuaturik duen erabiltzailerik.", "Todavía no hay usuarios con alineaciones puntuadas.")}
         </div>
       )}
       <ol className="mt-4 space-y-2">
@@ -264,7 +273,7 @@ function UsuariosRanking() {
               </span>
               <div className="min-w-0">
                 <div className="truncate font-semibold">{u.nombre}</div>
-                <div className="text-xs text-muted-foreground">{u.jornadas} jornada(s)</div>
+                <div className="text-xs text-muted-foreground">{u.jornadas} {t("jardunaldi", "jornada(s)")}</div>
               </div>
             </div>
             <div className="text-right">

@@ -1,8 +1,11 @@
 import { useRouter } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
-export function BackButton({ fallback = "/", label = "Volver" }: { fallback?: string; label?: string }) {
+export function BackButton({ fallback = "/", label }: { fallback?: string; label?: string }) {
   const router = useRouter();
+  const t = useT();
+  const resolvedLabel = label ?? t("Atzera", "Volver");
   return (
     <button
       type="button"
@@ -15,7 +18,7 @@ export function BackButton({ fallback = "/", label = "Volver" }: { fallback?: st
       }}
       className="inline-flex items-center gap-1 text-sm text-muted-foreground transition hover:text-foreground"
     >
-      <ArrowLeft className="h-4 w-4" /> {label}
+      <ArrowLeft className="h-4 w-4" /> {resolvedLabel}
     </button>
   );
 }
