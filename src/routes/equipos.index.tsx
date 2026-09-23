@@ -65,24 +65,24 @@ function Equipos() {
           <div key={category}>
             <h2 className="mb-3 font-display text-2xl">{CAT_LABEL[category]}</h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {cts.map((t) => {
-                const roster = pool.filter((p) => p.team_id === t.id && !p.club?.es_entrenador);
+              {cts.map((team) => {
+                const roster = pool.filter((p) => p.team_id === team.id && !p.club?.es_entrenador);
                 const teamPts = round2(roster.reduce((a, p) => a + (pts[p.id] ?? 0), 0));
                 return (
                   <Link
-                    key={t.id}
+                    key={team.id}
                     to="/equipos/$teamId"
-                    params={{ teamId: t.id }}
+                    params={{ teamId: team.id }}
                     className="group rounded-2xl border border-border bg-card p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated"
                     style={{ background: "var(--gradient-card)" }}
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="font-display text-xl">{t.nombre}</div>
+                        <div className="font-display text-xl">{team.nombre}</div>
                         <div className="mt-1 flex items-center gap-1.5">
-                          <CategoryBadge category={t.categoria as Category} />
+                          <CategoryBadge category={team.categoria as Category} />
                           <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium capitalize text-secondary-foreground">
-                            {t.sexo}
+                            {team.sexo}
                           </span>
                         </div>
                       </div>
