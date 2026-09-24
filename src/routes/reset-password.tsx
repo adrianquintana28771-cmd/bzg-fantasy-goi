@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, KeyRound } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/reset-password")({
   ssr: false,
@@ -16,18 +17,20 @@ export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
 });
 
-const schema = z
-  .object({
-    password: z.string().min(6, "Mínimo 6 caracteres").max(72),
-    confirm: z.string().min(6, "Mínimo 6 caracteres").max(72),
-  })
-  .refine((v) => v.password === v.confirm, {
-    message: "Las contraseñas no coinciden",
-    path: ["confirm"],
-  });
+const makeSchema = (t: (eu: string, es: string) => string) =>
+  z
+    .object({
+      password: z.string().min(6, t("Gutxienez 6 karaktere", "Mínimo 6 caracteres")).max(72),
+      confirm: z.string().min(6, t("Gutxienez 6 karaktere", "Mínimo 6 caracteres")).max(72),
+    })
+    .refine((v) => v.password === v.confirm, {
+      message: t("Pasahitzak ez datoz bat", "Las contraseñas no coinciden"),
+      path: ["confirm"],
+    });
 
 function ResetPasswordPage() {
   const navigate = useNavigate();
+  const t = useT();
   const [ready, setReady] = useState(false);
   const [hasSession, setHasSession] = useState(false);
   const [password, setPassword] = useState("");
@@ -52,7 +55,7 @@ function ResetPasswordPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const parsed = schema.safeParse({ password, confirm });
+    const parsed = makeSchema(t).safeParse({ password, confirm });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
@@ -64,7 +67,7 @@ function ResetPasswordPage() {
         toast.error(error.message);
         return;
       }
-      toast.success("Contraseña actualizada. ¡Ya puedes entrar!");
+      toast.success(t("Pasahitza eguneratuta. Orain sar zaitezke!", "Contraseña actualizada. ¡Ya puedes entrar!"));
       await supabase.auth.signOut();
       navigate({ to: "/auth", replace: true });
     } finally {
@@ -78,33 +81,36 @@ function ResetPasswordPage() {
         to="/auth"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" /> Entrar
+        <ArrowLeft className="h-4 w-4" /> {t("Sartu", "Entrar")}
       </Link>
       <div
         className="mt-4 rounded-2xl border border-border bg-card p-6 shadow-card"
         style={{ background: "var(--gradient-card)" }}
       >
-        <h1 className="font-display text-3xl">Nueva contraseña</h1>
+        <h1 className="font-display text-3xl">{t("Pasahitz berria", "Nueva contraseña")}</h1>
 
         {!ready ? (
-          <p className="mt-4 text-sm text-muted-foreground">Cargando...</p>
+          <p className="mt-4 text-sm text-muted-foreground">{t("Kargatzen...", "Cargando...")}</p>
         ) : !hasSession ? (
           <div className="mt-4 space-y-3 text-sm">
             <p className="text-muted-foreground">
-              El enlace no es válido o ha caducado. Solicita uno nuevo desde la pantalla de acceso.
+              {t(
+                "Esteka ez da baliozkoa edo iraungita dago. Eskatu berri bat sarbide-pantailatik.",
+                "El enlace no es válido o ha caducado. Solicita uno nuevo desde la pantalla de acceso.",
+              )}
             </p>
             <Link
               to="/auth"
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-display text-lg text-primary-foreground shadow-card"
             >
-              Volver a entrar
+              {t("Berriro sartu", "Volver a entrar")}
             </Link>
           </div>
         ) : (
           <form onSubmit={submit} className="mt-5 space-y-3">
             <label className="block">
               <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Nueva contraseña
+                {t("Pasahitz berria", "Nueva contraseña")}
               </span>
               <input
                 type="password"
@@ -118,7 +124,7 @@ function ResetPasswordPage() {
             </label>
             <label className="block">
               <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Repite la contraseña
+                {t("Errepikatu pasahitza", "Repite la contraseña")}
               </span>
               <input
                 type="password"
@@ -135,7 +141,7 @@ function ResetPasswordPage() {
               disabled={busy}
               className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-display text-lg text-primary-foreground shadow-card transition hover:-translate-y-0.5 disabled:opacity-60"
             >
-              <KeyRound className="h-5 w-5" /> {busy ? "Guardando..." : "Guardar contraseña"}
+              <KeyRound className="h-5 w-5" /> {busy ? t("Gordetzen...", "Guardando...") : t("Pasahitza gorde", "Guardar contraseña")}
             </button>
           </form>
         )}
