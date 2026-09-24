@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import type { Database } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useT } from "@/lib/i18n";
+import { useT, useTd } from "@/lib/i18n";
 
 type Posicion = Database["public"]["Enums"]["plantilla_posicion"];
 type Rareza = "normal" | "raro" | "legendario";
@@ -130,6 +130,7 @@ function PlantillaPage() {
   const { user, loading, isStaff } = useAuth();
 
   const t = useT();
+  const td = useTd();
   if (loading) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">
@@ -185,6 +186,7 @@ function PlantillaPage() {
 
 function Inner({ userId }: { userId: string }) {
   const t = useT();
+  const td = useTd();
   const qc = useQueryClient();
 
   const wallet = useQuery({
