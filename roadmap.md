@@ -11,3 +11,4 @@
 - [ ] Traducir página de nueva contraseña y panel de admin
 - [ ] Conectar Inicio, Partidos y ranking de jugadores a datos reales
 - [ ] Resto de equipos y entrenadores reales
+- [ ] Listado de jugadores/entrenadores por equipo con datos que faltan
