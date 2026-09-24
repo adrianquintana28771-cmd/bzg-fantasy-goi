@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
 import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
+import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/desempeno")({
@@ -58,6 +59,7 @@ interface PlayerRow {
 
 function Desempeno() {
   const { canEditStats } = useAuth();
+  const { t, td, lang } = useLang();
   const qc = useQueryClient();
   const [matchId, setMatchId] = useState<string>("");
   const [playerId, setPlayerId] = useState<string>("");
@@ -128,7 +130,7 @@ function Desempeno() {
       .channel("criterios-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "club_action_types" }, () => {
         qc.invalidateQueries({ queryKey: ["club_action_types"] });
-        toast.info("Criterios de puntuación actualizados");
+        toast.info(t("Puntuazio-irizpideak eguneratuta", "Criterios de puntuación actualizados"));
       })
       .subscribe();
     return () => {
@@ -178,11 +180,11 @@ function Desempeno() {
         .upsert({ match_id: matchId, player_id: playerId, jugado: true } as never, {
           onConflict: "match_id,player_id",
         });
-      toast.success(`Desempeño guardado · ${total} puntos`);
+      toast.success(`${t("Errendimendua gordeta", "Desempeño guardado")} · ${total} ${t("puntu", "puntos")}`);
       qc.invalidateQueries({ queryKey: ["club_match_actions"] });
     } catch (e) {
       console.error(e);
-      toast.error("No se ha podido guardar el desempeño");
+      toast.error(t("Ezin izan da errendimendua gorde", "No se ha podido guardar el desempeño"));
     } finally {
       setSaving(false);
     }
@@ -192,9 +194,12 @@ function Desempeno() {
     return (
       <div className="mx-auto max-w-md px-4 py-10 text-center">
         <BackButton />
-        <h1 className="mt-4 font-display text-3xl">Sin permisos</h1>
+        <h1 className="mt-4 font-display text-3xl">{t("Baimenik ez", "Sin permisos")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sólo los admins y el super admin pueden editar el desempeño.
+          {t(
+            "Adminek eta super adminak bakarrik edita dezakete errendimendua.",
+            "Sólo los admins y el super admin pueden editar el desempeño.",
+          )}
         </p>
       </div>
     );
@@ -205,14 +210,17 @@ function Desempeno() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <BackButton />
-      <h1 className="mt-3 font-display text-4xl">Desempeño por jugador/a</h1>
+      <h1 className="mt-3 font-display text-4xl">{t("Errendimendua jokalariz", "Desempeño por jugador/a")}</h1>
       <p className="text-sm text-muted-foreground">
-        Elige un partido y un jugador/a, y anota cada acción. Los puntos se calculan solos.
+        {t(
+          "Aukeratu partida bat eta jokalari bat, eta idatzi ekintza bakoitza. Puntuak berez kalkulatzen dira.",
+          "Elige un partido y un jugador/a, y anota cada acción. Los puntos se calculan solos.",
+        )}
       </p>
 
       <div className="mt-6 grid gap-3">
         <label className="text-sm font-semibold">
-          Partido
+          {t("Partida", "Partido")}
           <select
             value={matchId}
             onChange={(e) => {
@@ -221,11 +229,11 @@ function Desempeno() {
             }}
             className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           >
-            <option value="">Selecciona un partido…</option>
+            <option value="">{t("Aukeratu partida bat…", "Selecciona un partido…")}</option>
             {(matches.data ?? []).map((m) => (
               <option key={m.id} value={m.id}>
                 {m.club_teams?.nombre} vs {m.rival} · J{m.jornada} ·{" "}
-                {new Date(m.fecha).toLocaleDateString("es-ES")}
+                {new Date(m.fecha).toLocaleDateString(lang === "eu" ? "eu-ES" : "es-ES")}
               </option>
             ))}
           </select>
@@ -233,7 +241,7 @@ function Desempeno() {
 
         {match && (
           <div>
-            <div className="text-sm font-semibold">Jugador/a</div>
+            <div className="text-sm font-semibold">{t("Jokalaria", "Jugador/a")}</div>
             <div className="mt-2 flex flex-wrap gap-2">
               {(roster.data ?? []).map((r) => {
                 const p = r.club_players;
@@ -257,7 +265,7 @@ function Desempeno() {
               })}
               {roster.data?.length === 0 && (
                 <span className="text-sm text-muted-foreground">
-                  Este equipo aún no tiene jugadores/as.
+                  {t("Talde honek oraindik ez du jokalaririk.", "Este equipo aún no tiene jugadores/as.")}
                 </span>
               )}
             </div>
@@ -271,12 +279,12 @@ function Desempeno() {
             <div>
               <div className="font-display text-xl">{player.alias ?? player.nombre}</div>
               <div className="text-xs text-muted-foreground">
-                {esPortero ? "Portero/a" : "Jugador/a de campo"}
+                {esPortero ? t("Atezaina", "Portero/a") : t("Zelaiko jokalaria", "Jugador/a de campo")}
               </div>
             </div>
             <div className="text-right">
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                Puntos
+                {t("Puntuak", "Puntos")}
               </div>
               <div
                 className={`font-display text-3xl ${total >= 0 ? "text-primary" : "text-destructive"}`}
@@ -288,7 +296,7 @@ function Desempeno() {
 
           {grupos.map((g) => (
             <div key={g} className="mt-6">
-              <h2 className="font-display text-lg capitalize">{g}</h2>
+              <h2 className="font-display text-lg capitalize">{td(g)}</h2>
               <div className="mt-2 grid gap-2">
                 {visibleActions
                   .filter((a) => a.grupo === g)
@@ -298,7 +306,7 @@ function Desempeno() {
                       className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-2"
                     >
                       <div className="min-w-0">
-                        <div className="truncate text-sm font-medium">{a.nombre}</div>
+                        <div className="truncate text-sm font-medium">{td(a.nombre)}</div>
                         <div
                           className={`text-xs ${Number(a.puntos) >= 0 ? "text-primary" : "text-destructive"}`}
                         >
@@ -308,7 +316,7 @@ function Desempeno() {
                       <div className="flex shrink-0 items-center gap-2">
                         <button
                           type="button"
-                          aria-label={`Restar ${a.nombre}`}
+                          aria-label={`${t("Kendu", "Restar")} ${td(a.nombre)}`}
                           onClick={() => bump(a.id, -1)}
                           className="grid h-9 w-9 place-items-center rounded-lg border border-border bg-background"
                         >
@@ -319,7 +327,7 @@ function Desempeno() {
                         </span>
                         <button
                           type="button"
-                          aria-label={`Sumar ${a.nombre}`}
+                          aria-label={`${t("Gehitu", "Sumar")} ${td(a.nombre)}`}
                           onClick={() => bump(a.id, 1)}
                           className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground"
                         >
@@ -337,7 +345,7 @@ function Desempeno() {
             disabled={saving}
             className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-card disabled:opacity-50"
           >
-            <Save className="h-4 w-4" /> {saving ? "Guardando…" : "Guardar desempeño"}
+            <Save className="h-4 w-4" /> {saving ? t("Gordetzen…", "Guardando…") : t("Errendimendua gorde", "Guardar desempeño")}
           </button>
         </>
       )}

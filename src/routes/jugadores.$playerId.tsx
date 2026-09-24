@@ -23,7 +23,7 @@ import {
   type PlayerEstado,
   type Category,
 } from "@/lib/fantasy/types";
-import { useT, useLang } from "@/lib/i18n";
+import { useT, useTd, useLang } from "@/lib/i18n";
 import { fetchPoolPlayer, fetchTeams, round2 } from "@/lib/club-data";
 
 const ESTADO_COLOR: Record<PlayerEstado, string> = {
@@ -237,6 +237,7 @@ function Jugador() {
 
 function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] }) {
   const t = useT();
+  const td = useTd();
   const { data: calendar = [] } = useCalendarJornadas();
   const jornadas = useMemo(
     () =>
@@ -332,7 +333,7 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
                 className="grid grid-cols-[4rem_1fr_4rem] items-center border-t border-border px-5 py-3"
               >
                 <span className="font-display text-lg">{r.cantidad}</span>
-                <span className="text-center text-sm font-semibold">{r.nombre}</span>
+                <span className="text-center text-sm font-semibold">{td(r.nombre)}</span>
                 <span
                   className={`text-right font-display text-lg ${p > 0 ? "text-primary" : p < 0 ? "text-destructive" : "text-muted-foreground"}`}
                 >

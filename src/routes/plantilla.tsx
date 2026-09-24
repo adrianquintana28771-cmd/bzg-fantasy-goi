@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import type { Database } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useT } from "@/lib/i18n";
+import { useT, useTd } from "@/lib/i18n";
 
 type Posicion = Database["public"]["Enums"]["plantilla_posicion"];
 type Rareza = "normal" | "raro" | "legendario";
@@ -130,6 +130,7 @@ function PlantillaPage() {
   const { user, loading, isStaff } = useAuth();
 
   const t = useT();
+  const td = useTd();
   if (loading) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">
@@ -185,6 +186,7 @@ function PlantillaPage() {
 
 function Inner({ userId }: { userId: string }) {
   const t = useT();
+  const td = useTd();
   const qc = useQueryClient();
 
   const wallet = useQuery({
@@ -488,7 +490,7 @@ function Inner({ userId }: { userId: string }) {
           <h1 className="font-display text-3xl leading-none">{t("Nire taldea", "Mi equipo")}</h1>
           <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
             {jornada.data
-              ? `${jornada.data.nombre} · ${jornada.data.is_locked ? t("blokeatuta", "bloqueada") : t("aktiboa", "activa")}`
+              ? `${td(jornada.data.nombre)} · ${jornada.data.is_locked ? t("blokeatuta", "bloqueada") : t("aktiboa", "activa")}`
               : t("Jardunaldi aktiborik ez", "Sin jornada activa")}
           </p>
         </div>
@@ -592,7 +594,7 @@ function Inner({ userId }: { userId: string }) {
             {(historial.data ?? []).map((h) => (
               <div key={h.jornadaId} className="rounded-xl border border-border p-3">
                 <div className="flex items-center justify-between">
-                  <div className="font-semibold">{h.nombre}</div>
+                  <div className="font-semibold">{td(h.nombre)}</div>
                   <div className="text-right">
                     <div className="font-display text-2xl text-primary">{h.total}</div>
                     <div className="text-[10px] uppercase tracking-widest text-muted-foreground">

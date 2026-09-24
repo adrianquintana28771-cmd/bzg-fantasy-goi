@@ -13,25 +13,29 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader, SiteFooter, BottomNav } from "@/components/site-chrome";
 import { AuthProvider } from "@/lib/auth-context";
-import { LangProvider } from "@/lib/i18n";
+import { LangProvider, useT } from "@/lib/i18n";
 import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 import { Toaster } from "@/components/ui/sonner";
 import { GuidedTour } from "@/components/guided-tour";
 
 function NotFoundComponent() {
+  const t = useT();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="font-display text-7xl text-primary">404</h1>
-        <h2 className="mt-2 font-display text-2xl">Página no encontrada</h2>
+        <h2 className="mt-2 font-display text-2xl">{t("Ez da orria aurkitu", "Página no encontrada")}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          La página que buscas no existe o se ha movido.
+          {t(
+            "Bilatzen ari zaren orria ez dago edo lekuz aldatu da.",
+            "La página que buscas no existe o se ha movido.",
+          )}
         </p>
         <Link
           to="/"
           className="mt-6 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
         >
-          Volver al inicio
+          {t("Hasierara itzuli", "Volver al inicio")}
         </Link>
       </div>
     </div>
@@ -41,6 +45,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  const t = useT();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
@@ -48,9 +53,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-display text-2xl">Algo ha fallado</h1>
+        <h1 className="font-display text-2xl">{t("Zerbaitek huts egin du", "Algo ha fallado")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Prueba a recargar la página o vuelve al inicio.
+          {t("Saiatu orria berriro kargatzen edo itzuli hasierara.", "Prueba a recargar la página o vuelve al inicio.")}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -60,13 +65,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
           >
-            Reintentar
+            {t("Berriro saiatu", "Reintentar")}
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition hover:bg-accent hover:text-accent-foreground"
           >
-            Ir al inicio
+            {t("Hasierara joan", "Ir al inicio")}
           </a>
         </div>
       </div>
