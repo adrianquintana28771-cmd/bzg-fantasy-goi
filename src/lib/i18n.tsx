@@ -3,8 +3,72 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 export type Lang = "eu" | "es";
 const KEY = "bzg_lang";
 
-type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (eu: string, es: string) => string };
-const LangContext = createContext<Ctx>({ lang: "eu", setLang: () => {}, t: (eu) => eu });
+type Ctx = {
+  lang: Lang;
+  setLang: (l: Lang) => void;
+  t: (eu: string, es: string) => string;
+  /** Traduce textos que vienen de la base de datos (acciones, grupos, posiciones). */
+  td: (es: string) => string;
+};
+
+/** Textos guardados en castellano en la base de datos → euskera. */
+const DB_EU: Record<string, string> = {
+  Gol: "Gola",
+  "Gol de fly": "Fly gola",
+  "Gol de rosca": "Rosca gola",
+  "Gol de vaselina": "Baselina gola",
+  "Gol de 7 metros": "7 metroko gola",
+  "Gol de contraataque": "Kontraerasoko gola",
+  "Asistencia de gol": "Gol-pasea",
+  "Asistencia de fly": "Fly pasea",
+  "Asistencia de rosca": "Rosca pasea",
+  "Asistencia de vaselina": "Baselina pasea",
+  "Asistencia de portero/a": "Atezainaren gol-pasea",
+  "7 metros provocado": "Eragindako 7 metrokoa",
+  "Exclusión provocada": "Eragindako kanporaketa",
+  "Robo de balón": "Baloi-lapurreta",
+  "Corte de balón": "Baloi-mozketa",
+  "Blocaje defensivo": "Defentsako blokeoa",
+  Parada: "Geldiketa",
+  "Parada de 7 metros": "7 metroko geldiketa",
+  "Gol encajado": "Jasotako gola",
+  "Lanzamiento fallado": "Huts egindako jaurtiketa",
+  "Pase fallado": "Huts egindako pasea",
+  "Pérdida de balón": "Baloi-galera",
+  "7 metros fallado": "Huts egindako 7 metrokoa",
+  "Pasos / dobles": "Urratsak / dobleak",
+  "Falta en ataque": "Erasoko falta",
+  "Exclusión de 2 minutos": "2 minutuko kanporaketa",
+  "Tarjeta roja": "Txartel gorria",
+  "MVP del partido": "Partidako MVPa",
+  "Partido jugado": "Jokatutako partida",
+  "Victoria del equipo": "Taldearen garaipena",
+  "Entrenador/a: victoria": "Entrenatzailea: garaipena",
+  "Entrenador/a: empate": "Entrenatzailea: berdinketa",
+  "Entrenador/a: derrota": "Entrenatzailea: porrota",
+  ataque: "erasoa",
+  defensa: "defentsa",
+  portero: "atezaina",
+  "portería": "atea",
+  entrenador: "entrenatzailea",
+  negativo: "negatiboa",
+  bonus: "bonusa",
+  "Portero/a": "Atezaina",
+  "Extremo izquierdo": "Ezkerreko hegala",
+  "Extremo derecho": "Eskuineko hegala",
+  "Lateral izquierdo": "Ezkerreko alboa",
+  "Lateral derecho": "Eskuineko alboa",
+  Central: "Erdikoa",
+  Pivote: "Pibota",
+  "Especialista defensivo": "Defentsa-espezialista",
+};
+
+const LangContext = createContext<Ctx>({
+  lang: "eu",
+  setLang: () => {},
+  t: (eu) => eu,
+  td: (es) => DB_EU[es] ?? es,
+});
 
 export function LangProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("eu");
@@ -20,11 +84,13 @@ export function LangProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(KEY, l);
   }, []);
   const t = useCallback((eu: string, es: string) => (lang === "eu" ? eu : es), [lang]);
-  return <LangContext.Provider value={{ lang, setLang, t }}>{children}</LangContext.Provider>;
+  const td = useCallback((es: string) => (lang === "eu" ? (DB_EU[es] ?? es) : es), [lang]);
+  return <LangContext.Provider value={{ lang, setLang, t, td }}>{children}</LangContext.Provider>;
 }
 
 export const useLang = () => useContext(LangContext);
 export const useT = () => useContext(LangContext).t;
+export const useTd = () => useContext(LangContext).td;
 
 export function LangToggle({ className = "" }: { className?: string }) {
   const { lang, setLang } = useLang();
