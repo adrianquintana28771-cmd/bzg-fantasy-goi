@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BackButton } from "@/components/back-button";
 import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function Admin() {
+  const t = useT();
   const { data: counts } = useQuery({
     queryKey: ["admin-counts"],
     queryFn: async () => {
@@ -58,42 +60,54 @@ function Admin() {
   } = useAuth();
   const roleLabel = isSuperAdmin ? "super_admin" : isManager ? "manager" : isAdmin ? "admin" : "";
   const roleDescription = isSuperAdmin
-    ? "Puedes gestionar todo: reglas, partidos, jugadores/as y estadísticas."
+    ? t(
+        "Dena kudea dezakezu: arauak, partidak, jokalariak eta estatistikak.",
+        "Puedes gestionar todo: reglas, partidos, jugadores/as y estadísticas.",
+      )
     : isManager
-      ? "Puedes editar la información de partidos y añadir o borrar jugadores/as."
-      : "Puedes editar el desempeño (estadísticas) de cada jugador/a en los partidos.";
+      ? t(
+          "Partiden informazioa edita dezakezu eta jokalariak gehitu edo ezabatu.",
+          "Puedes editar la información de partidos y añadir o borrar jugadores/as.",
+        )
+      : t(
+          "Jokalari bakoitzaren errendimendua (estatistikak) edita dezakezu partidetan.",
+          "Puedes editar el desempeño (estadísticas) de cada jugador/a en los partidos.",
+        );
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <BackButton />
       <div className="mt-3 rounded-2xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning-foreground">
         <div className="flex items-center gap-2 font-semibold">
-          <ShieldAlert className="h-4 w-4" /> Zona de administración
+          <ShieldAlert className="h-4 w-4" /> {t("Administrazio eremua", "Zona de administración")}
         </div>
         <p className="mt-1 text-xs">
-          Rol actual: <strong>{roleLabel}</strong>. {roleDescription}
+          {t("Uneko rola", "Rol actual")}: <strong>{roleLabel}</strong>. {roleDescription}
         </p>
       </div>
 
-      <h1 className="mt-6 font-display text-4xl">Panel de administración</h1>
+      <h1 className="mt-6 font-display text-4xl">{t("Administrazio panela", "Panel de administración")}</h1>
       <p className="text-sm text-muted-foreground">
-        Accede a las secciones que tu rol permite gestionar.
+        {t(
+          "Sartu zure rolak kudeatzen uzten dizun ataletara.",
+          "Accede a las secciones que tu rol permite gestionar.",
+        )}
       </p>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={Calendar}
-          label="Temporada"
+          label={t("Denboraldia", "Temporada")}
           value={1}
-          sub={`Activa: ${counts?.season ?? "—"}`}
+          sub={`${t("Aktiboa", "Activa")}: ${counts?.season ?? "—"}`}
         />
-        <StatCard icon={Users} label="Equipos" value={counts?.teams ?? 0} />
-        <StatCard icon={Users} label="Jugadores/as" value={counts?.players ?? 0} />
+        <StatCard icon={Users} label={t("Taldeak", "Equipos")} value={counts?.teams ?? 0} />
+        <StatCard icon={Users} label={t("Jokalariak", "Jugadores/as")} value={counts?.players ?? 0} />
         <StatCard
           icon={ClipboardList}
-          label="Partidos"
+          label={t("Partidak", "Partidos")}
           value={counts?.matches ?? 0}
-          sub={`${counts?.actions ?? 0} acciones registradas`}
+          sub={`${counts?.actions ?? 0} ${t("ekintza erregistratuta", "acciones registradas")}`}
         />
       </div>
 
@@ -101,50 +115,63 @@ function Admin() {
         {canManageAll && (
           <Section
             icon={Settings}
-            title="Criterios de puntuación"
-            description="Crea o edita los puntos de cada acción. Al guardar se recalculan todas las jornadas. Sólo super_admin."
+            title={t("Puntuazio-irizpideak", "Criterios de puntuación")}
+            description={t(
+              "Sortu edo editatu ekintza bakoitzaren puntuak. Gordetzean jardunaldi guztiak berriro kalkulatzen dira. super_admin bakarrik.",
+              "Crea o edita los puntos de cada acción. Al guardar se recalculan todas las jornadas. Sólo super_admin.",
+            )}
             to="/admin/reglas"
           />
         )}
         {canEditMatches && (
           <Section
             icon={ClipboardList}
-            title="Gestionar partidos"
-            description="Crea, edita partidos y sube el acta."
+            title={t("Partidak kudeatu", "Gestionar partidos")}
+            description={t("Sortu eta editatu partidak eta igo akta.", "Crea, edita partidos y sube el acta.")}
             to="/partidos"
           />
         )}
         {canEditStats && (
           <Section
             icon={BarChart3}
-            title="Desempeño de jugadores/as"
-            description="Formulario oficial: anota goles, flys, roscas, paradas, robos, fallos… y los puntos se calculan solos."
+            title={t("Jokalarien errendimendua", "Desempeño de jugadores/as")}
+            description={t(
+              "Formulario ofiziala: idatzi golak, flyak, roskak, geldiketak, lapurretak, hutsak… eta puntuak berez kalkulatzen dira.",
+              "Formulario oficial: anota goles, flys, roscas, paradas, robos, fallos… y los puntos se calculan solos.",
+            )}
             to="/admin/desempeno"
           />
         )}
         {canManagePlayers && (
           <Section
             icon={Users}
-            title="Equipos y jugadores/as"
-            description="Añade o borra jugadores/as de cada equipo."
+            title={t("Taldeak eta jokalariak", "Equipos y jugadores/as")}
+            description={t("Gehitu edo ezabatu talde bakoitzeko jokalariak.", "Añade o borra jugadores/as de cada equipo.")}
             to="/equipos"
           />
         )}
         <Section
           icon={Trophy}
-          title="Rankings"
-          description="Rankings filtrables por temporada, categoría, jornada y posición."
+          title={t("Sailkapenak", "Rankings")}
+          description={t(
+            "Denboraldi, kategoria, jardunaldi eta posizioaren arabera iragazteko sailkapenak.",
+            "Rankings filtrables por temporada, categoría, jornada y posición.",
+          )}
           to="/rankings"
         />
       </div>
 
       {canManageAll && (
         <p className="mt-10 text-sm text-muted-foreground">
-          Los criterios de puntuación se gestionan en{" "}
+          {t("Puntuazio-irizpideak hemen kudeatzen dira:", "Los criterios de puntuación se gestionan en")}{" "}
           <Link to="/admin/reglas" className="text-primary underline">
-            Criterios de puntuación
+            {t("Puntuazio-irizpideak", "Criterios de puntuación")}
           </Link>
-          . Al cambiarlos se recalculan automáticamente todas las jornadas ya jugadas.
+          .{" "}
+          {t(
+            "Aldatzean, jokatutako jardunaldi guztiak automatikoki berriro kalkulatzen dira.",
+            "Al cambiarlos se recalculan automáticamente todas las jornadas ya jugadas.",
+          )}
         </p>
       )}
     </div>

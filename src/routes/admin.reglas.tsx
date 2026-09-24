@@ -5,6 +5,7 @@ import { ArrowLeft, ShieldAlert, Plus, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
+import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/reglas")({
@@ -29,16 +30,20 @@ export const Route = createFileRoute("/admin/reglas")({
 
 function SuperOnly({ children }: { children: React.ReactNode }) {
   const { canManageAll } = useAuth();
+  const { t } = useLang();
   if (!canManageAll) {
     return (
       <div className="mx-auto max-w-md p-10 text-center">
         <ShieldAlert className="mx-auto h-12 w-12 text-warning" />
-        <h1 className="mt-3 font-display text-3xl">Sólo super_admin</h1>
+        <h1 className="mt-3 font-display text-3xl">{t("super_admin bakarrik", "Sólo super_admin")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Editar los criterios de puntuación está reservado al rol super_admin.
+          {t(
+            "Puntuazio-irizpideak editatzea super_admin rolari dagokio.",
+            "Editar los criterios de puntuación está reservado al rol super_admin.",
+          )}
         </p>
         <Link to="/admin" className="mt-6 inline-block text-primary hover:underline">
-          Volver al panel
+          {t("Panelera itzuli", "Volver al panel")}
         </Link>
       </div>
     );
@@ -62,6 +67,7 @@ const GRUPOS = ["ataque", "defensa", "portero", "entrenador", "negativo", "bonus
 
 function Reglas() {
   const qc = useQueryClient();
+  const { t, td } = useLang();
   const [nuevo, setNuevo] = useState({
     nombre: "",
     puntos: 1,
@@ -97,16 +103,16 @@ function Reglas() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Criterio guardado · puntuaciones recalculadas");
+      toast.success(t("Irizpidea gordeta · puntuazioak berriro kalkulatuta", "Criterio guardado · puntuaciones recalculadas"));
       refrescar();
     },
-    onError: (e: Error) => toast.error(e.message ?? "No se pudo guardar"),
+    onError: (e: Error) => toast.error(e.message ?? t("Ezin izan da gorde", "No se pudo guardar")),
   });
 
   const crear = useMutation({
     mutationFn: async () => {
       const nombre = nuevo.nombre.trim();
-      if (!nombre) throw new Error("Pon un nombre al criterio");
+      if (!nombre) throw new Error(t("Jarri izen bat irizpideari", "Pon un nombre al criterio"));
       const id = nombre
         .toLowerCase()
         .normalize("NFD")
@@ -127,7 +133,7 @@ function Reglas() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Criterio creado. Ya aparece en el formulario de los admins.");
+      toast.success(t("Irizpidea sortuta. Adminen formularioan agertzen da jada.", "Criterio creado. Ya aparece en el formulario de los admins."));
       setNuevo({ nombre: "", puntos: 1, grupo: "ataque", solo_portero: false });
       refrescar();
     },
@@ -140,10 +146,10 @@ function Reglas() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Criterio eliminado · puntuaciones recalculadas");
+      toast.success(t("Irizpidea ezabatuta · puntuazioak berriro kalkulatuta", "Criterio eliminado · puntuaciones recalculadas"));
       refrescar();
     },
-    onError: () => toast.error("No se pudo eliminar (puede estar en uso)"),
+    onError: () => toast.error(t("Ezin izan da ezabatu (erabiltzen egon daiteke)", "No se pudo eliminar (puede estar en uso)")),
   });
 
   const lista = criterios.data ?? [];
@@ -158,20 +164,22 @@ function Reglas() {
       >
         <ArrowLeft className="h-4 w-4" /> Admin
       </Link>
-      <h1 className="mt-3 font-display text-4xl">Criterios de puntuación</h1>
+      <h1 className="mt-3 font-display text-4xl">{t("Puntuazio-irizpideak", "Criterios de puntuación")}</h1>
       <p className="text-sm text-muted-foreground">
-        Al guardar un cambio, el formulario de los admins se actualiza al momento y se recalculan
-        todas las jornadas pasadas: cada jugador/a y cada usuario/a pasan a tener los puntos nuevos.
+        {t(
+          "Aldaketa bat gordetzean, adminen formularioa berehala eguneratzen da eta iragandako jardunaldi guztiak berriro kalkulatzen dira: jokalari eta erabiltzaile bakoitzak puntu berriak izango ditu.",
+          "Al guardar un cambio, el formulario de los admins se actualiza al momento y se recalculan todas las jornadas pasadas: cada jugador/a y cada usuario/a pasan a tener los puntos nuevos.",
+        )}
       </p>
 
       {/* Nuevo criterio */}
       <div className="mt-6 rounded-2xl border border-border bg-card p-4 shadow-card">
-        <h2 className="font-display text-xl">Añadir criterio nuevo</h2>
+        <h2 className="font-display text-xl">{t("Irizpide berria gehitu", "Añadir criterio nuevo")}</h2>
         <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
           <input
             value={nuevo.nombre}
             onChange={(e) => setNuevo((n) => ({ ...n, nombre: e.target.value }))}
-            placeholder="Ej. Gol en superioridad"
+            placeholder={t("Adib. Gola nagusitasunean", "Ej. Gol en superioridad")}
             className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
           />
           <input
@@ -188,7 +196,7 @@ function Reglas() {
           >
             {GRUPOS.map((g) => (
               <option key={g} value={g}>
-                {g}
+                {td(g)}
               </option>
             ))}
           </select>
@@ -197,7 +205,7 @@ function Reglas() {
             disabled={crear.isPending}
             className="inline-flex items-center justify-center gap-1 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
           >
-            <Plus className="h-4 w-4" /> Crear
+            <Plus className="h-4 w-4" /> {t("Sortu", "Crear")}
           </button>
         </div>
         <label className="mt-2 inline-flex items-center gap-2 text-xs text-muted-foreground">
@@ -207,18 +215,18 @@ function Reglas() {
             onChange={(e) => setNuevo((n) => ({ ...n, solo_portero: e.target.checked }))}
             className="h-4 w-4 accent-[var(--color-primary)]"
           />
-          Sólo para porteros/as
+          {t("Atezainentzat bakarrik", "Sólo para porteros/as")}
         </label>
       </div>
 
       <Bloque
-        titulo="Entrenadores/as (según el resultado)"
+        titulo={t("Entrenatzaileak (emaitzaren arabera)", "Entrenadores/as (según el resultado)")}
         items={entrenador}
         guardar={guardar}
         borrar={borrar}
         fijo
       />
-      <Bloque titulo="Jugadores/as" items={jugadores} guardar={guardar} borrar={borrar} />
+      <Bloque titulo={t("Jokalariak", "Jugadores/as")} items={jugadores} guardar={guardar} borrar={borrar} />
     </div>
   );
 }
@@ -238,6 +246,7 @@ function Bloque({
   borrar: { mutate: (id: string) => void };
   fijo?: boolean;
 }) {
+  const { t } = useLang();
   return (
     <div className="mt-8">
       <h2 className="font-display text-2xl">{titulo}</h2>
@@ -245,7 +254,7 @@ function Bloque({
         {items.map((c) => (
           <Fila key={c.id} c={c} guardar={guardar} borrar={borrar} fijo={fijo} />
         ))}
-        {items.length === 0 && <p className="p-4 text-sm text-muted-foreground">Sin criterios.</p>}
+        {items.length === 0 && <p className="p-4 text-sm text-muted-foreground">{t("Irizpiderik ez.", "Sin criterios.")}</p>}
       </div>
     </div>
   );
@@ -265,6 +274,7 @@ function Fila({
   fijo?: boolean;
 }) {
   const [puntos, setPuntos] = useState(c.puntos);
+  const { t, td } = useLang();
   const cambiado = puntos !== c.puntos;
   return (
     <div className="flex flex-wrap items-center gap-3 p-4">
@@ -278,9 +288,9 @@ function Fila({
         <span
           className={`truncate ${c.activo ? "font-medium" : "text-muted-foreground line-through"}`}
         >
-          {c.nombre}
+          {td(c.nombre)}
           {c.solo_portero && (
-            <span className="ml-2 rounded bg-secondary px-1 text-[10px] uppercase">portero</span>
+            <span className="ml-2 rounded bg-secondary px-1 text-[10px] uppercase">{t("atezaina", "portero")}</span>
           )}
         </span>
       </label>
@@ -299,12 +309,12 @@ function Fila({
           disabled={!cambiado}
           className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-40"
         >
-          <Save className="h-3.5 w-3.5" /> Guardar
+          <Save className="h-3.5 w-3.5" /> {t("Gorde", "Guardar")}
         </button>
         {!fijo && (
           <button
             onClick={() => borrar.mutate(c.id)}
-            aria-label={`Eliminar ${c.nombre}`}
+            aria-label={`${t("Ezabatu", "Eliminar")} ${td(c.nombre)}`}
             className="grid h-8 w-8 place-items-center rounded-md border border-destructive/40 text-destructive"
           >
             <Trash2 className="h-4 w-4" />
