@@ -67,8 +67,14 @@ const LangContext = createContext<Ctx>({
   lang: "eu",
   setLang: () => {},
   t: (eu) => eu,
-  td: (es) => DB_EU[es] ?? es,
+  td: (es) => dbEu(es),
 });
+
+function dbEu(es: string) {
+  const m = /^Jornada (\d+)$/.exec(es);
+  if (m) return `${m[1]}. jardunaldia`;
+  return DB_EU[es] ?? es;
+}
 
 export function LangProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("eu");
@@ -84,7 +90,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(KEY, l);
   }, []);
   const t = useCallback((eu: string, es: string) => (lang === "eu" ? eu : es), [lang]);
-  const td = useCallback((es: string) => (lang === "eu" ? (DB_EU[es] ?? es) : es), [lang]);
+  const td = useCallback((es: string) => (lang === "eu" ? dbEu(es) : es), [lang]);
   return <LangContext.Provider value={{ lang, setLang, t, td }}>{children}</LangContext.Provider>;
 }
 
