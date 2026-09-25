@@ -730,7 +730,6 @@ export type Database = {
           dni: string
           id: string
           nombre: string | null
-          tutorial_visto: boolean
           updated_at: string
           username: string | null
         }
@@ -741,7 +740,6 @@ export type Database = {
           dni: string
           id: string
           nombre?: string | null
-          tutorial_visto?: boolean
           updated_at?: string
           username?: string | null
         }
@@ -752,7 +750,6 @@ export type Database = {
           dni?: string
           id?: string
           nombre?: string | null
-          tutorial_visto?: boolean
           updated_at?: string
           username?: string | null
         }
@@ -898,7 +895,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      mark_tutorial_visto: { Args: never; Returns: undefined }
       open_sobre: {
         Args: { _tipo?: string }
         Returns: {

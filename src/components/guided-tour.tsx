@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BarChart3, ChevronLeft, ChevronRight, CircleHelp, Sparkles, Trophy, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
-import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/lib/i18n";
 
 const TOUR_EVENT = "bzg:open-tour";
@@ -178,31 +177,15 @@ export function GuidedTour() {
   }, [isManager, isStaff, isSuperAdmin, user]);
 
   useEffect(() => {
-    // Solo con sesión iniciada; el estado "visto" se guarda en el perfil del usuario.
-    if (loading || !user) return;
-    let cancel = false;
-    let timer: number | undefined;
-    supabase
-      .from("profiles")
-      .select("tutorial_visto")
-      .eq("id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (cancel || !data || (data as { tutorial_visto?: boolean }).tutorial_visto) return;
-        timer = window.setTimeout(() => {
-          setStep(0);
-          setOpen(true);
-        }, 650);
-      });
-    return () => {
-      cancel = true;
-      window.clearTimeout(timer);
-    };
-  }, [loading, user]);
-
-  function markSeen() {
-    if (user) void supabase.rpc("mark_tutorial_visto" as never);
-  }
+    if (loading) return;
+    const timer = window.setTimeout(() => {
+      if (!window.localStorage.getItem(storageKey)) {
+        setStep(0);
+        setOpen(true);
+      }
+    }, 650);
+    return () => window.clearTimeout(timer);
+  }, [loading, storageKey]);
 
   useEffect(() => {
     const launch = () => {
@@ -269,13 +252,11 @@ export function GuidedTour() {
 
   function dismiss() {
     window.localStorage.setItem(storageKey, "skipped");
-    markSeen();
     setOpen(false);
   }
 
   function complete() {
     window.localStorage.setItem(storageKey, "done");
-    markSeen();
     window.dispatchEvent(new Event(TOUR_COMPLETED_EVENT));
     setOpen(false);
   }
