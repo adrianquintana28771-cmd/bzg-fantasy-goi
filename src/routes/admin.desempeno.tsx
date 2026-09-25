@@ -245,6 +245,7 @@ function Desempeno() {
         });
       toast.success(`${t("Errendimendua gordeta", "Desempeño guardado")} · ${total} ${t("puntu", "puntos")}`);
       qc.invalidateQueries({ queryKey: ["club_match_actions"] });
+      qc.invalidateQueries({ queryKey: ["club_match_players", matchId] });
     } catch (e) {
       console.error(e);
       toast.error(t("Ezin izan da errendimendua gorde", "No se ha podido guardar el desempeño"));
