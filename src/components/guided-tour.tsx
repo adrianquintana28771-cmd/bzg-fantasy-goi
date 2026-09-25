@@ -3,6 +3,7 @@ import { BarChart3, ChevronLeft, ChevronRight, CircleHelp, Sparkles, Trophy, Use
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 
 const TOUR_EVENT = "bzg:open-tour";
 export const TOUR_COMPLETED_EVENT = "bzg:tour-completed";
@@ -176,16 +177,30 @@ export function GuidedTour() {
     ];
   }, [isManager, isStaff, isSuperAdmin, user]);
 
+  // Solo se abre sola para usuarios con sesión que aún no lo han visto (guardado en su perfil)
   useEffect(() => {
-    if (loading) return;
-    const timer = window.setTimeout(() => {
-      if (!window.localStorage.getItem(storageKey)) {
+    if (loading || !user) return;
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("tutorial_visto")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (!cancelled && data && !data.tutorial_visto) {
         setStep(0);
         setOpen(true);
       }
     }, 650);
-    return () => window.clearTimeout(timer);
-  }, [loading, storageKey]);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [loading, user]);
+
+  function markSeen() {
+    if (user) void supabase.rpc("mark_tutorial_visto");
+  }
 
   useEffect(() => {
     const launch = () => {
@@ -252,11 +267,13 @@ export function GuidedTour() {
 
   function dismiss() {
     window.localStorage.setItem(storageKey, "skipped");
+    markSeen();
     setOpen(false);
   }
 
   function complete() {
     window.localStorage.setItem(storageKey, "done");
+    markSeen();
     window.dispatchEvent(new Event(TOUR_COMPLETED_EVENT));
     setOpen(false);
   }
