@@ -5,6 +5,7 @@ import { Package, Sparkles, X, Lock, Save } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
 import campoAsset from "@/assets/campo-bzg.png.asset.json";
+import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 import sobreAperturaAsset from "@/assets/sobre-apertura.webp.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -99,7 +100,13 @@ interface PoolRow {
   posicion: Posicion;
   rating: number;
   rareza: Rareza;
+  team_id?: string | null;
   club_teams?: { nombre: string } | null;
+}
+
+/** Foto de la carta: mismo origen para sobres, selector y campo */
+function CardPhoto({ className = "" }: { className?: string }) {
+  return <img src={escudoAsset.url} alt="" aria-hidden="true" className={`object-contain ${className}`} />;
 }
 interface CopyRow {
   id: string;
@@ -211,10 +218,24 @@ function Inner({ userId }: { userId: string }) {
     queryFn: async (): Promise<CopyRow[]> => {
       const { data, error } = await supabase
         .from("user_players")
-        .select("id, player_id, usos, player_pool(id, nombre, posicion, rating, rareza, club_teams(nombre))")
+        .select("id, player_id, usos, player_pool(id, nombre, posicion, rating, rareza, team_id)")
         .eq("user_id", userId);
       if (error) throw error;
-      return (data ?? []) as unknown as CopyRow[];
+      const { data: teams } = await supabase.from("club_teams").select("id, nombre");
+      const tmap = new Map((teams ?? []).map((t) => [t.id, t.nombre]));
+      return ((data ?? []) as unknown as CopyRow[]).map((c) =>
+        c.player_pool
+          ? {
+              ...c,
+              player_pool: {
+                ...c.player_pool,
+                club_teams: c.player_pool.team_id
+                  ? { nombre: tmap.get(c.player_pool.team_id) ?? "" }
+                  : null,
+              },
+            }
+          : c,
+      );
     },
   });
 
@@ -426,7 +447,7 @@ function Inner({ userId }: { userId: string }) {
       );
       setSobreResult(data);
       qc.invalidateQueries({ queryKey: ["wallet", userId] });
-      qc.invalidateQueries({ queryKey: ["inventory", userId] });
+      void qc.refetchQueries({ queryKey: ["inventory", userId] });
     },
     onError: (e: Error) =>
       toast.error(
@@ -574,7 +595,16 @@ function Inner({ userId }: { userId: string }) {
                         : "border-dashed border-white/70 bg-black/30 text-white"
                     }`}
                   >
-                    {c ? cartaPuntos(c.pool.rating, c.pool.rareza) : POS_SHORT[slot]}
+                    {c ? (
+                      <div className="relative h-full w-full overflow-hidden rounded-full">
+                        <CardPhoto className="h-full w-full bg-background p-1" />
+                        <span className="absolute inset-x-0 bottom-0 bg-black/60 text-[10px] leading-tight text-white">
+                          {cartaPuntos(c.pool.rating, c.pool.rareza)}
+                        </span>
+                      </div>
+                    ) : (
+                      POS_SHORT[slot]
+                    )}
                   </div>
                   <div className="max-w-[90px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                     {c ? c.pool.nombre : POS_LABEL[slot]}
@@ -719,6 +749,14 @@ function Inner({ userId }: { userId: string }) {
                     key={`${p.id}-${i}`}
                     className={`rounded-lg border-2 p-3 text-center ${RAREZA_STYLE[p.rareza]}`}
                   >
+                    <div className="relative mb-1">
+                      <CardPhoto className="mx-auto h-16 w-full" />
+                      {cardById(p.id)?.pool.club_teams?.nombre && (
+                        <div className="absolute inset-x-0 top-0 truncate rounded bg-black/60 px-1 text-[9px] font-semibold text-white">
+                          {cardById(p.id)!.pool.club_teams!.nombre}
+                        </div>
+                      )}
+                    </div>
                     <div className="font-display text-3xl text-primary">
                       {cartaPuntos(p.rating, p.rareza)}
                     </div>
@@ -786,7 +824,8 @@ function Inner({ userId }: { userId: string }) {
                   }}
                   className={`flex w-full items-center justify-between rounded-lg border-2 p-3 text-left ${RAREZA_STYLE[c.pool.rareza]}`}
                 >
-                  <div>
+                  <CardPhoto className="mr-3 h-10 w-10 shrink-0 rounded-full bg-background p-0.5" />
+                  <div className="min-w-0 flex-1">
                     <div className="font-semibold">
                       {c.pool.nombre}
                       {c.pool.club_teams?.nombre ? ` — ${c.pool.club_teams.nombre}` : ""}
