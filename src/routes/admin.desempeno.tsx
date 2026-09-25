@@ -110,6 +110,67 @@ function Desempeno() {
     },
   });
 
+  /** Todos los jugadores/as con su equipo habitual (para invitados de otros equipos) */
+  const allPlayers = useQuery({
+    queryKey: ["club_all_players"],
+    enabled: !!match,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("club_player_teams")
+        .select(
+          "team_id,dorsal,club_teams(nombre),club_players(id,nombre,alias,club_player_positions(position_id,es_principal))",
+        );
+      if (error) throw error;
+      return (data ?? []) as unknown as (PlayerRow & {
+        team_id: string;
+        club_teams: { nombre: string } | null;
+      })[];
+    },
+  });
+
+  const matchPlayers = useQuery({
+    queryKey: ["club_match_players", matchId],
+    enabled: !!matchId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("club_match_players")
+        .select("player_id")
+        .eq("match_id", matchId);
+      if (error) throw error;
+      return new Set((data ?? []).map((r) => r.player_id));
+    },
+  });
+
+  const rosterIds = new Set((roster.data ?? []).map((r) => r.club_players?.id));
+  const externos = (allPlayers.data ?? []).filter(
+    (r) => r.club_players && !rosterIds.has(r.club_players.id),
+  );
+  const invitadosMap = new Map<string, (typeof externos)[number]>();
+  for (const r of externos)
+    if (matchPlayers.data?.has(r.club_players!.id) && !invitadosMap.has(r.club_players!.id))
+      invitadosMap.set(r.club_players!.id, r);
+  const invitados = [...invitadosMap.values()];
+  const candidatos = externos
+    .filter((r) => !invitadosMap.has(r.club_players!.id))
+    .sort((a, b) => a.club_players!.nombre.localeCompare(b.club_players!.nombre));
+  const [externoSel, setExternoSel] = useState("");
+
+  async function addExterno() {
+    if (!externoSel || !matchId || matchPlayers.data?.has(externoSel)) return;
+    const { error } = await supabase
+      .from("club_match_players")
+      .upsert({ match_id: matchId, player_id: externoSel, jugado: true } as never, {
+        onConflict: "match_id,player_id",
+      });
+    if (error) {
+      toast.error(t("Ezin izan da gehitu", "No se ha podido añadir"));
+      return;
+    }
+    await qc.invalidateQueries({ queryKey: ["club_match_players", matchId] });
+    setPlayerId(externoSel);
+    setExternoSel("");
+  }
+
   const existing = useQuery({
     queryKey: ["club_match_actions", matchId, playerId],
     enabled: !!matchId && !!playerId,
@@ -144,7 +205,9 @@ function Desempeno() {
     setCounts(next);
   }, [existing.data, playerId, matchId]);
 
-  const player = roster.data?.find((r) => r.club_players?.id === playerId)?.club_players ?? null;
+  const player =
+    [...(roster.data ?? []), ...invitados].find((r) => r.club_players?.id === playerId)
+      ?.club_players ?? null;
   const esPortero = !!player?.club_player_positions?.some((p) => p.position_id === "portero");
 
   const visibleActions = useMemo(
@@ -263,11 +326,53 @@ function Desempeno() {
                   </button>
                 );
               })}
-              {roster.data?.length === 0 && (
+              {invitados.map((r) => {
+                const p = r.club_players!;
+                const active = p.id === playerId;
+                return (
+                  <button
+                    key={`inv-${p.id}`}
+                    type="button"
+                    onClick={() => setPlayerId(p.id)}
+                    className={`rounded-xl border border-dashed px-3 py-2 text-sm font-semibold transition ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-card hover:bg-secondary"
+                    }`}
+                  >
+                    {p.alias ?? p.nombre} · {r.club_teams?.nombre}
+                  </button>
+                );
+              })}
+              {roster.data?.length === 0 && invitados.length === 0 && (
                 <span className="text-sm text-muted-foreground">
                   {t("Talde honek oraindik ez du jokalaririk.", "Este equipo aún no tiene jugadores/as.")}
                 </span>
               )}
+            </div>
+            <div className="mt-3 flex gap-2">
+              <select
+                value={externoSel}
+                onChange={(e) => setExternoSel(e.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm"
+              >
+                <option value="">
+                  {t("+ Beste talde bateko jokalaria gehitu", "+ Añadir jugador de otro equipo")}
+                </option>
+                {candidatos.map((r) => (
+                  <option key={`${r.club_players!.id}-${r.team_id}`} value={r.club_players!.id}>
+                    {r.club_players!.alias ?? r.club_players!.nombre} · {r.club_teams?.nombre}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={addExterno}
+                disabled={!externoSel}
+                className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold hover:bg-secondary disabled:opacity-50"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
             </div>
           </div>
         )}
