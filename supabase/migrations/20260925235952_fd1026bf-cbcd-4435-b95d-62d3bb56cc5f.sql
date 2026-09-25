@@ -1,0 +1,1 @@
+GRANT SELECT (semanal, espera_segundos) ON public.misiones TO authenticated, anon;
