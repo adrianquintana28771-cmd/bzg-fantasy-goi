@@ -18,6 +18,7 @@ type Rareza = "normal" | "raro" | "legendario";
 const MAX_USOS = 3;
 
 const RAREZA_MULT: Record<Rareza, number> = { normal: 1, raro: 1.3, legendario: 1.5 };
+const RAREZA_LABEL_ES: Record<Rareza, string> = { normal: "Normal", raro: "Raro", legendario: "Legendario" };
 const RAREZA_LABEL_EU: Record<Rareza, string> = {
   normal: "Normala",
   raro: "Bitxia",
@@ -209,7 +210,7 @@ function Inner({ userId }: { userId: string }) {
     queryFn: async (): Promise<CopyRow[]> => {
       const { data, error } = await supabase
         .from("user_players")
-        .select("id, player_id, usos, player_pool(id, nombre, posicion, rating, rareza)")
+        .select("id, player_id, usos, player_pool(id, nombre, posicion, rating, rareza, club_teams(nombre))")
         .eq("user_id", userId);
       if (error) throw error;
       return (data ?? []) as unknown as CopyRow[];
@@ -660,7 +661,7 @@ function Inner({ userId }: { userId: string }) {
                   </div>
                   <div className="mt-1 flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase">
-                      {RAREZA_LABEL_EU[c.pool.rareza]} ·x{RAREZA_MULT[c.pool.rareza]}
+                      {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])} ·x{RAREZA_MULT[c.pool.rareza]}
                     </span>
                     {c.total > 1 && (
                       <span className="rounded bg-secondary px-1 text-[10px] font-bold">
@@ -715,7 +716,7 @@ function Inner({ userId }: { userId: string }) {
                     </div>
                     <div className="truncate text-xs font-semibold">{p.nombre}</div>
                     <div className="text-[10px] uppercase text-muted-foreground">
-                      {RAREZA_LABEL_EU[p.rareza]}
+                      {t(RAREZA_LABEL_EU[p.rareza], RAREZA_LABEL_ES[p.rareza])}
                     </div>
                   </div>
                 ))}
@@ -783,7 +784,7 @@ function Inner({ userId }: { userId: string }) {
                       {posList(c.pool.id, c.pool.posicion)
                         .map((p) => POS_SHORT[p])
                         .join(" · ")}{" "}
-                      · {RAREZA_LABEL_EU[c.pool.rareza]}
+                      · {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])}
                     </div>
                   </div>
                   <div className="text-right">
