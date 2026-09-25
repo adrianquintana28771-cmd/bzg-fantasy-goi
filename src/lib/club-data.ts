@@ -92,7 +92,7 @@ export async function fetchPlayerRanking(): Promise<RankedPlayer[]> {
   return pool
     .map((p) => ({
       id: p.id,
-      nombre: p.club ? [p.club.nombre, p.club.apellido1].filter(Boolean).join(" ") : p.nombre,
+      nombre: p.nombre,
       posicion: p.posicion,
       dorsal: p.club?.dorsal ?? null,
       esEntrenador: !!p.club?.es_entrenador,
