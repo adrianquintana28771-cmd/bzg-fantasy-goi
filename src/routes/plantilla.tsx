@@ -99,6 +99,7 @@ interface PoolRow {
   posicion: Posicion;
   rating: number;
   rareza: Rareza;
+  club_teams?: { nombre: string } | null;
 }
 interface CopyRow {
   id: string;
@@ -415,7 +416,14 @@ function Inner({ userId }: { userId: string }) {
         rareza: r.p_rareza,
       }));
     },
-    onSuccess: (data) => {
+    onSuccess: (data, tipo) => {
+      qc.setQueryData<{ sobres: number; premium: number }>(["wallet", userId], (w) =>
+        w
+          ? tipo === "premium"
+            ? { ...w, premium: Math.max(0, w.premium - 1) }
+            : { ...w, sobres: Math.max(0, w.sobres - 1) }
+          : w,
+      );
       setSobreResult(data);
       qc.invalidateQueries({ queryKey: ["wallet", userId] });
       qc.invalidateQueries({ queryKey: ["inventory", userId] });
@@ -779,7 +787,10 @@ function Inner({ userId }: { userId: string }) {
                   className={`flex w-full items-center justify-between rounded-lg border-2 p-3 text-left ${RAREZA_STYLE[c.pool.rareza]}`}
                 >
                   <div>
-                    <div className="font-semibold">{c.pool.nombre}</div>
+                    <div className="font-semibold">
+                      {c.pool.nombre}
+                      {c.pool.club_teams?.nombre ? ` — ${c.pool.club_teams.nombre}` : ""}
+                    </div>
                     <div className="text-[10px] uppercase text-muted-foreground">
                       {posList(c.pool.id, c.pool.posicion)
                         .map((p) => POS_SHORT[p])
