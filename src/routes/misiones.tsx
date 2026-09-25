@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BookOpen, ExternalLink, Package, QrCode, Sparkles, Trophy } from "lucide-react";
 import { toast } from "sonner";
@@ -35,6 +35,16 @@ interface MisionRow {
   recompensa_sobres: number;
   tipo_sobre: string;
   requiere_qr: boolean | null;
+  semanal: boolean;
+  espera_segundos: number;
+}
+
+function weekStart() {
+  const d = new Date();
+  const day = (d.getDay() + 6) % 7;
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - day);
+  return d.getTime();
 }
 
 const TUTORIAL_MISSION_ID = "a8d4a001-7985-4f2a-a23b-b2079a97bd01";
@@ -67,6 +77,41 @@ const missionCopy: Record<
       "Visita la pagina oficial de BerdeZuriGorri!!",
     ],
     url: "https://www.bzg.eus/",
+  },
+  "a8d4a004-7985-4f2a-a23b-b2079a97bd04": {
+    title: ["Jarraitu BerdeZuriGorri TikTok-en", "Sigue a BerdeZuriGorri en TikTok"],
+    description: [
+      "Jarraitu BerdeZuriGorri TikTok-en. Saria minutu bat geroago.",
+      "Sigue a BerdeZuriGorri en TikTok. Recompensa tras 1 minuto.",
+    ],
+    url: "https://www.tiktok.com/@bzg.juveniless",
+  },
+  "a8d4a005-7985-4f2a-a23b-b2079a97bd05": {
+    title: ["Jarraitu BerdeZuriGorri Instagram-en", "Sigue a BerdeZuriGorri en Instagram"],
+    description: [
+      "Jarraitu BerdeZuriGorri Instagram-en. Saria minutu bat geroago.",
+      "Sigue a BerdeZuriGorri en Instagram. Recompensa tras 1 minuto.",
+    ],
+    url: "https://www.instagram.com/berdezurigorri/",
+  },
+  "a8d4a006-7985-4f2a-a23b-b2079a97bd06": {
+    title: ["Eman like TikTok-eko azken argitalpenari", "Da like a la última publicación de TikTok"],
+    description: [
+      "Astero berrabiarazten da. Saria minutu bat geroago.",
+      "Se reinicia cada semana. Recompensa tras 1 minuto.",
+    ],
+    url: "https://www.tiktok.com/@bzg.juveniless",
+  },
+  "a8d4a007-7985-4f2a-a23b-b2079a97bd07": {
+    title: [
+      "Eman like Instagram-eko azken argitalpenari",
+      "Da like a la última publicación de Instagram",
+    ],
+    description: [
+      "Astero berrabiarazten da. Saria minutu bat geroago.",
+      "Se reinicia cada semana. Recompensa tras 1 minuto.",
+    ],
+    url: "https://www.instagram.com/berdezurigorri/",
   },
 };
 
@@ -126,6 +171,9 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
   const t = useT();
   const navigate = useNavigate();
   const [codigo, setCodigo] = useState(initialQr ?? "");
+  const [waiting, setWaiting] = useState<Record<string, boolean>>({});
+  const timers = useRef<number[]>([]);
+  useEffect(() => () => timers.current.forEach((id) => window.clearTimeout(id)), []);
 
   const wallet = useQuery({
     queryKey: ["wallet", userId],
@@ -148,16 +196,20 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       const [{ data: ms }, { data: um }] = await Promise.all([
         supabase
           .from("misiones")
-          .select("id, nombre, descripcion, recompensa_sobres, tipo_sobre, requiere_qr")
+          .select("id, nombre, descripcion, recompensa_sobres, tipo_sobre, requiere_qr, semanal, espera_segundos")
           .eq("is_active", true)
           .order("created_at"),
-        supabase.from("user_misiones").select("mision_id").eq("user_id", userId),
+        supabase.from("user_misiones").select("mision_id, claimed_at").eq("user_id", userId),
       ]);
-      const claimedIds = new Set((um ?? []).map((r) => r.mision_id));
-      return ((ms ?? []) as unknown as MisionRow[]).map((m) => ({
-        mision: m,
-        claimed: claimedIds.has(m.id),
-      }));
+      const claimedAt = new Map((um ?? []).map((r) => [r.mision_id, r.claimed_at]));
+      const ws = weekStart();
+      return ((ms ?? []) as unknown as MisionRow[]).map((m) => {
+        const at = claimedAt.get(m.id);
+        return {
+          mision: m,
+          claimed: !!at && (!m.semanal || new Date(at).getTime() >= ws),
+        };
+      });
     },
   });
 
@@ -313,6 +365,11 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
             return (
               <li key={mision.id} className="rounded-lg border border-border p-3">
                 <div className="text-sm font-semibold">
+                  {mision.semanal && (
+                    <span className="mr-2 rounded bg-secondary px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {t("Astekoa", "Semanal")}
+                    </span>
+                  )}
                   {copy ? t(copy.title[0], copy.title[1]) : mision.nombre}
                 </div>
                 <div className="mt-1 text-xs leading-5 text-muted-foreground">
@@ -336,9 +393,21 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
                         href={copy?.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={() => claimMut.mutate(mision.id)}
+                        onClick={() => {
+                          const wait = mision.espera_segundos ?? 0;
+                          if (wait <= 0) return claimMut.mutate(mision.id);
+                          if (waiting[mision.id]) return;
+                          setWaiting((w) => ({ ...w, [mision.id]: true }));
+                          timers.current.push(
+                            window.setTimeout(() => {
+                              claimMut.mutate(mision.id);
+                              setWaiting((w) => ({ ...w, [mision.id]: false }));
+                            }, wait * 1000),
+                          );
+                        }}
                       >
-                        {actionLabel} <ExternalLink aria-hidden />
+                        {waiting[mision.id] ? t("Itxaron minutu bat…", "Espera 1 minuto…") : actionLabel}{" "}
+                        <ExternalLink aria-hidden />
                       </a>
                     </Button>
                   )}

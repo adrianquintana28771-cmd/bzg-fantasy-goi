@@ -548,33 +548,39 @@ export type Database = {
           codigo_qr: string | null
           created_at: string
           descripcion: string
+          espera_segundos: number
           id: string
           is_active: boolean
           nombre: string
           recompensa_sobres: number
           requiere_qr: boolean | null
+          semanal: boolean
           tipo_sobre: string
         }
         Insert: {
           codigo_qr?: string | null
           created_at?: string
           descripcion: string
+          espera_segundos?: number
           id?: string
           is_active?: boolean
           nombre: string
           recompensa_sobres?: number
           requiere_qr?: boolean | null
+          semanal?: boolean
           tipo_sobre?: string
         }
         Update: {
           codigo_qr?: string | null
           created_at?: string
           descripcion?: string
+          espera_segundos?: number
           id?: string
           is_active?: boolean
           nombre?: string
           recompensa_sobres?: number
           requiere_qr?: boolean | null
+          semanal?: boolean
           tipo_sobre?: string
         }
         Relationships: []
