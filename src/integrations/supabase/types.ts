@@ -401,6 +401,45 @@ export type Database = {
           },
         ]
       }
+      jornada_alineaciones_congeladas: {
+        Row: {
+          created_at: string
+          jornada_id: string
+          player_id: string | null
+          posicion: Database["public"]["Enums"]["plantilla_posicion"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          jornada_id: string
+          player_id?: string | null
+          posicion: Database["public"]["Enums"]["plantilla_posicion"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          jornada_id?: string
+          player_id?: string | null
+          posicion?: Database["public"]["Enums"]["plantilla_posicion"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jornada_alineaciones_congeladas_jornada_id_fkey"
+            columns: ["jornada_id"]
+            isOneToOne: false
+            referencedRelation: "jornadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jornada_alineaciones_congeladas_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jornadas: {
         Row: {
           created_at: string
@@ -895,6 +934,15 @@ export type Database = {
       claim_qr: { Args: { _codigo: string }; Returns: number }
       close_jornada: { Args: { _jornada_id: string }; Returns: undefined }
       dni_exists: { Args: { _dni: string }; Returns: boolean }
+      effective_lineup_players: {
+        Args: never
+        Returns: {
+          jornada_id: string
+          numero: number
+          player_id: string
+          user_id: string
+        }[]
+      }
       email_for_dni: { Args: { _dni: string }; Returns: string }
       email_for_username: { Args: { _username: string }; Returns: string }
       has_role: {
