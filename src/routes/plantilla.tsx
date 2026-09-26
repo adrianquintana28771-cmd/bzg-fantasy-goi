@@ -286,6 +286,27 @@ function Inner({ userId }: { userId: string }) {
     },
   });
 
+  /** Puntos reales de cada jugador en la jornada activa (player_jornada_stats) */
+  const jornadaPts = useQuery({
+    queryKey: ["jornada-pts", jornada.data?.numero],
+    enabled: !!jornada.data,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("player_jornada_stats")
+        .select("player_id, puntos")
+        .eq("jornada_numero", jornada.data!.numero);
+      if (error) throw error;
+      const map = new Map<string, number>();
+      (data ?? []).forEach((s) =>
+        map.set(s.player_id, (map.get(s.player_id) ?? 0) + Number(s.puntos)),
+      );
+      return map;
+    },
+  });
+
+  const ptsJornada = (id: string) => jornadaPts.data?.get(id) ?? 0;
+  const fmtPts = (n: number) => String(Math.round(n * 100) / 100);
+
   const historial = useQuery({
     queryKey: ["historial-jornadas", userId],
     queryFn: async () => {
