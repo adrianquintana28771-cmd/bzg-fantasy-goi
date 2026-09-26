@@ -177,17 +177,23 @@ export function GuidedTour() {
     ];
   }, [isManager, isStaff, isSuperAdmin, user]);
 
-  // Solo se abre sola para usuarios con sesión que aún no lo han visto (guardado en su perfil)
+  // Única fuente de verdad: profiles.tutorial_visto. Se comprueba una sola vez por usuario
+  // (por id, no por objeto: el objeto user cambia en cada refresco de token).
+  const userId = user?.id ?? null;
+  const checkedFor = useRef<string | null>(null);
+  const seenFor = useRef<string | null>(null);
   useEffect(() => {
-    if (loading || !user) return;
+    if (loading || !userId || checkedFor.current === userId) return;
     let cancelled = false;
     const timer = window.setTimeout(async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("tutorial_visto")
-        .eq("id", user.id)
+        .eq("id", userId)
         .maybeSingle();
-      if (!cancelled && data && !data.tutorial_visto) {
+      if (cancelled || error || !data) return;
+      checkedFor.current = userId;
+      if (!data.tutorial_visto && seenFor.current !== userId) {
         setStep(0);
         setOpen(true);
       }
@@ -196,10 +202,16 @@ export function GuidedTour() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [loading, user]);
+  }, [loading, userId]);
 
-  function markSeen() {
-    if (user) void supabase.rpc("mark_tutorial_visto");
+  async function markSeen() {
+    if (!userId) return;
+    seenFor.current = userId;
+    for (let i = 0; i < 3; i++) {
+      const { error } = await supabase.rpc("mark_tutorial_visto");
+      if (!error) return;
+      await new Promise((r) => setTimeout(r, 800));
+    }
   }
 
   useEffect(() => {
@@ -266,16 +278,13 @@ export function GuidedTour() {
   });
 
   function dismiss() {
-    window.localStorage.setItem(storageKey, "skipped");
-    markSeen();
+    void markSeen();
     setOpen(false);
   }
 
   function complete() {
-    window.localStorage.setItem(storageKey, "done");
-    markSeen();
-    window.dispatchEvent(new Event(TOUR_COMPLETED_EVENT));
     setOpen(false);
+    void markSeen().then(() => window.dispatchEvent(new Event(TOUR_COMPLETED_EVENT)));
   }
 
   if (!open || !steps[step]) return null;

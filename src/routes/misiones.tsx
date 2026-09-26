@@ -232,18 +232,12 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
     const tutorial = (misiones.data ?? []).find(
       ({ mision }) => mision.id === TUTORIAL_MISSION_ID,
     );
+    // Se reclama al terminar el tutorial (evento). El servidor impide reclamarla dos veces.
     const claimCompletedTutorial = () => {
-      if (
-        tutorial &&
-        !tutorial.claimed &&
-        window.localStorage.getItem("bzg_tour_v1_player") === "done" &&
-        !claimMut.isPending
-      ) {
+      if (tutorial && !tutorial.claimed && !claimMut.isPending) {
         claimMut.mutate(TUTORIAL_MISSION_ID);
       }
     };
-
-    claimCompletedTutorial();
     window.addEventListener(TOUR_COMPLETED_EVENT, claimCompletedTutorial);
     return () => window.removeEventListener(TOUR_COMPLETED_EVENT, claimCompletedTutorial);
   }, [misiones.data, claimMut.isPending]);
