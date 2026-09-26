@@ -639,7 +639,7 @@ function Inner({ userId }: { userId: string }) {
                   </div>
                   {c && (
                     <div className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                      {fmtPts(ptsJornada(c.pool.id))} pts
+                      {fmtPts(ptsJornada(c.pool.id) * RAREZA_MULT[c.pool.rareza])} pts
                     </div>
                   )}
                 </div>
@@ -746,7 +746,7 @@ function Inner({ userId }: { userId: string }) {
                     {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
                   </div>
                   <div className="text-[10px] font-semibold text-muted-foreground">
-                    {t("Jardunaldia", "Jornada")}: {fmtPts(ptsJornada(c.pool.id))} pts
+                    {t("Jardunaldia", "Jornada")}: {fmtPts(ptsJornada(c.pool.id) * RAREZA_MULT[c.pool.rareza])} pts
                   </div>
                 </li>
               );
@@ -889,7 +889,7 @@ function Inner({ userId }: { userId: string }) {
                       {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
                     </div>
                     <div className="text-[10px] font-semibold text-muted-foreground">
-                      {fmtPts(ptsJornada(c.pool.id))} pts
+                      {fmtPts(ptsJornada(c.pool.id) * RAREZA_MULT[c.pool.rareza])} pts
                     </div>
                   </div>
                 </button>
