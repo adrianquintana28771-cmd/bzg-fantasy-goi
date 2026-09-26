@@ -36,6 +36,35 @@ function cartaPuntos(rating: number, rareza: Rareza) {
   return Math.min(99, Math.round(rating * RAREZA_MULT[rareza]));
 }
 
+const fmtPts = (n: number) => String(Math.round(n * 100) / 100);
+const fmtMult = (m: number) => `×${String(m).replace(".", ",")}`;
+
+/** Muestra base de la jornada · multiplicador de rareza → total final (solo visual) */
+function PuntosRareza({
+  base,
+  rareza,
+  className = "",
+  baseClass = "text-muted-foreground",
+  finalClass = "text-primary",
+}: {
+  base: number;
+  rareza: Rareza;
+  className?: string;
+  baseClass?: string;
+  finalClass?: string;
+}) {
+  const mult = RAREZA_MULT[rareza];
+  return (
+    <span className={`inline-flex flex-wrap items-center gap-x-1 tabular-nums ${className}`}>
+      <span className={baseClass}>{fmtPts(base)}</span>
+      <span className={`${baseClass} opacity-60`}>·</span>
+      <span className={baseClass}>{fmtMult(mult)}</span>
+      <span className={`${baseClass} opacity-60`}>→</span>
+      <span className={finalClass}>{fmtPts(base * mult)} pts</span>
+    </span>
+  );
+}
+
 const POS_LABEL: Record<Posicion, string> = {
   portero: "Atezaina",
   extremo_izq: "Hegaleko ezk.",
