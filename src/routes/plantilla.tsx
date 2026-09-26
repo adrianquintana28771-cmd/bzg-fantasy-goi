@@ -36,6 +36,35 @@ function cartaPuntos(rating: number, rareza: Rareza) {
   return Math.min(99, Math.round(rating * RAREZA_MULT[rareza]));
 }
 
+const fmtPts = (n: number) => String(Math.round(n * 100) / 100);
+const fmtMult = (m: number) => `×${String(m).replace(".", ",")}`;
+
+/** Muestra base de la jornada · multiplicador de rareza → total final (solo visual) */
+function PuntosRareza({
+  base,
+  rareza,
+  className = "",
+  baseClass = "text-muted-foreground",
+  finalClass = "text-primary",
+}: {
+  base: number;
+  rareza: Rareza;
+  className?: string;
+  baseClass?: string;
+  finalClass?: string;
+}) {
+  const mult = RAREZA_MULT[rareza];
+  return (
+    <span className={`inline-flex flex-wrap items-center gap-x-1 tabular-nums ${className}`}>
+      <span className={baseClass}>{fmtPts(base)}</span>
+      <span className={`${baseClass} opacity-60`}>·</span>
+      <span className={baseClass}>{fmtMult(mult)}</span>
+      <span className={`${baseClass} opacity-60`}>→</span>
+      <span className={finalClass}>{fmtPts(base * mult)} pts</span>
+    </span>
+  );
+}
+
 const POS_LABEL: Record<Posicion, string> = {
   portero: "Atezaina",
   extremo_izq: "Hegaleko ezk.",
@@ -305,7 +334,7 @@ function Inner({ userId }: { userId: string }) {
   });
 
   const ptsJornada = (id: string) => jornadaPts.data?.get(id) ?? 0;
-  const fmtPts = (n: number) => String(Math.round(n * 100) / 100);
+
 
   const historial = useQuery({
     queryKey: ["historial-jornadas", userId],
@@ -335,6 +364,8 @@ function Inner({ userId }: { userId: string }) {
                   slot,
                   id: pid,
                   nombre: nameById.get(pid) ?? pid,
+                  rareza: rarezaById.get(pid) ?? ("normal" as Rareza),
+                  base: ptsKey.get(`${pid}|${numero}`) ?? 0,
                   puntos:
                     Math.round(
                       (ptsKey.get(`${pid}|${numero}`) ?? 0) *
@@ -347,6 +378,8 @@ function Inner({ userId }: { userId: string }) {
             slot: Posicion;
             id: string;
             nombre: string;
+            rareza: Rareza;
+            base: number;
             puntos: number;
           }>;
           return {
@@ -638,8 +671,13 @@ function Inner({ userId }: { userId: string }) {
                     {c ? c.pool.nombre : POS_LABEL[slot]}
                   </div>
                   {c && (
-                    <div className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                      {fmtPts(ptsJornada(c.pool.id) * RAREZA_MULT[c.pool.rareza])} pts
+                    <div className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold">
+                      <PuntosRareza
+                        base={ptsJornada(c.pool.id)}
+                        rareza={c.pool.rareza}
+                        baseClass="text-white/70"
+                        finalClass="text-white"
+                      />
                     </div>
                   )}
                 </div>
@@ -683,11 +721,12 @@ function Inner({ userId }: { userId: string }) {
                       <span className="truncate">
                         <span className="font-bold">{POS_SHORT[p.slot]}</span> <span translate="no">{p.nombre}</span>
                       </span>
-                      <span
-                        className={`font-semibold ${p.puntos < 0 ? "text-destructive" : "text-foreground"}`}
-                      >
-                        {p.puntos}
-                      </span>
+                      <PuntosRareza
+                        base={p.base}
+                        rareza={p.rareza}
+                        className="shrink-0 text-[10px]"
+                        finalClass={p.puntos < 0 ? "text-destructive" : "text-foreground"}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -732,7 +771,7 @@ function Inner({ userId }: { userId: string }) {
                   </div>
                   <div className="mt-1 flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase">
-                      {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])} ·x{RAREZA_MULT[c.pool.rareza]}
+                      {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])} {fmtMult(RAREZA_MULT[c.pool.rareza])}
                     </span>
                     {c.total > 1 && (
                       <span className="rounded bg-secondary px-1 text-[10px] font-bold">
@@ -745,8 +784,11 @@ function Inner({ userId }: { userId: string }) {
                   >
                     {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
                   </div>
-                  <div className="text-[10px] font-semibold text-muted-foreground">
-                    {t("Jardunaldia", "Jornada")}: {fmtPts(ptsJornada(c.pool.id) * RAREZA_MULT[c.pool.rareza])} pts
+                  <div className="flex flex-wrap items-center gap-x-1 text-[10px] font-semibold">
+                    <span className="text-muted-foreground">
+                      {t("Jardunaldia", "Jornada")}:
+                    </span>
+                    <PuntosRareza base={ptsJornada(c.pool.id)} rareza={c.pool.rareza} />
                   </div>
                 </li>
               );
@@ -888,8 +930,12 @@ function Inner({ userId }: { userId: string }) {
                     <div className="text-[10px] text-muted-foreground">
                       {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
                     </div>
-                    <div className="text-[10px] font-semibold text-muted-foreground">
-                      {fmtPts(ptsJornada(c.pool.id) * RAREZA_MULT[c.pool.rareza])} pts
+                    <div className="text-[10px] font-semibold">
+                      <PuntosRareza
+                        base={ptsJornada(c.pool.id)}
+                        rareza={c.pool.rareza}
+                        className="justify-end"
+                      />
                     </div>
                   </div>
                 </button>
