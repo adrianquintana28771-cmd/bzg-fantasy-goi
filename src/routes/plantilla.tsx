@@ -771,7 +771,7 @@ function Inner({ userId }: { userId: string }) {
                   </div>
                   <div className="mt-1 flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase">
-                      {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])} ·x{RAREZA_MULT[c.pool.rareza]}
+                      {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])} {fmtMult(RAREZA_MULT[c.pool.rareza])}
                     </span>
                     {c.total > 1 && (
                       <span className="rounded bg-secondary px-1 text-[10px] font-bold">
