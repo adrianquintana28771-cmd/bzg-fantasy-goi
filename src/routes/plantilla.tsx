@@ -313,9 +313,10 @@ function Inner({ userId }: { userId: string }) {
       const [{ data: lineups }, { data: stats }, { data: pool }] = await Promise.all([
         supabase.from("lineups").select("*, jornadas(numero, nombre)").eq("user_id", userId),
         supabase.from("player_jornada_stats").select("player_id, jornada_numero, puntos"),
-        supabase.from("player_pool").select("id, nombre"),
+        supabase.from("player_pool").select("id, nombre, rareza"),
       ]);
       const nameById = new Map((pool ?? []).map((p) => [p.id, p.nombre]));
+      const rarezaById = new Map((pool ?? []).map((p) => [p.id, p.rareza as Rareza]));
       const ptsKey = new Map(
         (stats ?? []).map((s) => [`${s.player_id}|${s.jornada_numero}`, Number(s.puntos)]),
       );
@@ -334,7 +335,12 @@ function Inner({ userId }: { userId: string }) {
                   slot,
                   id: pid,
                   nombre: nameById.get(pid) ?? pid,
-                  puntos: ptsKey.get(`${pid}|${numero}`) ?? 0,
+                  puntos:
+                    Math.round(
+                      (ptsKey.get(`${pid}|${numero}`) ?? 0) *
+                        RAREZA_MULT[rarezaById.get(pid) ?? "normal"] *
+                        100,
+                    ) / 100,
                 }
               : null;
           }).filter(Boolean) as Array<{
@@ -633,7 +639,7 @@ function Inner({ userId }: { userId: string }) {
                   </div>
                   {c && (
                     <div className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                      {fmtPts(ptsJornada(c.pool.id))} pts
+                      {fmtPts(ptsJornada(c.pool.id) * RAREZA_MULT[c.pool.rareza])} pts
                     </div>
                   )}
                 </div>
@@ -740,7 +746,7 @@ function Inner({ userId }: { userId: string }) {
                     {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
                   </div>
                   <div className="text-[10px] font-semibold text-muted-foreground">
-                    {t("Jardunaldia", "Jornada")}: {fmtPts(ptsJornada(c.pool.id))} pts
+                    {t("Jardunaldia", "Jornada")}: {fmtPts(ptsJornada(c.pool.id) * RAREZA_MULT[c.pool.rareza])} pts
                   </div>
                 </li>
               );
@@ -883,7 +889,7 @@ function Inner({ userId }: { userId: string }) {
                       {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
                     </div>
                     <div className="text-[10px] font-semibold text-muted-foreground">
-                      {fmtPts(ptsJornada(c.pool.id))} pts
+                      {fmtPts(ptsJornada(c.pool.id) * RAREZA_MULT[c.pool.rareza])} pts
                     </div>
                   </div>
                 </button>
