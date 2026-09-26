@@ -607,7 +607,7 @@ function Inner({ userId }: { userId: string }) {
                       POS_SHORT[slot]
                     )}
                   </div>
-                  <div className="max-w-[90px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                  <div translate="no" className="max-w-[90px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                     {c ? c.pool.nombre : POS_LABEL[slot]}
                   </div>
                 </div>
@@ -649,7 +649,7 @@ function Inner({ userId }: { userId: string }) {
                       className="flex items-center justify-between gap-1 rounded-md bg-secondary px-2 py-1 text-[11px]"
                     >
                       <span className="truncate">
-                        <span className="font-bold">{POS_SHORT[p.slot]}</span> {p.nombre}
+                        <span className="font-bold">{POS_SHORT[p.slot]}</span> <span translate="no">{p.nombre}</span>
                       </span>
                       <span
                         className={`font-semibold ${p.puntos < 0 ? "text-destructive" : "text-foreground"}`}
@@ -688,7 +688,7 @@ function Inner({ userId }: { userId: string }) {
                   className={`rounded-lg border-2 p-2 text-xs ${enPista ? "border-primary bg-primary/5" : RAREZA_STYLE[c.pool.rareza]}`}
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <div className="truncate font-semibold">{c.pool.nombre}</div>
+                    <div translate="no" className="truncate font-semibold">{c.pool.nombre}</div>
                     <div className="font-display text-base text-primary">
                       {cartaPuntos(c.pool.rating, c.pool.rareza)}
                     </div>
@@ -761,7 +761,7 @@ function Inner({ userId }: { userId: string }) {
                     <div className="font-display text-3xl text-primary">
                       {cartaPuntos(p.rating, p.rareza)}
                     </div>
-                    <div className="truncate text-xs font-semibold">{p.nombre}</div>
+                    <div translate="no" className="truncate text-xs font-semibold">{p.nombre}</div>
                     <div className="text-[10px] uppercase text-muted-foreground">
                       {t(RAREZA_LABEL_EU[p.rareza], RAREZA_LABEL_ES[p.rareza])}
                     </div>
@@ -827,7 +827,7 @@ function Inner({ userId }: { userId: string }) {
                 >
                   <CardPhoto className="mr-3 h-10 w-10 shrink-0 rounded-full bg-background p-0.5" />
                   <div className="min-w-0 flex-1">
-                    <div className="font-semibold">
+                    <div translate="no" className="font-semibold">
                       {c.pool.nombre}
                       {c.pool.club_teams?.nombre ? ` — ${c.pool.club_teams.nombre}` : ""}
                       {c.pool.estado && c.pool.estado !== "disponible" && (

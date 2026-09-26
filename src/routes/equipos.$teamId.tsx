@@ -113,7 +113,7 @@ function EquipoDetalle() {
                 params={{ playerId: p.id }}
                 className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card transition hover:shadow-elevated"
               >
-                <div className="min-w-0 flex-1 truncate font-semibold">{p.nombre}</div>
+                <div translate="no" className="min-w-0 flex-1 truncate font-semibold">{p.nombre}</div>
                 <span className="font-display text-xl text-primary">{round2(pts[p.id] ?? 0)}</span>
               </Link>
             ))}
@@ -133,7 +133,7 @@ function EquipoDetalle() {
               {i + 1}
             </span>
             <div className="min-w-0 flex-1">
-              <div className="truncate font-semibold">{p.nombre}</div>
+              <div translate="no" className="truncate font-semibold">{p.nombre}</div>
               <div className="text-xs text-muted-foreground">
                 {POS_LABEL[p.posicion as keyof typeof POS_LABEL] ?? p.posicion}
               </div>

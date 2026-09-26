@@ -191,11 +191,11 @@ function Jugador() {
         <EstadoEditor clubPlayerId={player.club_player_id} estado={estado} onDone={() => q.refetch()} />
 
         <div className="mt-4 text-center">
-          <h1 className="font-display text-2xl leading-tight sm:text-3xl">
+          <h1 translate="no" className="font-display text-2xl leading-tight sm:text-3xl">
             {player.club?.nombre ?? player.nombre}
           </h1>
           {(player.club?.apellido1 || player.club?.apellido2) && (
-            <p className="text-sm text-muted-foreground">
+            <p translate="no" className="text-sm text-muted-foreground">
               {[player.club?.apellido1, player.club?.apellido2].filter(Boolean).join(" ")}
             </p>
           )}

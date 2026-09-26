@@ -323,7 +323,7 @@ function Desempeno() {
                     }`}
                   >
                     {r.dorsal ? `${r.dorsal} · ` : ""}
-                    {p.alias ?? p.nombre}
+                    <span translate="no">{p.alias ?? p.nombre}</span>
                   </button>
                 );
               })}
@@ -341,7 +341,7 @@ function Desempeno() {
                         : "border-border bg-card hover:bg-secondary"
                     }`}
                   >
-                    {p.alias ?? p.nombre} · {r.club_teams?.nombre}
+                    <span translate="no">{p.alias ?? p.nombre}</span> · {r.club_teams?.nombre}
                   </button>
                 );
               })}
@@ -362,7 +362,7 @@ function Desempeno() {
                 </option>
                 {candidatos.map((r) => (
                   <option key={`${r.club_players!.id}-${r.team_id}`} value={r.club_players!.id}>
-                    {r.club_players!.alias ?? r.club_players!.nombre} · {r.club_teams?.nombre}
+                    <span translate="no">{r.club_players!.alias ?? r.club_players!.nombre}</span> · {r.club_teams?.nombre}
                   </option>
                 ))}
               </select>
@@ -383,7 +383,7 @@ function Desempeno() {
         <>
           <div className="sticky top-16 z-30 mt-6 flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 shadow-card">
             <div>
-              <div className="font-display text-xl">{player.alias ?? player.nombre}</div>
+              <div translate="no" className="font-display text-xl">{player.alias ?? player.nombre}</div>
               <div className="text-xs text-muted-foreground">
                 {esPortero ? t("Atezaina", "Portero/a") : t("Zelaiko jokalaria", "Jugador/a de campo")}
               </div>
