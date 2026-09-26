@@ -224,7 +224,7 @@ function Desempeno() {
     () =>
       (actions.data ?? []).filter((a) =>
         esEntrenador
-          ? a.solo_entrenador
+          ? a.solo_entrenador && !a.es_resultado
           : esPortero
             ? a.solo_portero
             : !a.solo_portero && !a.solo_entrenador,
@@ -238,12 +238,12 @@ function Desempeno() {
   );
 
   function bump(id: string, delta: number) {
-    const esRes = (a?: ActionRow) => !!a && (a.grupo === "resultado" || !!a.es_resultado);
-    if (esRes(visibleActions.find((a) => a.id === id))) {
+    const grupo = visibleActions.find((a) => a.id === id)?.grupo;
+    if (grupo === "resultado") {
       // Resultado exclusivo: victoria, empate o derrota
       setCounts((c) => {
         const n = { ...c };
-        for (const a of visibleActions) if (esRes(a)) n[a.id] = 0;
+        for (const a of visibleActions) if (a.grupo === "resultado") n[a.id] = 0;
         n[id] = delta > 0 ? 1 : 0;
         return n;
       });
