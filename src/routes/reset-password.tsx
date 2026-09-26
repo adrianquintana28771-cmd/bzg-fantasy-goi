@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { passwordSchema } from "@/components/auth-panel";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, KeyRound } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -20,8 +21,8 @@ export const Route = createFileRoute("/reset-password")({
 const makeSchema = (t: (eu: string, es: string) => string) =>
   z
     .object({
-      password: z.string().min(6, t("Gutxienez 6 karaktere", "Mínimo 6 caracteres")).max(72),
-      confirm: z.string().min(6, t("Gutxienez 6 karaktere", "Mínimo 6 caracteres")).max(72),
+      password: passwordSchema(t),
+      confirm: z.string().max(72),
     })
     .refine((v) => v.password === v.confirm, {
       message: t("Pasahitzak ez datoz bat", "Las contraseñas no coinciden"),

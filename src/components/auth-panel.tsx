@@ -9,6 +9,18 @@ import { useT } from "@/lib/i18n";
 type T = (eu: string, es: string) => string;
 const DNI_LETTERS = "TRWAGMYFPDXBNJZSQVHLCKE";
 
+export function passwordSchema(t: T) {
+  return z
+    .string()
+    .min(4, t("Gutxienez 4 karaktere", "Mínimo 4 caracteres"))
+    .max(72, t("Gehienez 72 karaktere", "Máximo 72 caracteres"))
+    .refine((v) => /\d/.test(v), t("Gutxienez zenbaki 1 behar du", "Debe incluir al menos 1 número"))
+    .refine(
+      (v) => !/(.)\1\1/.test(v),
+      t("Ezin dira 3 karaktere berdin jarraian egon", "No puede tener 3 caracteres iguales seguidos"),
+    );
+}
+
 function schemas(t: T) {
   const dni = z
     .string()
@@ -32,21 +44,7 @@ function schemas(t: T) {
       t("Letrak, zenbakiak eta azpimarra soilik", "Sólo letras, números y guion bajo"),
     )
     .transform((v) => v.toLowerCase());
-  const password = z
-    .string()
-    .max(72, t("Gehienez 72 karaktere", "Máximo 72 caracteres"))
-    .refine(
-      (v) => (v.match(/[A-Z]/g) ?? []).length >= 1,
-      t("Gutxienez letra larri 1 behar du", "Debe incluir al menos 1 mayúscula"),
-    )
-    .refine(
-      (v) => (v.match(/[a-z]/g) ?? []).length >= 5,
-      t("Gutxienez 5 letra xehe behar ditu", "Debe incluir al menos 5 minúsculas"),
-    )
-    .refine(
-      (v) => (v.match(/\d/g) ?? []).length >= 2,
-      t("Gutxienez 2 zenbaki behar ditu", "Debe incluir al menos 2 números"),
-    );
+  const password = passwordSchema(t);
   const name = z
     .string()
     .trim()
@@ -320,8 +318,8 @@ function SignupForm({ onDone }: { onDone?: () => void }) {
       />
       <p className="text-xs text-muted-foreground">
         {t(
-          "Pasahitzak gutxienez letra larri 1, 5 letra xehe eta 2 zenbaki behar ditu.",
-          "La contraseña necesita al menos 1 mayúscula, 5 minúsculas y 2 números.",
+          "Pasahitzak gutxienez 4 karaktere eta zenbaki 1 behar ditu, eta ezin ditu 3 karaktere berdin jarraian izan.",
+          "La contraseña necesita mínimo 4 caracteres y 1 número, sin 3 caracteres iguales seguidos.",
         )}
       </p>
       <button

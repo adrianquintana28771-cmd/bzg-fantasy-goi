@@ -45,6 +45,7 @@ interface ActionRow {
   grupo: string;
   solo_portero: boolean;
   solo_entrenador: boolean;
+  es_resultado: string | null;
   orden: number;
 }
 interface PlayerRow {
@@ -53,6 +54,9 @@ interface PlayerRow {
     id: string;
     nombre: string;
     alias: string | null;
+    apellido1: string | null;
+    apellido2: string | null;
+    es_entrenador: boolean;
     club_player_positions: { position_id: string; es_principal: boolean }[];
   } | null;
 }
@@ -62,6 +66,7 @@ function Desempeno() {
   const { t, td, lang } = useLang();
   const qc = useQueryClient();
   const [matchId, setMatchId] = useState<string>("");
+  const [jornada, setJornada] = useState<string>("");
   const [playerId, setPlayerId] = useState<string>("");
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
@@ -85,7 +90,7 @@ function Desempeno() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("club_action_types")
-        .select("id,nombre,puntos,grupo,solo_portero,solo_entrenador,orden")
+        .select("id,nombre,puntos,grupo,solo_portero,solo_entrenador,es_resultado,orden")
         .eq("activo", true)
         .order("orden");
       if (error) throw error;
@@ -93,6 +98,9 @@ function Desempeno() {
     },
   });
 
+  const jornadas = Array.from(new Set((matches.data ?? []).map((m) => m.jornada))).sort(
+    (a, b) => a - b,
+  );
   const match = matches.data?.find((m) => m.id === matchId) ?? null;
 
   const roster = useQuery({
@@ -102,7 +110,7 @@ function Desempeno() {
       const { data, error } = await supabase
         .from("club_player_teams")
         .select(
-          "dorsal,club_players(id,nombre,alias,club_player_positions(position_id,es_principal))",
+          "dorsal,club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,club_player_positions(position_id,es_principal))",
         )
         .eq("team_id", match!.team_id);
       if (error) throw error;
@@ -118,7 +126,7 @@ function Desempeno() {
       const { data, error } = await supabase
         .from("club_player_teams")
         .select(
-          "team_id,dorsal,club_teams(nombre),club_players(id,nombre,alias,club_player_positions(position_id,es_principal))",
+          "team_id,dorsal,club_teams(nombre),club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,club_player_positions(position_id,es_principal))",
         );
       if (error) throw error;
       return (data ?? []) as unknown as (PlayerRow & {
@@ -152,7 +160,7 @@ function Desempeno() {
   const invitados = [...invitadosMap.values()];
   const candidatos = externos
     .filter((r) => !invitadosMap.has(r.club_players!.id))
-    .sort((a, b) => a.club_players!.nombre.localeCompare(b.club_players!.nombre));
+    .sort((a, b) => fullName(a.club_players!).localeCompare(fullName(b.club_players!)));
   const [externoSel, setExternoSel] = useState("");
 
   async function addExterno() {
@@ -208,11 +216,20 @@ function Desempeno() {
   const player =
     [...(roster.data ?? []), ...invitados].find((r) => r.club_players?.id === playerId)
       ?.club_players ?? null;
-  const esPortero = !!player?.club_player_positions?.some((p) => p.position_id === "portero");
+  const esEntrenador = !!player?.es_entrenador;
+  const esPortero =
+    !esEntrenador && !!player?.club_player_positions?.some((p) => p.position_id === "portero");
 
   const visibleActions = useMemo(
-    () => (actions.data ?? []).filter((a) => !a.solo_entrenador && (!a.solo_portero || esPortero)),
-    [actions.data, esPortero],
+    () =>
+      (actions.data ?? []).filter((a) =>
+        esEntrenador
+          ? a.solo_entrenador && !a.es_resultado
+          : esPortero
+            ? a.solo_portero
+            : !a.solo_portero && !a.solo_entrenador,
+      ),
+    [actions.data, esPortero, esEntrenador],
   );
 
   const total = useMemo(
@@ -221,6 +238,17 @@ function Desempeno() {
   );
 
   function bump(id: string, delta: number) {
+    const grupo = visibleActions.find((a) => a.id === id)?.grupo;
+    if (grupo === "resultado") {
+      // Resultado exclusivo: victoria, empate o derrota
+      setCounts((c) => {
+        const n = { ...c };
+        for (const a of visibleActions) if (a.grupo === "resultado") n[a.id] = 0;
+        n[id] = delta > 0 ? 1 : 0;
+        return n;
+      });
+      return;
+    }
     setCounts((c) => ({ ...c, [id]: Math.max(0, (c[id] ?? 0) + delta) }));
   }
 
@@ -284,6 +312,26 @@ function Desempeno() {
 
       <div className="mt-6 grid gap-3">
         <label className="text-sm font-semibold">
+          {t("Jardunaldia", "Jornada")}
+          <select
+            value={jornada}
+            onChange={(e) => {
+              setJornada(e.target.value);
+              setMatchId("");
+              setPlayerId("");
+            }}
+            className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
+          >
+            <option value="">{t("Aukeratu jardunaldi bat…", "Selecciona una jornada…")}</option>
+            {jornadas.map((j) => (
+              <option key={j} value={j}>
+                {t(`${j}. jardunaldia`, `Jornada ${j}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        {jornada && (
+        <label className="text-sm font-semibold">
           {t("Partida", "Partido")}
           <select
             value={matchId}
@@ -294,7 +342,7 @@ function Desempeno() {
             className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           >
             <option value="">{t("Aukeratu partida bat…", "Selecciona un partido…")}</option>
-            {(matches.data ?? []).map((m) => (
+            {(matches.data ?? []).filter((m) => String(m.jornada) === jornada).map((m) => (
               <option key={m.id} value={m.id}>
                 {m.club_teams?.nombre} vs {m.rival} · J{m.jornada} ·{" "}
                 {new Date(m.fecha).toLocaleDateString(lang === "eu" ? "eu-ES" : "es-ES")}
@@ -302,6 +350,7 @@ function Desempeno() {
             ))}
           </select>
         </label>
+        )}
 
         {match && (
           <div>
@@ -322,8 +371,8 @@ function Desempeno() {
                         : "border-border bg-card hover:bg-secondary"
                     }`}
                   >
-                    {r.dorsal ? `${r.dorsal} · ` : ""}
-                    <span translate="no">{p.alias ?? p.nombre}</span>
+                    <span translate="no">{fullName(p)}</span>
+                    {r.dorsal ? ` — ${r.dorsal}` : ""}
                   </button>
                 );
               })}
@@ -341,7 +390,8 @@ function Desempeno() {
                         : "border-border bg-card hover:bg-secondary"
                     }`}
                   >
-                    <span translate="no">{p.alias ?? p.nombre}</span> · {r.club_teams?.nombre}
+                    <span translate="no">{fullName(p)}</span>
+                    {r.dorsal ? ` — ${r.dorsal}` : ""} · {r.club_teams?.nombre}
                   </button>
                 );
               })}
@@ -362,7 +412,8 @@ function Desempeno() {
                 </option>
                 {candidatos.map((r) => (
                   <option key={`${r.club_players!.id}-${r.team_id}`} value={r.club_players!.id}>
-                    <span translate="no">{r.club_players!.alias ?? r.club_players!.nombre}</span> · {r.club_teams?.nombre}
+                    {fullName(r.club_players!)}
+                    {r.dorsal ? ` — ${r.dorsal}` : ""} · {r.club_teams?.nombre}
                   </option>
                 ))}
               </select>
@@ -383,9 +434,13 @@ function Desempeno() {
         <>
           <div className="sticky top-16 z-30 mt-6 flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 shadow-card">
             <div>
-              <div translate="no" className="font-display text-xl">{player.alias ?? player.nombre}</div>
+              <div translate="no" className="font-display text-xl">{fullName(player)}</div>
               <div className="text-xs text-muted-foreground">
-                {esPortero ? t("Atezaina", "Portero/a") : t("Zelaiko jokalaria", "Jugador/a de campo")}
+                {esEntrenador
+                  ? t("Entrenatzailea", "Entrenador/a")
+                  : esPortero
+                    ? t("Atezaina", "Portero/a")
+                    : t("Zelaiko jokalaria", "Jugador/a de campo")}
               </div>
             </div>
             <div className="text-right">
@@ -457,4 +512,8 @@ function Desempeno() {
       )}
     </div>
   );
+}
+
+function fullName(p: { nombre: string; alias: string | null; apellido1: string | null; apellido2: string | null }) {
+  return [p.nombre, p.apellido1, p.apellido2].filter(Boolean).join(" ") || p.alias || "";
 }
