@@ -195,7 +195,7 @@ function Jugador() {
             {player.club?.nombre ?? player.nombre}
           </h1>
           {(player.club?.apellido1 || player.club?.apellido2) && (
-            <p className="text-sm text-muted-foreground">
+            <p translate="no" className="text-sm text-muted-foreground">
               {[player.club?.apellido1, player.club?.apellido2].filter(Boolean).join(" ")}
             </p>
           )}
