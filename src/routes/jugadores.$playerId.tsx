@@ -24,6 +24,7 @@ import {
   type Category,
 } from "@/lib/fantasy/types";
 import { useT, useTd, useLang } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth-context";
 import { fetchPoolPlayer, fetchTeams, round2 } from "@/lib/club-data";
 
 const ESTADO_COLOR: Record<PlayerEstado, string> = {
@@ -187,6 +188,7 @@ function Jugador() {
             )}
           </div>
         </div>
+        <EstadoEditor clubPlayerId={player.club_player_id} estado={estado} onDone={() => q.refetch()} />
 
         <div className="mt-4 text-center">
           <h1 className="font-display text-2xl leading-tight sm:text-3xl">
@@ -446,5 +448,50 @@ function EstadoBadge({ estado }: { estado: PlayerEstado }) {
     >
       {EST_LABEL[estado]}
     </span>
+  );
+}
+
+function EstadoEditor({
+  clubPlayerId,
+  estado,
+  onDone,
+}: {
+  clubPlayerId: string | null;
+  estado: PlayerEstado;
+  onDone: () => void;
+}) {
+  const { canManageAll } = useAuth();
+  const t = useT();
+  const [saving, setSaving] = useState(false);
+  if (!canManageAll || !clubPlayerId) return null;
+  const opts: Array<[PlayerEstado, string]> = [
+    ["disponible", t("Eskuragarri", "Disponible")],
+    ["dudoso", t("Zalantzazkoa", "Dudoso")],
+    ["no_disponible", t("Ez eskuragarri", "No disponible")],
+  ];
+  const save = async (v: PlayerEstado) => {
+    setSaving(true);
+    await supabase.from("club_players").update({ estado: v }).eq("id", clubPlayerId);
+    await supabase.from("player_pool").update({ estado: v }).eq("club_player_id", clubPlayerId);
+    setSaving(false);
+    onDone();
+  };
+  return (
+    <div className="mx-auto mt-3 flex max-w-sm flex-wrap items-center justify-center gap-2 text-sm">
+      <span className="text-muted-foreground">{t("Egoera", "Estado")}:</span>
+      {opts.map(([v, label]) => (
+        <button
+          key={v}
+          type="button"
+          disabled={saving}
+          onClick={() => save(v)}
+          className={`rounded-lg border px-2.5 py-1 text-xs font-semibold ${
+            estado === v ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted"
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
   );
 }

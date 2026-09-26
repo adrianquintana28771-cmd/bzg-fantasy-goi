@@ -70,7 +70,8 @@ function EquipoDetalle() {
       </div>
     );
   const pts = q.data!.pts;
-  const ranking = [...q.data!.pool].sort((a, b) => (pts[b.id] ?? 0) - (pts[a.id] ?? 0));
+  const coaches = q.data!.pool.filter((p) => p.club?.es_entrenador);
+  const ranking = [...q.data!.pool.filter((p) => !p.club?.es_entrenador)].sort((a, b) => (pts[b.id] ?? 0) - (pts[a.id] ?? 0));
   const total = round2(
     ranking.filter((p) => !p.club?.es_entrenador).reduce((a, p) => a + (pts[p.id] ?? 0), 0),
   );
@@ -101,6 +102,24 @@ function EquipoDetalle() {
         </div>
       </div>
 
+      {coaches.length > 0 && (
+        <>
+          <h2 className="mt-8 font-display text-2xl">{t("Entrenatzailea", "Entrenador/a")}</h2>
+          <div className="mt-3 space-y-2">
+            {coaches.map((p) => (
+              <Link
+                key={p.id}
+                to="/jugadores/$playerId"
+                params={{ playerId: p.id }}
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card transition hover:shadow-elevated"
+              >
+                <div className="min-w-0 flex-1 truncate font-semibold">{p.nombre}</div>
+                <span className="font-display text-xl text-primary">{round2(pts[p.id] ?? 0)}</span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
       <h2 className="mt-8 font-display text-2xl">{t("Barne sailkapena", "Ranking interno")}</h2>
       <div className="mt-3 space-y-2">
         {ranking.map((p, i) => (

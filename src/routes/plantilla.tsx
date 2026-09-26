@@ -101,6 +101,7 @@ interface PoolRow {
   rating: number;
   rareza: Rareza;
   team_id?: string | null;
+  estado?: "disponible" | "dudoso" | "no_disponible";
   club_teams?: { nombre: string } | null;
 }
 
@@ -218,7 +219,7 @@ function Inner({ userId }: { userId: string }) {
     queryFn: async (): Promise<CopyRow[]> => {
       const { data, error } = await supabase
         .from("user_players")
-        .select("id, player_id, usos, player_pool(id, nombre, posicion, rating, rareza, team_id)")
+        .select("id, player_id, usos, player_pool(id, nombre, posicion, rating, rareza, team_id, estado)")
         .eq("user_id", userId);
       if (error) throw error;
       const { data: teams } = await supabase.from("club_teams").select("id, nombre");
@@ -829,6 +830,14 @@ function Inner({ userId }: { userId: string }) {
                     <div className="font-semibold">
                       {c.pool.nombre}
                       {c.pool.club_teams?.nombre ? ` — ${c.pool.club_teams.nombre}` : ""}
+                      {c.pool.estado && c.pool.estado !== "disponible" && (
+                        <span className={c.pool.estado === "dudoso" ? "text-warning" : "text-destructive"}>
+                          {" — "}
+                          {c.pool.estado === "dudoso"
+                            ? t("Zalantzazkoa", "Dudoso")
+                            : t("Ez eskuragarri", "No disponible")}
+                        </span>
+                      )}
                     </div>
                     <div className="text-[10px] uppercase text-muted-foreground">
                       {posList(c.pool.id, c.pool.posicion)

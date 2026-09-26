@@ -9,7 +9,8 @@ import {
   ShieldAlert,
   BarChart3,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BackButton } from "@/components/back-button";
 import { AdminGuard } from "@/components/admin-guard";
@@ -161,6 +162,8 @@ function Admin() {
         />
       </div>
 
+      {canManageAll && <CloseJornada />}
+
       {canManageAll && (
         <p className="mt-10 text-sm text-muted-foreground">
           {t("Puntuazio-irizpideak hemen kudeatzen dira:", "Los criterios de puntuación se gestionan en")}{" "}
@@ -229,5 +232,47 @@ function Section({
         </div>
       </div>
     </Link>
+  );
+}
+
+function CloseJornada() {
+  const t = useT();
+  const qc = useQueryClient();
+  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const { data: jornada, refetch } = useQuery({
+    queryKey: ["admin-jornada-activa"],
+    queryFn: async () =>
+      (await supabase.from("jornadas").select("id, numero").eq("is_active", true).eq("is_locked", false).order("numero").limit(1).maybeSingle()).data,
+  });
+  const close = async () => {
+    if (!jornada) return;
+    if (!window.confirm(t(`${jornada.numero}. jardunaldia behin betiko itxi? Ezin da berriro ireki.`, `¿Cerrar definitivamente la jornada ${jornada.numero}? No se podrá reabrir.`))) return;
+    setBusy(true);
+    const { error } = await supabase.rpc("close_jornada", { _jornada_id: jornada.id });
+    setBusy(false);
+    setMsg(error ? error.message : t("Jardunaldia itxita eta alineazioak gordeta.", "Jornada cerrada y alineaciones guardadas."));
+    refetch();
+    qc.invalidateQueries();
+  };
+  return (
+    <div className="mt-8 rounded-2xl border border-border bg-card p-5 shadow-card">
+      <div className="font-display text-lg">{t("Jardunaldia itxi", "Cerrar jornada")}</div>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {t(
+          "Erabiltzaile guztien alineazioaren argazkia gordetzen du. Jardunaldi horrek argazki hori erabiliko du beti puntuatzeko. Ezin da berriro ireki.",
+          "Guarda una foto de la alineación de todos los usuarios. Esa jornada puntuará siempre con esa foto. No se puede reabrir.",
+        )}
+      </p>
+      <button
+        type="button"
+        disabled={!jornada || busy}
+        onClick={close}
+        className="mt-3 rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
+      >
+        {jornada ? t(`${jornada.numero}. jardunaldia itxi`, `Cerrar jornada ${jornada.numero}`) : t("Jardunaldi irekirik ez", "Sin jornada abierta")}
+      </button>
+      {msg && <p className="mt-2 text-sm">{msg}</p>}
+    </div>
   );
 }
