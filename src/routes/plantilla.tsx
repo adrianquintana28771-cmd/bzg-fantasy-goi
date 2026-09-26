@@ -716,11 +716,12 @@ function Inner({ userId }: { userId: string }) {
                       <span className="truncate">
                         <span className="font-bold">{POS_SHORT[p.slot]}</span> <span translate="no">{p.nombre}</span>
                       </span>
-                      <span
-                        className={`font-semibold ${p.puntos < 0 ? "text-destructive" : "text-foreground"}`}
-                      >
-                        {p.puntos}
-                      </span>
+                      <PuntosRareza
+                        base={p.base}
+                        rareza={p.rareza}
+                        className="shrink-0 text-[10px]"
+                        finalClass={p.puntos < 0 ? "text-destructive" : "text-foreground"}
+                      />
                     </li>
                   ))}
                 </ul>
