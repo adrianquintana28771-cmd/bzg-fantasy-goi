@@ -671,8 +671,13 @@ function Inner({ userId }: { userId: string }) {
                     {c ? c.pool.nombre : POS_LABEL[slot]}
                   </div>
                   {c && (
-                    <div className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                      {fmtPts(ptsJornada(c.pool.id) * RAREZA_MULT[c.pool.rareza])} pts
+                    <div className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold">
+                      <PuntosRareza
+                        base={ptsJornada(c.pool.id)}
+                        rareza={c.pool.rareza}
+                        baseClass="text-white/70"
+                        finalClass="text-white"
+                      />
                     </div>
                   )}
                 </div>
