@@ -101,6 +101,13 @@ function Equipos() {
                     <div className="mt-4 flex items-end justify-between">
                       <div className="text-sm text-muted-foreground">
                         {roster.length} {t("jokalari", "jugadores/as")}
+                        {pool
+                          .filter((p) => p.team_id === team.id && p.club?.es_entrenador)
+                          .map((c) => (
+                            <div key={c.id} className="text-xs">
+                              {t("Entrenatzailea", "Entrenador/a")}: {c.nombre}
+                            </div>
+                          ))}
                       </div>
                       <div className="text-right">
                         <div className="font-display text-2xl text-primary">{teamPts}</div>
