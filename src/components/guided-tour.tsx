@@ -28,8 +28,6 @@ export function GuidedTour() {
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const audience = !user ? "visitor" : isStaff ? "staff" : "player";
-  const storageKey = `bzg_tour_${TOUR_VERSION}_${audience}`;
 
   const steps = useMemo<TourStep[]>(() => {
     if (isStaff) {
