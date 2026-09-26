@@ -364,6 +364,8 @@ function Inner({ userId }: { userId: string }) {
                   slot,
                   id: pid,
                   nombre: nameById.get(pid) ?? pid,
+                  rareza: rarezaById.get(pid) ?? ("normal" as Rareza),
+                  base: ptsKey.get(`${pid}|${numero}`) ?? 0,
                   puntos:
                     Math.round(
                       (ptsKey.get(`${pid}|${numero}`) ?? 0) *
@@ -376,6 +378,8 @@ function Inner({ userId }: { userId: string }) {
             slot: Posicion;
             id: string;
             nombre: string;
+            rareza: Rareza;
+            base: number;
             puntos: number;
           }>;
           return {
