@@ -631,6 +631,11 @@ function Inner({ userId }: { userId: string }) {
                   <div translate="no" className="max-w-[90px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                     {c ? c.pool.nombre : POS_LABEL[slot]}
                   </div>
+                  {c && (
+                    <div className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      {fmtPts(ptsJornada(c.pool.id))} pts
+                    </div>
+                  )}
                 </div>
               </button>
             );
@@ -733,6 +738,9 @@ function Inner({ userId }: { userId: string }) {
                     className={`text-[10px] font-semibold ${c.usosRestantes <= 1 ? "text-destructive" : "text-muted-foreground"}`}
                   >
                     {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
+                  </div>
+                  <div className="text-[10px] font-semibold text-muted-foreground">
+                    {t("Jardunaldia", "Jornada")}: {fmtPts(ptsJornada(c.pool.id))} pts
                   </div>
                 </li>
               );
