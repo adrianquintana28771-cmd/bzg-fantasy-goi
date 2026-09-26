@@ -778,8 +778,11 @@ function Inner({ userId }: { userId: string }) {
                   >
                     {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
                   </div>
-                  <div className="text-[10px] font-semibold text-muted-foreground">
-                    {t("Jardunaldia", "Jornada")}: {fmtPts(ptsJornada(c.pool.id) * RAREZA_MULT[c.pool.rareza])} pts
+                  <div className="flex flex-wrap items-center gap-x-1 text-[10px] font-semibold">
+                    <span className="text-muted-foreground">
+                      {t("Jardunaldia", "Jornada")}:
+                    </span>
+                    <PuntosRareza base={ptsJornada(c.pool.id)} rareza={c.pool.rareza} />
                   </div>
                 </li>
               );
