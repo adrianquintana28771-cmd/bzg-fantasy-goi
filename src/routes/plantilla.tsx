@@ -334,7 +334,7 @@ function Inner({ userId }: { userId: string }) {
   });
 
   const ptsJornada = (id: string) => jornadaPts.data?.get(id) ?? 0;
-  const fmtPts = (n: number) => String(Math.round(n * 100) / 100);
+
 
   const historial = useQuery({
     queryKey: ["historial-jornadas", userId],
