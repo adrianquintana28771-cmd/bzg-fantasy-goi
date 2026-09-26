@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 const TOUR_EVENT = "bzg:open-tour";
 export const TOUR_COMPLETED_EVENT = "bzg:tour-completed";
-const TOUR_VERSION = "v1";
 
 type TourStep = {
   target?: string;
