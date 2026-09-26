@@ -12,7 +12,7 @@ export function RankedPlayerRow({ p, rank }: { p: RankedPlayer; rank: number }) 
     >
       <div className="w-7 text-center font-display text-xl text-muted-foreground">{rank}</div>
       <div className="min-w-0 flex-1">
-        <div className="truncate font-semibold">{p.nombre}</div>
+        <div translate="no" className="truncate font-semibold">{p.nombre}</div>
         <div className="truncate text-xs text-muted-foreground">
           {p.team?.nombre ?? "BZG"}
           {p.esEntrenador ? ` · ${t("Entrenatzailea", "Entrenador/a")}` : ""}

@@ -105,7 +105,7 @@ function Equipos() {
                           .filter((p) => p.team_id === team.id && p.club?.es_entrenador)
                           .map((c) => (
                             <div key={c.id} className="text-xs">
-                              {t("Entrenatzailea", "Entrenador/a")}: {c.nombre}
+                              {t("Entrenatzailea", "Entrenador/a")}: <span translate="no">{c.nombre}</span>
                             </div>
                           ))}
                       </div>

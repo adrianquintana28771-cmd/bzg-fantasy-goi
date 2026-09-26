@@ -149,7 +149,7 @@ function Home() {
               </div>
               <div className="mt-3 flex items-center gap-4">
                 <div className="flex-1">
-                  <div className="font-display text-2xl">{playerOfWeek.nombre}</div>
+                  <div translate="no" className="font-display text-2xl">{playerOfWeek.nombre}</div>
                   <div className="text-sm text-muted-foreground">
                     {playerOfWeek.team?.nombre}
                     {playerOfWeek.team

@@ -827,7 +827,7 @@ function Inner({ userId }: { userId: string }) {
                 >
                   <CardPhoto className="mr-3 h-10 w-10 shrink-0 rounded-full bg-background p-0.5" />
                   <div className="min-w-0 flex-1">
-                    <div className="font-semibold">
+                    <div translate="no" className="font-semibold">
                       {c.pool.nombre}
                       {c.pool.club_teams?.nombre ? ` — ${c.pool.club_teams.nombre}` : ""}
                       {c.pool.estado && c.pool.estado !== "disponible" && (
