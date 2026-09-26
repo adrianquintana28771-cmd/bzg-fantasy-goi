@@ -882,6 +882,9 @@ function Inner({ userId }: { userId: string }) {
                     <div className="text-[10px] text-muted-foreground">
                       {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
                     </div>
+                    <div className="text-[10px] font-semibold text-muted-foreground">
+                      {fmtPts(ptsJornada(c.pool.id))} pts
+                    </div>
                   </div>
                 </button>
               ))}
