@@ -286,6 +286,27 @@ function Inner({ userId }: { userId: string }) {
     },
   });
 
+  /** Puntos reales de cada jugador en la jornada activa (player_jornada_stats) */
+  const jornadaPts = useQuery({
+    queryKey: ["jornada-pts", jornada.data?.numero],
+    enabled: !!jornada.data,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("player_jornada_stats")
+        .select("player_id, puntos")
+        .eq("jornada_numero", jornada.data!.numero);
+      if (error) throw error;
+      const map = new Map<string, number>();
+      (data ?? []).forEach((s) =>
+        map.set(s.player_id, (map.get(s.player_id) ?? 0) + Number(s.puntos)),
+      );
+      return map;
+    },
+  });
+
+  const ptsJornada = (id: string) => jornadaPts.data?.get(id) ?? 0;
+  const fmtPts = (n: number) => String(Math.round(n * 100) / 100);
+
   const historial = useQuery({
     queryKey: ["historial-jornadas", userId],
     queryFn: async () => {
@@ -610,6 +631,11 @@ function Inner({ userId }: { userId: string }) {
                   <div translate="no" className="max-w-[90px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                     {c ? c.pool.nombre : POS_LABEL[slot]}
                   </div>
+                  {c && (
+                    <div className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      {fmtPts(ptsJornada(c.pool.id))} pts
+                    </div>
+                  )}
                 </div>
               </button>
             );
@@ -712,6 +738,9 @@ function Inner({ userId }: { userId: string }) {
                     className={`text-[10px] font-semibold ${c.usosRestantes <= 1 ? "text-destructive" : "text-muted-foreground"}`}
                   >
                     {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
+                  </div>
+                  <div className="text-[10px] font-semibold text-muted-foreground">
+                    {t("Jardunaldia", "Jornada")}: {fmtPts(ptsJornada(c.pool.id))} pts
                   </div>
                 </li>
               );
@@ -852,6 +881,9 @@ function Inner({ userId }: { userId: string }) {
                     </div>
                     <div className="text-[10px] text-muted-foreground">
                       {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
+                    </div>
+                    <div className="text-[10px] font-semibold text-muted-foreground">
+                      {fmtPts(ptsJornada(c.pool.id))} pts
                     </div>
                   </div>
                 </button>
