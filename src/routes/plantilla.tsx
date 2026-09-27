@@ -387,7 +387,7 @@ function Inner({ userId }: { userId: string }) {
             numero,
             nombre: l.jornadas!.nombre,
             alineados,
-            total: Math.min(99, Math.round(alineados.reduce((a, p) => a + p.puntos, 0))),
+            total: Math.round(alineados.reduce((a, p) => a + p.puntos, 0)),
           };
         })
         .sort((a, b) => b.numero - a.numero);
@@ -559,17 +559,14 @@ function Inner({ userId }: { userId: string }) {
         (!alignedIds.has(c.pool.id) || slotDraft[slot] === c.pool.id),
     );
 
-  /** Puntuación estimada de la jornada (máx. 2 dígitos) */
-  const puntosJornada = Math.min(
-    99,
-    Math.round(
-      (Object.values(slotDraft).filter(Boolean) as string[]).reduce(
-        (acc, id) =>
-          acc +
-          (cardById(id) ? cartaPuntos(cardById(id)!.pool.rating, cardById(id)!.pool.rareza) : 0),
-        0,
-      ) / 8,
-    ),
+  /** Puntuación estimada de la jornada (sin límite de visualización) */
+  const puntosJornada = Math.round(
+    (Object.values(slotDraft).filter(Boolean) as string[]).reduce(
+      (acc, id) =>
+        acc +
+        (cardById(id) ? cartaPuntos(cardById(id)!.pool.rating, cardById(id)!.pool.rareza) : 0),
+      0,
+    ) / 8,
   );
 
   return (
