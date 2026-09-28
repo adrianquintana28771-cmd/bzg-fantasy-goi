@@ -77,6 +77,19 @@ function EquipoDetalle() {
       </div>
     );
   const pts = q.data!.pts;
+  const posNombre = new Map((q.data!.posTipos ?? []).map((p) => [p.id, p.nombre]));
+  const posByPerson = new Map<string, { id: string; nombre: string; es_principal: boolean }[]>();
+  for (const r of q.data!.posJug ?? []) {
+    const arr = posByPerson.get(r.player_id) ?? [];
+    arr.push({ id: r.position_id, nombre: posNombre.get(r.position_id) ?? r.position_id, es_principal: r.es_principal });
+    posByPerson.set(r.player_id, arr);
+  }
+  /** Todas las posiciones actuales de la persona en la base de datos (principal primero) */
+  const posicionesDe = (clubPlayerId: string | null) =>
+    (clubPlayerId ? posByPerson.get(clubPlayerId) ?? [] : [])
+      .sort((a, b) => Number(b.es_principal) - Number(a.es_principal))
+      .map((p) => POS_LABEL[p.id as keyof typeof POS_LABEL] ?? p.nombre)
+      .join(" · ");
   const coaches = q.data!.pool.filter((p) => p.club?.es_entrenador);
   const ranking = [...q.data!.pool.filter((p) => !p.club?.es_entrenador)].sort((a, b) => (pts[b.id] ?? 0) - (pts[a.id] ?? 0));
   const total = round2(
@@ -121,6 +134,11 @@ function EquipoDetalle() {
                 className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card transition hover:shadow-elevated"
               >
                 <div translate="no" className="min-w-0 flex-1 truncate font-semibold">{p.nombre}</div>
+                {posicionesDe(p.club_player_id) && (
+                  <div className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+                    {posicionesDe(p.club_player_id)}
+                  </div>
+                )}
                 <span className="font-display text-xl text-primary">{round2(pts[p.id] ?? 0)}</span>
               </Link>
             ))}
