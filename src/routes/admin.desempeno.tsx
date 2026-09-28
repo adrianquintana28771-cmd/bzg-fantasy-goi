@@ -7,6 +7,7 @@ import { BackButton } from "@/components/back-button";
 import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/i18n";
+import { ESTADO_LABEL, ESTADO_LABEL_EU, type PlayerEstado } from "@/lib/fantasy/types";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/desempeno")({
@@ -57,6 +58,7 @@ interface PlayerRow {
     apellido1: string | null;
     apellido2: string | null;
     es_entrenador: boolean;
+    estado: PlayerEstado;
     club_player_positions: { position_id: string; es_principal: boolean }[];
   } | null;
 }
@@ -110,7 +112,7 @@ function Desempeno() {
       const { data, error } = await supabase
         .from("club_player_teams")
         .select(
-          "dorsal,club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,club_player_positions(position_id,es_principal))",
+          "dorsal,club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,estado,club_player_positions(position_id,es_principal))",
         )
         .eq("team_id", match!.team_id);
       if (error) throw error;
@@ -126,7 +128,7 @@ function Desempeno() {
       const { data, error } = await supabase
         .from("club_player_teams")
         .select(
-          "team_id,dorsal,club_teams(nombre),club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,club_player_positions(position_id,es_principal))",
+          "team_id,dorsal,club_teams(nombre),club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,estado,club_player_positions(position_id,es_principal))",
         );
       if (error) throw error;
       return (data ?? []) as unknown as (PlayerRow & {
