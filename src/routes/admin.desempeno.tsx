@@ -530,3 +530,29 @@ function Desempeno() {
 function fullName(p: { nombre: string; alias: string | null; apellido1: string | null; apellido2: string | null }) {
   return [p.nombre, p.apellido1, p.apellido2].filter(Boolean).join(" ") || p.alias || "";
 }
+
+const ESTADO_DOT: Record<PlayerEstado, string> = {
+  disponible: "bg-primary",
+  dudoso: "bg-[color:var(--gold,#d4a017)]",
+  no_disponible: "bg-destructive",
+};
+
+function EstadoTag({
+  estado,
+  label,
+  active,
+}: {
+  estado: PlayerEstado;
+  label: string;
+  active: boolean;
+}) {
+  const activeCls = active ? "bg-white/15" : "bg-secondary";
+  return (
+    <span
+      className={`ml-2 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wide ${activeCls}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${ESTADO_DOT[estado]}`} />
+      {label}
+    </span>
+  );
+}
