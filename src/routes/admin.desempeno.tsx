@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/i18n";
 import { ESTADO_LABEL, ESTADO_LABEL_EU, type PlayerEstado } from "@/lib/fantasy/types";
 import { supabase } from "@/integrations/supabase/client";
+import { golEncajadoPts } from "@/lib/club-data";
 
 export const Route = createFileRoute("/admin/desempeno")({
   head: () => ({
@@ -236,7 +237,15 @@ function Desempeno() {
   );
 
   const total = useMemo(
-    () => visibleActions.reduce((acc, a) => acc + (counts[a.id] ?? 0) * Number(a.puntos), 0),
+    () =>
+      visibleActions.reduce(
+        (acc, a) =>
+          acc +
+          (a.id === "gol_encajado"
+            ? golEncajadoPts(counts[a.id] ?? 0)
+            : (counts[a.id] ?? 0) * Number(a.puntos)),
+        0,
+      ),
     [visibleActions, counts],
   );
 
