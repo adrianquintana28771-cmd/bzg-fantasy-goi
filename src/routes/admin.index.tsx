@@ -52,9 +52,6 @@ function Admin() {
     isSuperAdmin,
     isManager,
     isAdmin,
-    canEditStats,
-    canEditMatches,
-    canManagePlayers,
     canManageAll,
   } = useAuth();
   const roleLabel = isSuperAdmin ? "super_admin" : isManager ? "manager" : isAdmin ? "admin" : "";
