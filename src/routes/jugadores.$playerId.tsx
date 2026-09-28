@@ -256,10 +256,11 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
   const filtered = current === "total" ? actions : actions.filter((a) => a.jornada === current);
   const grouped = new Map<
     string,
-    { nombre: string; puntos: number; cantidad: number; orden: number }
+    { action_id: string; nombre: string; puntos: number; cantidad: number; orden: number }
   >();
   for (const a of filtered) {
     const g = grouped.get(a.action_id) ?? {
+      action_id: a.action_id,
       nombre: a.nombre,
       puntos: a.puntos,
       cantidad: 0,
