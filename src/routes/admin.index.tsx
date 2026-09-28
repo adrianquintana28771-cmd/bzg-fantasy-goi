@@ -124,6 +124,17 @@ function Admin() {
             to="/admin/reglas"
           />
         )}
+        {canManageAll && (
+          <Section
+            icon={Users}
+            title={t("Jokalarien posizioak", "Posiciones de jugadores/as")}
+            description={t(
+              "Gehitu edo kendu posizioak edozein jokalariri, talde edo kategoria kontuan hartu gabe.",
+              "Añade o quita posiciones a cualquier jugador/a, sin importar equipo o categoría.",
+            )}
+            to="/admin/posiciones"
+          />
+        )}
         {canEditMatches && (
           <Section
             icon={ClipboardList}
