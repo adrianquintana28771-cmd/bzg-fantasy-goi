@@ -221,6 +221,7 @@ function Desempeno() {
   const esEntrenador = !!player?.es_entrenador;
   const esPortero =
     !esEntrenador && !!player?.club_player_positions?.some((p) => p.position_id === "portero");
+  const EST_LABEL = lang === "eu" ? ESTADO_LABEL_EU : ESTADO_LABEL;
 
   const visibleActions = useMemo(
     () =>
@@ -376,6 +377,7 @@ function Desempeno() {
                   >
                     <span translate="no">{fullName(p)}</span>
                     {r.dorsal ? ` — ${r.dorsal}` : ""}
+                    <EstadoTag estado={p.estado} label={EST_LABEL[p.estado]} active={active} />
                   </button>
                 );
               })}
@@ -395,6 +397,7 @@ function Desempeno() {
                   >
                     <span translate="no">{fullName(p)}</span>
                     {r.dorsal ? ` — ${r.dorsal}` : ""} · {r.club_teams?.nombre}
+                    <EstadoTag estado={p.estado} label={EST_LABEL[p.estado]} active={active} />
                   </button>
                 );
               })}
@@ -438,12 +441,19 @@ function Desempeno() {
           <div className="sticky top-16 z-30 mt-6 flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 shadow-card">
             <div>
               <div translate="no" className="font-display text-xl">{fullName(player)}</div>
-              <div className="text-xs text-muted-foreground">
-                {esEntrenador
-                  ? t("Entrenatzailea", "Entrenador/a")
-                  : esPortero
-                    ? t("Atezaina", "Portero/a")
-                    : t("Zelaiko jokalaria", "Jugador/a de campo")}
+              <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                <span>
+                  {esEntrenador
+                    ? t("Entrenatzailea", "Entrenador/a")
+                    : esPortero
+                      ? t("Atezaina", "Portero/a")
+                      : t("Zelaiko jokalaria", "Jugador/a de campo")}
+                </span>
+                <EstadoTag
+                  estado={player.estado}
+                  label={EST_LABEL[player.estado]}
+                  active={false}
+                />
               </div>
             </div>
             <div className="text-right">
