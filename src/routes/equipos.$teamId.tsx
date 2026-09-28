@@ -160,7 +160,9 @@ function EquipoDetalle() {
             <div className="min-w-0 flex-1">
               <div translate="no" className="truncate font-semibold">{p.nombre}</div>
               <div className="text-xs text-muted-foreground">
-                {POS_LABEL[p.posicion as keyof typeof POS_LABEL] ?? p.posicion}
+                {posicionesDe(p.club_player_id) ||
+                  POS_LABEL[p.posicion as keyof typeof POS_LABEL] ||
+                  p.posicion}
               </div>
             </div>
             <span className="font-display text-xl text-primary">{round2(pts[p.id] ?? 0)}</span>
