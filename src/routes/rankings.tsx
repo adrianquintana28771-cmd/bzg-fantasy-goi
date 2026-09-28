@@ -199,7 +199,7 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
           (r.username as string | null) ??
           (r.display_name as string | null) ??
           t("Erabiltzailea", "Usuario"),
-        puntos: Math.round(Number(r.puntos)),
+        puntos: Math.round(Number(r.puntos) * 100) / 100,
         jornadas: Number(r.jornadas),
         porJornada: porUser[r.user_id] ?? {},
       }));
@@ -231,7 +231,7 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
         ? u
         : {
             ...u,
-            puntos: Math.round(u.porJornada[jor] ?? 0),
+            puntos: Math.round((u.porJornada[jor] ?? 0) * 100) / 100,
             jornadas: jor in u.porJornada ? 1 : 0,
           },
     )
@@ -287,7 +287,9 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
               </div>
             </div>
             <div className="text-right">
-              <div className="font-display text-2xl text-primary">{u.puntos}</div>
+              <div className="font-display text-2xl text-primary">
+                {String(u.puntos).replace(".", ",")}
+              </div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</div>
             </div>
           </li>

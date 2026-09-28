@@ -7,6 +7,7 @@ import { BackButton } from "@/components/back-button";
 import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/i18n";
+import { ESTADO_LABEL, ESTADO_LABEL_EU, type PlayerEstado } from "@/lib/fantasy/types";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/desempeno")({
@@ -57,6 +58,7 @@ interface PlayerRow {
     apellido1: string | null;
     apellido2: string | null;
     es_entrenador: boolean;
+    estado: PlayerEstado;
     club_player_positions: { position_id: string; es_principal: boolean }[];
   } | null;
 }
@@ -110,7 +112,7 @@ function Desempeno() {
       const { data, error } = await supabase
         .from("club_player_teams")
         .select(
-          "dorsal,club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,club_player_positions(position_id,es_principal))",
+          "dorsal,club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,estado,club_player_positions(position_id,es_principal))",
         )
         .eq("team_id", match!.team_id);
       if (error) throw error;
@@ -126,7 +128,7 @@ function Desempeno() {
       const { data, error } = await supabase
         .from("club_player_teams")
         .select(
-          "team_id,dorsal,club_teams(nombre),club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,club_player_positions(position_id,es_principal))",
+          "team_id,dorsal,club_teams(nombre),club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,estado,club_player_positions(position_id,es_principal))",
         );
       if (error) throw error;
       return (data ?? []) as unknown as (PlayerRow & {
@@ -219,6 +221,7 @@ function Desempeno() {
   const esEntrenador = !!player?.es_entrenador;
   const esPortero =
     !esEntrenador && !!player?.club_player_positions?.some((p) => p.position_id === "portero");
+  const EST_LABEL = lang === "eu" ? ESTADO_LABEL_EU : ESTADO_LABEL;
 
   const visibleActions = useMemo(
     () =>
@@ -374,6 +377,7 @@ function Desempeno() {
                   >
                     <span translate="no">{fullName(p)}</span>
                     {r.dorsal ? ` — ${r.dorsal}` : ""}
+                    <EstadoTag estado={p.estado} label={EST_LABEL[p.estado]} active={active} />
                   </button>
                 );
               })}
@@ -393,6 +397,7 @@ function Desempeno() {
                   >
                     <span translate="no">{fullName(p)}</span>
                     {r.dorsal ? ` — ${r.dorsal}` : ""} · {r.club_teams?.nombre}
+                    <EstadoTag estado={p.estado} label={EST_LABEL[p.estado]} active={active} />
                   </button>
                 );
               })}
@@ -436,12 +441,19 @@ function Desempeno() {
           <div className="sticky top-16 z-30 mt-6 flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 shadow-card">
             <div>
               <div translate="no" className="font-display text-xl">{fullName(player)}</div>
-              <div className="text-xs text-muted-foreground">
-                {esEntrenador
-                  ? t("Entrenatzailea", "Entrenador/a")
-                  : esPortero
-                    ? t("Atezaina", "Portero/a")
-                    : t("Zelaiko jokalaria", "Jugador/a de campo")}
+              <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                <span>
+                  {esEntrenador
+                    ? t("Entrenatzailea", "Entrenador/a")
+                    : esPortero
+                      ? t("Atezaina", "Portero/a")
+                      : t("Zelaiko jokalaria", "Jugador/a de campo")}
+                </span>
+                <EstadoTag
+                  estado={player.estado}
+                  label={EST_LABEL[player.estado]}
+                  active={false}
+                />
               </div>
             </div>
             <div className="text-right">
@@ -517,4 +529,30 @@ function Desempeno() {
 
 function fullName(p: { nombre: string; alias: string | null; apellido1: string | null; apellido2: string | null }) {
   return [p.nombre, p.apellido1, p.apellido2].filter(Boolean).join(" ") || p.alias || "";
+}
+
+const ESTADO_DOT: Record<PlayerEstado, string> = {
+  disponible: "bg-primary",
+  dudoso: "bg-[color:var(--gold,#d4a017)]",
+  no_disponible: "bg-destructive",
+};
+
+function EstadoTag({
+  estado,
+  label,
+  active,
+}: {
+  estado: PlayerEstado;
+  label: string;
+  active: boolean;
+}) {
+  const activeCls = active ? "bg-white/15" : "bg-secondary";
+  return (
+    <span
+      className={`ml-2 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wide ${activeCls}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${ESTADO_DOT[estado]}`} />
+      {label}
+    </span>
+  );
 }
