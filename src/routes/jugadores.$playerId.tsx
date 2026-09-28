@@ -25,7 +25,7 @@ import {
 } from "@/lib/fantasy/types";
 import { useT, useTd, useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
-import { fetchPoolPlayer, fetchTeams, round2 } from "@/lib/club-data";
+import { fetchPoolPlayer, fetchTeams, golEncajadoPts, round2 } from "@/lib/club-data";
 
 const ESTADO_COLOR: Record<PlayerEstado, string> = {
   disponible: "var(--color-primary)",
@@ -274,7 +274,9 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
     .sort((a, b) => a.orden - b.orden);
   const totalPts =
     current === "total" ? round2(stats.reduce((a, s) => a + s.puntos, 0)) : round2(ptsFor(current));
-  const accionesPts = round2(rows.reduce((a, r) => a + r.cantidad * r.puntos, 0));
+  const rowPts = (r: { action_id: string; cantidad: number; puntos: number }) =>
+    r.action_id === "gol_encajado" ? golEncajadoPts(r.cantidad) : round2(r.cantidad * r.puntos);
+  const accionesPts = round2(rows.reduce((a, r) => a + rowPts(r), 0));
   const extra = round2(totalPts - accionesPts);
   const noDisp = current !== "total" && estadoFor(current) === "no_disponible";
 
@@ -329,7 +331,7 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
             </p>
           )}
           {rows.map((r) => {
-            const p = round2(r.cantidad * r.puntos);
+            const p = rowPts(r);
             return (
               <div
                 key={r.nombre}
