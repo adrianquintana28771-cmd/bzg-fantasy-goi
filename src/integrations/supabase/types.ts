@@ -930,6 +930,25 @@ export type Database = {
       }
     }
     Functions: {
+      admin_save_player: {
+        Args: {
+          _activo: boolean
+          _alias: string
+          _anio_nacimiento: number
+          _apellido1: string
+          _apellido2: string
+          _dorsal: number
+          _es_entrenador: boolean
+          _estado: Database["public"]["Enums"]["player_estado"]
+          _id: string
+          _nombre: string
+          _positions: string[]
+          _principal: string
+          _sexo: Database["public"]["Enums"]["club_sexo"]
+          _team_ids: string[]
+        }
+        Returns: string
+      }
       claim_mision: { Args: { _mision_id: string }; Returns: number }
       claim_qr: { Args: { _codigo: string }; Returns: number }
       close_jornada: { Args: { _jornada_id: string }; Returns: undefined }
