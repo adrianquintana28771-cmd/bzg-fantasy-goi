@@ -964,6 +964,10 @@ export type Database = {
         }[]
       }
       recalc_player_stats: { Args: never; Returns: undefined }
+      set_player_activo: {
+        Args: { _activo: boolean; _player_id: string }
+        Returns: undefined
+      }
       user_ranking: {
         Args: never
         Returns: {
