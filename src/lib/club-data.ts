@@ -61,6 +61,17 @@ export async function fetchPointsByPlayer(): Promise<Record<string, number>> {
 
 export const round2 = (n: number) => Math.round(n * 100) / 100;
 
+// Penalización de porteros por goles encajados, acumulativa por tramos:
+// 1-10: -0,25/gol · 11-20: -0,50/gol · 21-30: -0,75/gol · 31+: -1/gol
+export const golEncajadoPts = (goles: number) => {
+  const g = Math.max(0, Math.floor(goles));
+  const t1 = Math.min(g, 10) * 0.25;
+  const t2 = Math.min(Math.max(g - 10, 0), 10) * 0.5;
+  const t3 = Math.min(Math.max(g - 20, 0), 10) * 0.75;
+  const t4 = Math.max(g - 30, 0) * 1;
+  return -round2(t1 + t2 + t3 + t4);
+};
+
 export type RankedPlayer = {
   id: string;
   nombre: string;
