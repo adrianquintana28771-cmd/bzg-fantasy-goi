@@ -22,6 +22,7 @@ import { Route as JugadoresPlayerIdRouteImport } from './routes/jugadores.$playe
 import { Route as EquiposTeamIdRouteImport } from './routes/equipos.$teamId'
 import { Route as AdminReglasRouteImport } from './routes/admin.reglas'
 import { Route as AdminPosicionesRouteImport } from './routes/admin.posiciones'
+import { Route as AdminJugadoresRouteImport } from './routes/admin.jugadores'
 import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -89,6 +90,11 @@ const AdminPosicionesRoute = AdminPosicionesRouteImport.update({
   path: '/admin/posiciones',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminJugadoresRoute = AdminJugadoresRouteImport.update({
+  id: '/admin/jugadores',
+  path: '/admin/jugadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminDesempenoRoute = AdminDesempenoRouteImport.update({
   id: '/admin/desempeno',
   path: '/admin/desempeno',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
+  '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
+  '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
+  '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/rankings'
     | '/reset-password'
     | '/admin/desempeno'
+    | '/admin/jugadores'
     | '/admin/posiciones'
     | '/admin/reglas'
     | '/equipos/$teamId'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/rankings'
     | '/reset-password'
     | '/admin/desempeno'
+    | '/admin/jugadores'
     | '/admin/posiciones'
     | '/admin/reglas'
     | '/equipos/$teamId'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/rankings'
     | '/reset-password'
     | '/admin/desempeno'
+    | '/admin/jugadores'
     | '/admin/posiciones'
     | '/admin/reglas'
     | '/equipos/$teamId'
@@ -203,6 +215,7 @@ export interface RootRouteChildren {
   RankingsRoute: typeof RankingsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   AdminDesempenoRoute: typeof AdminDesempenoRoute
+  AdminJugadoresRoute: typeof AdminJugadoresRoute
   AdminPosicionesRoute: typeof AdminPosicionesRoute
   AdminReglasRoute: typeof AdminReglasRoute
   EquiposTeamIdRoute: typeof EquiposTeamIdRoute
@@ -305,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPosicionesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/jugadores': {
+      id: '/admin/jugadores'
+      path: '/admin/jugadores'
+      fullPath: '/admin/jugadores'
+      preLoaderRoute: typeof AdminJugadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/desempeno': {
       id: '/admin/desempeno'
       path: '/admin/desempeno'
@@ -323,6 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   RankingsRoute: RankingsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   AdminDesempenoRoute: AdminDesempenoRoute,
+  AdminJugadoresRoute: AdminJugadoresRoute,
   AdminPosicionesRoute: AdminPosicionesRoute,
   AdminReglasRoute: AdminReglasRoute,
   EquiposTeamIdRoute: EquiposTeamIdRoute,
