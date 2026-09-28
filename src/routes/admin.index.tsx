@@ -5,9 +5,7 @@ import {
   ClipboardList,
   Settings,
   FileText,
-  Trophy,
   ShieldAlert,
-  BarChart3,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -138,50 +136,14 @@ function Admin() {
         {canManageAll && (
           <Section
             icon={Users}
-            title={t("Jokalariak gehitu / kendu", "Añadir / eliminar jugadores/as")}
+            title={t("Jokalarien kudeaketa", "Gestión de jugadores/as")}
             description={t(
-              "Kendu edo berriro gehitu jokalariak. Historia eta puntuak gordetzen dira.",
-              "Elimina o vuelve a añadir jugadores/as. Se conservan su historial y puntos.",
+              "Sortu, editatu edo desaktibatu jokalariak. Historia eta puntuak gordetzen dira.",
+              "Crea, edita o desactiva jugadores/as. Se conservan su historial y puntos.",
             )}
             to="/admin/jugadores"
           />
         )}
-        {canEditMatches && (
-          <Section
-            icon={ClipboardList}
-            title={t("Partidak kudeatu", "Gestionar partidos")}
-            description={t("Sortu eta editatu partidak eta igo akta.", "Crea, edita partidos y sube el acta.")}
-            to="/partidos"
-          />
-        )}
-        {canEditStats && (
-          <Section
-            icon={BarChart3}
-            title={t("Jokalarien errendimendua", "Desempeño de jugadores/as")}
-            description={t(
-              "Formulario ofiziala: idatzi golak, flyak, roskak, geldiketak, lapurretak, hutsak… eta puntuak berez kalkulatzen dira.",
-              "Formulario oficial: anota goles, flys, roscas, paradas, robos, fallos… y los puntos se calculan solos.",
-            )}
-            to="/admin/desempeno"
-          />
-        )}
-        {canManagePlayers && (
-          <Section
-            icon={Users}
-            title={t("Taldeak eta jokalariak", "Equipos y jugadores/as")}
-            description={t("Gehitu edo ezabatu talde bakoitzeko jokalariak.", "Añade o borra jugadores/as de cada equipo.")}
-            to="/equipos"
-          />
-        )}
-        <Section
-          icon={Trophy}
-          title={t("Sailkapenak", "Rankings")}
-          description={t(
-            "Denboraldi, kategoria, jardunaldi eta posizioaren arabera iragazteko sailkapenak.",
-            "Rankings filtrables por temporada, categoría, jornada y posición.",
-          )}
-          to="/rankings"
-        />
       </div>
 
       {canManageAll && <CloseJornada />}
