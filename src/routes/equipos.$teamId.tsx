@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { CategoryBadge } from "@/components/fantasy-ui";
 import { ArrowLeft } from "lucide-react";
 import { POSITION_LABEL, POSITION_LABEL_EU, type Category } from "@/lib/fantasy/types";
@@ -38,15 +39,21 @@ function EquipoDetalle() {
   const q = useQuery({
     queryKey: ["club-equipo", teamId],
     queryFn: async () => {
-      const [teams, pool, pts] = await Promise.all([
+      const [teams, pool, pts, posTipos, posJug] = await Promise.all([
         fetchTeams(),
         fetchPool(),
         fetchPointsByPlayer(),
+        supabase.from("club_positions").select("id,nombre,orden").order("orden"),
+        supabase.from("club_player_positions").select("player_id,position_id,es_principal"),
       ]);
+      if (posTipos.error) throw posTipos.error;
+      if (posJug.error) throw posJug.error;
       return {
         team: teams.find((t) => t.id === teamId),
         pool: pool.filter((p) => p.team_id === teamId),
         pts,
+        posTipos: (posTipos.data ?? []) as { id: string; nombre: string }[],
+        posJug: (posJug.data ?? []) as { player_id: string; position_id: string; es_principal: boolean }[],
       };
     },
   });
