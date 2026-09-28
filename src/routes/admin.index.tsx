@@ -135,6 +135,17 @@ function Admin() {
             to="/admin/posiciones"
           />
         )}
+        {canManageAll && (
+          <Section
+            icon={Users}
+            title={t("Jokalariak gehitu / kendu", "Añadir / eliminar jugadores/as")}
+            description={t(
+              "Kendu edo berriro gehitu jokalariak. Historia eta puntuak gordetzen dira.",
+              "Elimina o vuelve a añadir jugadores/as. Se conservan su historial y puntos.",
+            )}
+            to="/admin/jugadores"
+          />
+        )}
         {canEditMatches && (
           <Section
             icon={ClipboardList}

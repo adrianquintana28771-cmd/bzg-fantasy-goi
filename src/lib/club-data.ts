@@ -35,8 +35,9 @@ export async function fetchTeams(): Promise<ClubTeam[]> {
 export async function fetchPool(): Promise<PoolPlayer[]> {
   const { data, error } = await supabase
     .from("player_pool")
-    .select(POOL_SELECT)
-    .eq("rareza", "normal");
+    .select(POOL_SELECT.replace("club:club_players(", "club:club_players!inner(activo,"))
+    .eq("rareza", "normal")
+    .eq("club.activo", true);
   if (error) throw error;
   return (data ?? []) as unknown as PoolPlayer[];
 }
