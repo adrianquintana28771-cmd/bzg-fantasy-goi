@@ -48,9 +48,21 @@ function Rankings() {
   const [jor, setJor] = useState<JornadaSel>("total");
   const { data: jornadas = [] } = useCalendarJornadas();
 
-  const teams = [
+  const allTeams = [
     ...new Map(ranking.flatMap((r) => (r.team ? [[r.team.id, r.team]] : []))).values(),
   ].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  const teams = allTeams.filter(
+    (tm) => (!category || tm.categoria === category) && (!gender || tm.sexo === gender),
+  );
+  const catOptions = (["cadete", "juvenil", "senior"] as const).filter(
+    (k) => allTeams.some((tm) => tm.categoria === k && (!gender || tm.sexo === gender)),
+  );
+  const genderOptions = (["masculino", "femenino"] as const).filter((g) =>
+    allTeams.some((tm) => tm.sexo === g && (!category || tm.categoria === category)),
+  );
+  useEffect(() => {
+    if (teamId && !teams.some((tm) => tm.id === teamId)) setTeamId("");
+  }, [category, gender, teamId, teams]);
   const sorted = ranking
     .filter(
       (r) =>
@@ -107,18 +119,20 @@ function Rankings() {
           <div className="mt-6 grid grid-cols-1 gap-2 rounded-2xl border border-border bg-card p-3 shadow-card sm:grid-cols-3">
             <Select value={category} onChange={setCategory} label={t("Kategoria", "Categoría")}>
               <option value="">{t("Guztiak", "Todas")}</option>
-              {(["senior", "juvenil", "cadete"] as const)
-                .map((k) => [k, CAT_LABEL[k]])
-                .map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
-                  </option>
-                ))}
+              {catOptions.map((k) => (
+                <option key={k} value={k}>
+                  {CAT_LABEL[k]}
+                </option>
+              ))}
             </Select>
-            <Select value={gender} onChange={setGender} label={t("Generoa", "Género")}>
+            <Select value={gender} onChange={setGender} label={t("Sexua", "Sexo")}>
               <option value="">{t("Guztiak", "Todos")}</option>
-              <option value="masculino">{t("Gizonezkoa", "Masculino")}</option>
-              <option value="femenino">{t("Emakumezkoa", "Femenino")}</option>
+              {genderOptions.includes("masculino") && (
+                <option value="masculino">{t("Gizonezkoa", "Masculino")}</option>
+              )}
+              {genderOptions.includes("femenino") && (
+                <option value="femenino">{t("Emakumezkoa", "Femenino")}</option>
+              )}
             </Select>
             <Select value={teamId} onChange={setTeamId} label={t("Taldea", "Equipo")}>
               <option value="">{t("Guztiak", "Todos")}</option>
