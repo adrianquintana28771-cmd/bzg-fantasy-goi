@@ -446,6 +446,7 @@ function Inner({ userId }: { userId: string }) {
   });
   const [dirty, setDirty] = useState(false);
   const [pickSlot, setPickSlot] = useState<Posicion | null>(null);
+  const [histJor, setHistJor] = useState<number | null>(null);
   const [sobreResult, setSobreResult] = useState<Array<{
     id: string;
     nombre: string;
