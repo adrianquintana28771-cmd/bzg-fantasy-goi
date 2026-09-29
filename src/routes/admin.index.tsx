@@ -224,8 +224,18 @@ function CloseJornada() {
   const { data: jornada, refetch } = useQuery({
     queryKey: ["admin-jornada-activa"],
     queryFn: async () =>
-      (await supabase.from("jornadas").select("id, numero").eq("is_active", true).eq("is_locked", false).order("numero").limit(1).maybeSingle()).data,
+      (await supabase.from("jornadas").select("id, numero, is_locked").eq("is_active", true).order("numero").limit(1).maybeSingle()).data,
   });
+  const lockLineups = async () => {
+    if (!jornada || jornada.is_locked) return;
+    if (!window.confirm(t(`${jornada.numero}. jardunaldiko alineazioak blokeatu?`, `¿Bloquear las alineaciones de la jornada ${jornada.numero}?`))) return;
+    setBusy(true);
+    const { error } = await supabase.from("jornadas").update({ is_locked: true }).eq("id", jornada.id);
+    setBusy(false);
+    setMsg(error ? error.message : t("Alineazioak blokeatuta.", "Alineaciones bloqueadas."));
+    refetch();
+    qc.invalidateQueries();
+  };
   const close = async () => {
     if (!jornada) return;
     if (!window.confirm(t(`${jornada.numero}. jardunaldia behin betiko itxi? Ezin da berriro ireki.`, `¿Cerrar definitivamente la jornada ${jornada.numero}? No se podrá reabrir.`))) return;
@@ -238,21 +248,31 @@ function CloseJornada() {
   };
   return (
     <div className="mt-8 rounded-2xl border border-border bg-card p-5 shadow-card">
-      <div className="font-display text-lg">{t("Jardunaldia itxi", "Cerrar jornada")}</div>
+      <div className="font-display text-lg">{t("Jardunaldia amaitu", "Acabar jornada")}</div>
       <p className="mt-1 text-sm text-muted-foreground">
         {t(
-          "Erabiltzaile guztien alineazioaren argazkia gordetzen du. Jardunaldi horrek argazki hori erabiliko du beti puntuatzeko. Ezin da berriro ireki.",
-          "Guarda una foto de la alineación de todos los usuarios. Esa jornada puntuará siempre con esa foto. No se puede reabrir.",
+          "Alineazioak itxi: erabiltzaileek ezin dituzte aldatu, baina puntuak ikusten jarraitzen dute. Jardunaldia itxi: argazkia gorde eta hurrengo jardunaldira pasatzen da. Ezin da berriro ireki.",
+          "Cerrar alineaciones: los usuarios no pueden modificarlas, pero siguen viendo los puntos. Cerrar jornada: guarda la foto y pasa a la siguiente. No se puede reabrir.",
         )}
       </p>
-      <button
-        type="button"
-        disabled={!jornada || busy}
-        onClick={close}
-        className="mt-3 rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
-      >
-        {jornada ? t(`${jornada.numero}. jardunaldia itxi`, `Cerrar jornada ${jornada.numero}`) : t("Jardunaldi irekirik ez", "Sin jornada abierta")}
-      </button>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={!jornada || jornada.is_locked || busy}
+          onClick={lockLineups}
+          className="rounded-lg border border-border bg-secondary px-4 py-2 text-sm font-semibold disabled:opacity-50"
+        >
+          {jornada?.is_locked ? t("Alineazioak blokeatuta", "Alineaciones bloqueadas") : t("Alineazioak itxi", "Cerrar alineaciones")}
+        </button>
+        <button
+          type="button"
+          disabled={!jornada || busy}
+          onClick={close}
+          className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
+        >
+          {jornada ? t(`${jornada.numero}. jardunaldia itxi`, `Cerrar jornada ${jornada.numero}`) : t("Jardunaldi irekirik ez", "Sin jornada abierta")}
+        </button>
+      </div>
       {msg && <p className="mt-2 text-sm">{msg}</p>}
     </div>
   );

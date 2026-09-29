@@ -87,6 +87,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   async function handleSignOut() {
+    if (!window.confirm(t("Saioa itxi nahi duzu?", "¿Deseas cerrar sesión?"))) return;
     await signOut();
     navigate({ to: "/auth", replace: true });
   }
