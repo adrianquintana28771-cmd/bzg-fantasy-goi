@@ -339,16 +339,28 @@ function Inner({ userId }: { userId: string }) {
   const historial = useQuery({
     queryKey: ["historial-jornadas", userId],
     queryFn: async () => {
-      const [{ data: lineups }, { data: stats }, { data: pool }] = await Promise.all([
-        supabase.from("lineups").select("*, jornadas(numero, nombre)").eq("user_id", userId),
-        supabase.from("player_jornada_stats").select("player_id, jornada_numero, puntos"),
-        supabase.from("player_pool").select("id, nombre, rareza"),
-      ]);
+      const [{ data: lineups }, { data: stats }, { data: pool }, { data: frozen }] =
+        await Promise.all([
+          supabase.from("lineups").select("*, jornadas(numero, nombre)").eq("user_id", userId),
+          supabase.from("player_jornada_stats").select("player_id, jornada_numero, puntos"),
+          supabase.from("player_pool").select("id, nombre, rareza"),
+          supabase
+            .from("jornada_alineaciones_congeladas")
+            .select("jornada_id, posicion, player_id")
+            .eq("user_id", userId),
+        ]);
       const nameById = new Map((pool ?? []).map((p) => [p.id, p.nombre]));
       const rarezaById = new Map((pool ?? []).map((p) => [p.id, p.rareza as Rareza]));
       const ptsKey = new Map(
         (stats ?? []).map((s) => [`${s.player_id}|${s.jornada_numero}`, Number(s.puntos)]),
       );
+      /** Alineación congelada por jornada (fuente histórica de jornadas cerradas) */
+      const frozenByJornada = new Map<string, Map<Posicion, string | null>>();
+      (frozen ?? []).forEach((f) => {
+        const m = frozenByJornada.get(f.jornada_id) ?? new Map<Posicion, string | null>();
+        m.set(f.posicion as Posicion, f.player_id);
+        frozenByJornada.set(f.jornada_id, m);
+      });
       return (
         (lineups ?? []) as unknown as Array<
           LineupRow & { jornadas: { numero: number; nombre: string } | null }
@@ -357,8 +369,9 @@ function Inner({ userId }: { userId: string }) {
         .filter((l) => !!l.jornadas)
         .map((l) => {
           const numero = l.jornadas!.numero;
+          const congelada = frozenByJornada.get(l.jornada_id);
           const alineados = SLOTS.map((slot) => {
-            const pid = l[slot];
+            const pid = congelada ? (congelada.get(slot) ?? null) : l[slot];
             return pid
               ? {
                   slot,
