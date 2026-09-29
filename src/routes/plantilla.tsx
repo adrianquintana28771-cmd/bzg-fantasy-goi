@@ -339,16 +339,28 @@ function Inner({ userId }: { userId: string }) {
   const historial = useQuery({
     queryKey: ["historial-jornadas", userId],
     queryFn: async () => {
-      const [{ data: lineups }, { data: stats }, { data: pool }] = await Promise.all([
-        supabase.from("lineups").select("*, jornadas(numero, nombre)").eq("user_id", userId),
-        supabase.from("player_jornada_stats").select("player_id, jornada_numero, puntos"),
-        supabase.from("player_pool").select("id, nombre, rareza"),
-      ]);
+      const [{ data: lineups }, { data: stats }, { data: pool }, { data: frozen }] =
+        await Promise.all([
+          supabase.from("lineups").select("*, jornadas(numero, nombre)").eq("user_id", userId),
+          supabase.from("player_jornada_stats").select("player_id, jornada_numero, puntos"),
+          supabase.from("player_pool").select("id, nombre, rareza"),
+          supabase
+            .from("jornada_alineaciones_congeladas")
+            .select("jornada_id, posicion, player_id")
+            .eq("user_id", userId),
+        ]);
       const nameById = new Map((pool ?? []).map((p) => [p.id, p.nombre]));
       const rarezaById = new Map((pool ?? []).map((p) => [p.id, p.rareza as Rareza]));
       const ptsKey = new Map(
         (stats ?? []).map((s) => [`${s.player_id}|${s.jornada_numero}`, Number(s.puntos)]),
       );
+      /** Alineación congelada por jornada (fuente histórica de jornadas cerradas) */
+      const frozenByJornada = new Map<string, Map<Posicion, string | null>>();
+      (frozen ?? []).forEach((f) => {
+        const m = frozenByJornada.get(f.jornada_id) ?? new Map<Posicion, string | null>();
+        m.set(f.posicion as Posicion, f.player_id);
+        frozenByJornada.set(f.jornada_id, m);
+      });
       return (
         (lineups ?? []) as unknown as Array<
           LineupRow & { jornadas: { numero: number; nombre: string } | null }
@@ -357,8 +369,9 @@ function Inner({ userId }: { userId: string }) {
         .filter((l) => !!l.jornadas)
         .map((l) => {
           const numero = l.jornadas!.numero;
+          const congelada = frozenByJornada.get(l.jornada_id);
           const alineados = SLOTS.map((slot) => {
-            const pid = l[slot];
+            const pid = congelada ? (congelada.get(slot) ?? null) : l[slot];
             return pid
               ? {
                   slot,
@@ -433,6 +446,7 @@ function Inner({ userId }: { userId: string }) {
   });
   const [dirty, setDirty] = useState(false);
   const [pickSlot, setPickSlot] = useState<Posicion | null>(null);
+  const [histJor, setHistJor] = useState<number | null>(null);
   const [sobreResult, setSobreResult] = useState<Array<{
     id: string;
     nombre: string;
@@ -689,6 +703,34 @@ function Inner({ userId }: { userId: string }) {
         <h2 className="mb-3 font-display text-lg">
           {t("Aurreko jardunaldiak", "Jornadas anteriores")}
         </h2>
+        {(historial.data ?? []).length > 0 && (
+          <div className="mb-3 flex gap-2 overflow-x-auto pb-2">
+            <button
+              onClick={() => setHistJor(null)}
+              className={`shrink-0 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+                histJor === null
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card hover:bg-muted"
+              }`}
+            >
+              {t("Dena", "Todos")}
+            </button>
+            {(historial.data ?? []).map((h) => (
+              <button
+                key={h.jornadaId}
+                onClick={() => setHistJor(h.numero)}
+                className={`shrink-0 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+                  histJor === h.numero
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card hover:bg-muted"
+                }`}
+              >
+                {t("J", "J")}
+                {h.numero}
+              </button>
+            ))}
+          </div>
+        )}
         {(historial.data ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {t(
@@ -698,7 +740,9 @@ function Inner({ userId }: { userId: string }) {
           </p>
         ) : (
           <div className="space-y-3">
-            {(historial.data ?? []).map((h) => (
+            {(historial.data ?? [])
+              .filter((h) => histJor === null || h.numero === histJor)
+              .map((h) => (
               <div key={h.jornadaId} className="rounded-xl border border-border p-3">
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">{td(h.nombre)}</div>
