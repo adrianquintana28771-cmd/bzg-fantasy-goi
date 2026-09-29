@@ -179,19 +179,14 @@ export function SiteHeader() {
 }
 
 export function BottomNav() {
-  const { isStaff, user, signOut } = useAuth();
+  const { isStaff, user } = useAuth();
   const t = useT();
-  const navigate = useNavigate();
   const canPlay = !isStaff;
   const nav = BASE_NAV.filter(
     (n) => (!n.adminOnly || isStaff) && (!n.authOnly || !!user) && (!n.gameOnly || canPlay),
   );
-  const cols = nav.length + (user ? 1 : 0);
+  const cols = nav.length;
 
-  async function handleSignOut() {
-    await signOut();
-    navigate({ to: "/auth", replace: true });
-  }
 
   return (
     <nav
@@ -251,26 +246,6 @@ export function BottomNav() {
             </Link>
           </li>
         ))}
-        {user && (
-          <li>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              aria-label={t("Saioa itxi", "Cerrar sesión")}
-              className="group flex w-full flex-col items-center justify-center gap-1 px-1 py-2 text-muted-foreground transition hover:text-foreground"
-            >
-              <span
-                className="grid h-11 w-11 place-items-center rounded-2xl bg-secondary/60 transition group-hover:bg-secondary"
-                style={{ color: "var(--color-destructive)" }}
-              >
-                <LogOut className="h-6 w-6" strokeWidth={2.4} aria-hidden />
-              </span>
-              <span className="text-[11px] font-semibold leading-none tracking-wide">
-                {t("Irten", "Salir")}
-              </span>
-            </button>
-          </li>
-        )}
       </ul>
     </nav>
   );
