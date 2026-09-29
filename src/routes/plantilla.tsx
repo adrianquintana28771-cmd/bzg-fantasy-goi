@@ -703,6 +703,34 @@ function Inner({ userId }: { userId: string }) {
         <h2 className="mb-3 font-display text-lg">
           {t("Aurreko jardunaldiak", "Jornadas anteriores")}
         </h2>
+        {(historial.data ?? []).length > 0 && (
+          <div className="mb-3 flex gap-2 overflow-x-auto pb-2">
+            <button
+              onClick={() => setHistJor(null)}
+              className={`shrink-0 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+                histJor === null
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card hover:bg-muted"
+              }`}
+            >
+              {t("Dena", "Todos")}
+            </button>
+            {(historial.data ?? []).map((h) => (
+              <button
+                key={h.jornadaId}
+                onClick={() => setHistJor(h.numero)}
+                className={`shrink-0 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+                  histJor === h.numero
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card hover:bg-muted"
+                }`}
+              >
+                {t("J", "J")}
+                {h.numero}
+              </button>
+            ))}
+          </div>
+        )}
         {(historial.data ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {t(
@@ -712,7 +740,9 @@ function Inner({ userId }: { userId: string }) {
           </p>
         ) : (
           <div className="space-y-3">
-            {(historial.data ?? []).map((h) => (
+            {(historial.data ?? [])
+              .filter((h) => histJor === null || h.numero === histJor)
+              .map((h) => (
               <div key={h.jornadaId} className="rounded-xl border border-border p-3">
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">{td(h.nombre)}</div>
