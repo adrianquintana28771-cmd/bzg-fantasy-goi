@@ -141,6 +141,17 @@ function Admin() {
             to="/admin/jugadores"
           />
         )}
+        {canManageAll && (
+          <Section
+            icon={ShieldAlert}
+            title={t("Pasahitza aldatu", "Cambiar contraseña")}
+            description={t(
+              "Aukeratu edozein erabiltzaile eta ezarri pasahitz berria.",
+              "Selecciona cualquier usuario y establece una nueva contraseña.",
+            )}
+            to="/admin/password"
+          />
+        )}
       </div>
 
       {canManageAll && <CloseJornada />}
