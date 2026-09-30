@@ -22,6 +22,7 @@ import { Route as JugadoresPlayerIdRouteImport } from './routes/jugadores.$playe
 import { Route as EquiposTeamIdRouteImport } from './routes/equipos.$teamId'
 import { Route as AdminReglasRouteImport } from './routes/admin.reglas'
 import { Route as AdminPosicionesRouteImport } from './routes/admin.posiciones'
+import { Route as AdminPasswordRouteImport } from './routes/admin.password'
 import { Route as AdminJugadoresRouteImport } from './routes/admin.jugadores'
 import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
 
@@ -90,6 +91,11 @@ const AdminPosicionesRoute = AdminPosicionesRouteImport.update({
   path: '/admin/posiciones',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPasswordRoute = AdminPasswordRouteImport.update({
+  id: '/admin/password',
+  path: '/admin/password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminJugadoresRoute = AdminJugadoresRouteImport.update({
   id: '/admin/jugadores',
   path: '/admin/jugadores',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
+  '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
+  '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
+  '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/desempeno'
     | '/admin/jugadores'
+    | '/admin/password'
     | '/admin/posiciones'
     | '/admin/reglas'
     | '/equipos/$teamId'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/desempeno'
     | '/admin/jugadores'
+    | '/admin/password'
     | '/admin/posiciones'
     | '/admin/reglas'
     | '/equipos/$teamId'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/desempeno'
     | '/admin/jugadores'
+    | '/admin/password'
     | '/admin/posiciones'
     | '/admin/reglas'
     | '/equipos/$teamId'
@@ -216,6 +228,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   AdminDesempenoRoute: typeof AdminDesempenoRoute
   AdminJugadoresRoute: typeof AdminJugadoresRoute
+  AdminPasswordRoute: typeof AdminPasswordRoute
   AdminPosicionesRoute: typeof AdminPosicionesRoute
   AdminReglasRoute: typeof AdminReglasRoute
   EquiposTeamIdRoute: typeof EquiposTeamIdRoute
@@ -318,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPosicionesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/password': {
+      id: '/admin/password'
+      path: '/admin/password'
+      fullPath: '/admin/password'
+      preLoaderRoute: typeof AdminPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/jugadores': {
       id: '/admin/jugadores'
       path: '/admin/jugadores'
@@ -344,6 +364,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   AdminDesempenoRoute: AdminDesempenoRoute,
   AdminJugadoresRoute: AdminJugadoresRoute,
+  AdminPasswordRoute: AdminPasswordRoute,
   AdminPosicionesRoute: AdminPosicionesRoute,
   AdminReglasRoute: AdminReglasRoute,
   EquiposTeamIdRoute: EquiposTeamIdRoute,
