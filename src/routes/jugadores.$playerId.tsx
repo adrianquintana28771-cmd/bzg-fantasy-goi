@@ -26,6 +26,7 @@ import {
 import { useT, useTd, useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { fetchPoolPlayer, fetchTeams, golEncajadoPts, round2 } from "@/lib/club-data";
+import { useCardImages, photoFor } from "@/lib/card-images";
 
 const ESTADO_COLOR: Record<PlayerEstado, string> = {
   disponible: "var(--color-primary)",
