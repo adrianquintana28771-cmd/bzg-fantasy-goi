@@ -26,6 +26,7 @@ import {
 import { useT, useTd, useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { fetchPoolPlayer, fetchTeams, golEncajadoPts, round2 } from "@/lib/club-data";
+import { useCardImages, photoFor } from "@/lib/card-images";
 
 const ESTADO_COLOR: Record<PlayerEstado, string> = {
   disponible: "var(--color-primary)",
@@ -70,6 +71,7 @@ type JStat = { jornada: number; puntos: number; estado: PlayerEstado };
 function Jugador() {
   const t = useT();
   const { lang } = useLang();
+  const cardImages = useCardImages();
   const POS_LABEL = lang === "eu" ? POSITION_LABEL_EU : POSITION_LABEL;
   const EST_LABEL = lang === "eu" ? ESTADO_LABEL_EU : ESTADO_LABEL;
   const { playerId } = Route.useParams();
@@ -149,6 +151,8 @@ function Jugador() {
   const dorsal = player.club?.dorsal;
   const total = round2(stats.reduce((a, s) => a + s.puntos, 0));
   const media = stats.length ? round2(total / stats.length) : 0;
+  // Foto principal = imagen de rareza común (player_card_images, rareza "normal").
+  const photo = photoFor(cardImages.data, player.club_player_id, "normal");
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -174,11 +178,20 @@ function Jugador() {
         style={{ background: "var(--gradient-card)" }}
       >
         <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-elevated">
-          <div className="grid h-full w-full place-items-center">
-            <span className="font-display text-[8rem] leading-none text-primary-foreground/90">
-              {dorsal ?? player.nombre.charAt(0)}
-            </span>
-          </div>
+          {photo ? (
+            <img
+              src={photo}
+              alt={`${player.club?.nombre ?? player.nombre} ${player.club?.apellido1 ?? ""}`.trim()}
+              className="h-full w-full object-cover"
+              loading="eager"
+            />
+          ) : (
+            <div className="grid h-full w-full place-items-center">
+              <span className="font-display text-[8rem] leading-none text-primary-foreground/90">
+                {dorsal ?? player.nombre.charAt(0)}
+              </span>
+            </div>
+          )}
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent p-3">
             <EstadoBadge estado={estado} />
             {dorsal != null && (
