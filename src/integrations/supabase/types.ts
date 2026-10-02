@@ -624,6 +624,41 @@ export type Database = {
         }
         Relationships: []
       }
+      player_card_images: {
+        Row: {
+          created_at: string
+          id: string
+          path: string
+          player_id: string
+          rareza: Database["public"]["Enums"]["card_rareza"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          path: string
+          player_id: string
+          rareza: Database["public"]["Enums"]["card_rareza"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          path?: string
+          player_id?: string
+          rareza?: Database["public"]["Enums"]["card_rareza"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_card_images_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_jornada_stats: {
         Row: {
           created_at: string
