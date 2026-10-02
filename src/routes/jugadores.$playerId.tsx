@@ -70,6 +70,7 @@ type JStat = { jornada: number; puntos: number; estado: PlayerEstado };
 function Jugador() {
   const t = useT();
   const { lang } = useLang();
+  const cardImages = useCardImages();
   const POS_LABEL = lang === "eu" ? POSITION_LABEL_EU : POSITION_LABEL;
   const EST_LABEL = lang === "eu" ? ESTADO_LABEL_EU : ESTADO_LABEL;
   const { playerId } = Route.useParams();
