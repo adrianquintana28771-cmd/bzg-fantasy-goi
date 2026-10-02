@@ -182,7 +182,7 @@ function Jugador() {
             <img
               src={photo}
               alt={`${player.club?.nombre ?? player.nombre} ${player.club?.apellido1 ?? ""}`.trim()}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover object-top"
               loading="eager"
             />
           ) : (
