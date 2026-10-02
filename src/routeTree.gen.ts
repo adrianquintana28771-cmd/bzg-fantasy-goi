@@ -9,41 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as MisionesRouteImport } from './routes/misiones'
-import { Route as PlantillaRouteImport } from './routes/plantilla'
-import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
-import { Route as AdminJugadoresRouteImport } from './routes/admin.jugadores'
-import { Route as AdminPasswordRouteImport } from './routes/admin.password'
-import { Route as AdminPosicionesRouteImport } from './routes/admin.posiciones'
-import { Route as AdminReglasRouteImport } from './routes/admin.reglas'
-import { Route as EquiposIndexRouteImport } from './routes/equipos.index'
-import { Route as EquiposTeamIdRouteImport } from './routes/equipos.$teamId'
-import { Route as JugadoresPlayerIdRouteImport } from './routes/jugadores.$playerId'
+import { Route as RankingsRouteImport } from './routes/rankings'
+import { Route as PlantillaRouteImport } from './routes/plantilla'
+import { Route as MisionesRouteImport } from './routes/misiones'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as PartidosIndexRouteImport } from './routes/partidos.index'
+import { Route as EquiposIndexRouteImport } from './routes/equipos.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as JugadoresPlayerIdRouteImport } from './routes/jugadores.$playerId'
+import { Route as EquiposTeamIdRouteImport } from './routes/equipos.$teamId'
+import { Route as AdminReglasRouteImport } from './routes/admin.reglas'
+import { Route as AdminPosicionesRouteImport } from './routes/admin.posiciones'
+import { Route as AdminPasswordRouteImport } from './routes/admin.password'
+import { Route as AdminJugadoresRouteImport } from './routes/admin.jugadores'
+import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MisionesRoute = MisionesRouteImport.update({
-  id: '/misiones',
-  path: '/misiones',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlantillaRoute = PlantillaRouteImport.update({
-  id: '/plantilla',
-  path: '/plantilla',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RankingsRoute = RankingsRouteImport.update({
@@ -51,39 +36,29 @@ const RankingsRoute = RankingsRouteImport.update({
   path: '/rankings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const PlantillaRoute = PlantillaRouteImport.update({
+  id: '/plantilla',
+  path: '/plantilla',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
+const MisionesRoute = MisionesRouteImport.update({
+  id: '/misiones',
+  path: '/misiones',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminDesempenoRoute = AdminDesempenoRouteImport.update({
-  id: '/admin/desempeno',
-  path: '/admin/desempeno',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminJugadoresRoute = AdminJugadoresRouteImport.update({
-  id: '/admin/jugadores',
-  path: '/admin/jugadores',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminPasswordRoute = AdminPasswordRouteImport.update({
-  id: '/admin/password',
-  path: '/admin/password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPosicionesRoute = AdminPosicionesRouteImport.update({
-  id: '/admin/posiciones',
-  path: '/admin/posiciones',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminReglasRoute = AdminReglasRouteImport.update({
-  id: '/admin/reglas',
-  path: '/admin/reglas',
+const PartidosIndexRoute = PartidosIndexRouteImport.update({
+  id: '/partidos/',
+  path: '/partidos/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EquiposIndexRoute = EquiposIndexRouteImport.update({
@@ -91,9 +66,9 @@ const EquiposIndexRoute = EquiposIndexRouteImport.update({
   path: '/equipos/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EquiposTeamIdRoute = EquiposTeamIdRouteImport.update({
-  id: '/equipos/$teamId',
-  path: '/equipos/$teamId',
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JugadoresPlayerIdRoute = JugadoresPlayerIdRouteImport.update({
@@ -101,9 +76,34 @@ const JugadoresPlayerIdRoute = JugadoresPlayerIdRouteImport.update({
   path: '/jugadores/$playerId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PartidosIndexRoute = PartidosIndexRouteImport.update({
-  id: '/partidos/',
-  path: '/partidos/',
+const EquiposTeamIdRoute = EquiposTeamIdRouteImport.update({
+  id: '/equipos/$teamId',
+  path: '/equipos/$teamId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminReglasRoute = AdminReglasRouteImport.update({
+  id: '/admin/reglas',
+  path: '/admin/reglas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPosicionesRoute = AdminPosicionesRouteImport.update({
+  id: '/admin/posiciones',
+  path: '/admin/posiciones',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPasswordRoute = AdminPasswordRouteImport.update({
+  id: '/admin/password',
+  path: '/admin/password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminJugadoresRoute = AdminJugadoresRouteImport.update({
+  id: '/admin/jugadores',
+  path: '/admin/jugadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDesempenoRoute = AdminDesempenoRouteImport.update({
+  id: '/admin/desempeno',
+  path: '/admin/desempeno',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -240,32 +240,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/misiones': {
-      id: '/misiones'
-      path: '/misiones'
-      fullPath: '/misiones'
-      preLoaderRoute: typeof MisionesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/plantilla': {
-      id: '/plantilla'
-      path: '/plantilla'
-      fullPath: '/plantilla'
-      preLoaderRoute: typeof PlantillaRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rankings': {
@@ -275,53 +254,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RankingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/plantilla': {
+      id: '/plantilla'
+      path: '/plantilla'
+      fullPath: '/plantilla'
+      preLoaderRoute: typeof PlantillaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/admin'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
+    '/misiones': {
+      id: '/misiones'
+      path: '/misiones'
+      fullPath: '/misiones'
+      preLoaderRoute: typeof MisionesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/desempeno': {
-      id: '/admin/desempeno'
-      path: '/admin/desempeno'
-      fullPath: '/admin/desempeno'
-      preLoaderRoute: typeof AdminDesempenoRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/jugadores': {
-      id: '/admin/jugadores'
-      path: '/admin/jugadores'
-      fullPath: '/admin/jugadores'
-      preLoaderRoute: typeof AdminJugadoresRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/password': {
-      id: '/admin/password'
-      path: '/admin/password'
-      fullPath: '/admin/password'
-      preLoaderRoute: typeof AdminPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/posiciones': {
-      id: '/admin/posiciones'
-      path: '/admin/posiciones'
-      fullPath: '/admin/posiciones'
-      preLoaderRoute: typeof AdminPosicionesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/reglas': {
-      id: '/admin/reglas'
-      path: '/admin/reglas'
-      fullPath: '/admin/reglas'
-      preLoaderRoute: typeof AdminReglasRouteImport
+    '/partidos/': {
+      id: '/partidos/'
+      path: '/partidos'
+      fullPath: '/partidos/'
+      preLoaderRoute: typeof PartidosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/equipos/': {
@@ -331,11 +296,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EquiposIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/equipos/$teamId': {
-      id: '/equipos/$teamId'
-      path: '/equipos/$teamId'
-      fullPath: '/equipos/$teamId'
-      preLoaderRoute: typeof EquiposTeamIdRouteImport
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jugadores/$playerId': {
@@ -345,11 +310,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JugadoresPlayerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/partidos/': {
-      id: '/partidos/'
-      path: '/partidos'
-      fullPath: '/partidos/'
-      preLoaderRoute: typeof PartidosIndexRouteImport
+    '/equipos/$teamId': {
+      id: '/equipos/$teamId'
+      path: '/equipos/$teamId'
+      fullPath: '/equipos/$teamId'
+      preLoaderRoute: typeof EquiposTeamIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reglas': {
+      id: '/admin/reglas'
+      path: '/admin/reglas'
+      fullPath: '/admin/reglas'
+      preLoaderRoute: typeof AdminReglasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/posiciones': {
+      id: '/admin/posiciones'
+      path: '/admin/posiciones'
+      fullPath: '/admin/posiciones'
+      preLoaderRoute: typeof AdminPosicionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/password': {
+      id: '/admin/password'
+      path: '/admin/password'
+      fullPath: '/admin/password'
+      preLoaderRoute: typeof AdminPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/jugadores': {
+      id: '/admin/jugadores'
+      path: '/admin/jugadores'
+      fullPath: '/admin/jugadores'
+      preLoaderRoute: typeof AdminJugadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/desempeno': {
+      id: '/admin/desempeno'
+      path: '/admin/desempeno'
+      fullPath: '/admin/desempeno'
+      preLoaderRoute: typeof AdminDesempenoRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
