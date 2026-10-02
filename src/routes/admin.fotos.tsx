@@ -37,8 +37,6 @@ type Entry = { folder: string; files: Partial<Record<Rareza, File>>; candidates:
 const norm = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[_\-.]+/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
 const fullName = (p: Person) => [p.nombre, p.apellido1, p.apellido2].filter(Boolean).join(" ");
-const RZ_FROM_FILE: Record<string, Rareza> = { comun: "normal", raro: "raro", legendario: "legendario" };
-const TPL_FROM_FILE: Record<string, Rareza> = { ficha_comun: "normal", ficha_raro: "raro", ficha_legendario: "legendario" };
 
 function Fotos() {
   const t = useT();
@@ -48,6 +46,7 @@ function Fotos() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [templates, setTemplates] = useState<Partial<Record<Rareza, File>>>({});
   const [busy, setBusy] = useState(false);
+  const [picked, setPicked] = useState<number | null>(null);
   const [report, setReport] = useState<string[] | null>(null);
   const [filter, setFilter] = useState("");
   const [onlyMissing, setOnlyMissing] = useState(false);
@@ -119,12 +118,14 @@ function Fotos() {
   const replacements = entries.flatMap((e) =>
     RAREZAS.filter((rz) => e.files[rz] && existing(e.chosen, rz)).map((rz) => `${fullName(byId.get(e.chosen!)!)} · ${FILE_OF[rz]}`),
   );
+  const canConfirm = Object.keys(templates).length > 0 || entries.some((e) => e.chosen && Object.keys(e.files).length > 0);
   const tplReplace = RAREZAS.filter((rz) => templates[rz] && ci.data?.templates[rz]);
 
   const upload = async (path: string, file: File) =>
     supabase.storage.from(CARD_BUCKET).upload(path, file, { upsert: true, contentType: file.type || undefined, cacheControl: "3600" });
 
   const runImport = async () => {
+    if (!canConfirm) return;
     const reps = [...replacements, ...tplReplace.map((rz) => `${t("Txantiloia", "Plantilla")} ${FILE_OF[rz]}`)];
     if (reps.length && !window.confirm(`${t("Ordezkatuko dira:", "Se reemplazarán:")}\n\n${reps.join("\n")}\n\n${t("Jarraitu?", "¿Continuar?")}`)) return;
     setBusy(true);
