@@ -151,6 +151,8 @@ function Jugador() {
   const dorsal = player.club?.dorsal;
   const total = round2(stats.reduce((a, s) => a + s.puntos, 0));
   const media = stats.length ? round2(total / stats.length) : 0;
+  // Foto principal = imagen de rareza común (player_card_images, rareza "normal").
+  const photo = photoFor(cardImages.data, player.club_player_id, "normal");
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
