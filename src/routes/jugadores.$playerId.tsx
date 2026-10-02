@@ -176,11 +176,20 @@ function Jugador() {
         style={{ background: "var(--gradient-card)" }}
       >
         <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-elevated">
-          <div className="grid h-full w-full place-items-center">
-            <span className="font-display text-[8rem] leading-none text-primary-foreground/90">
-              {dorsal ?? player.nombre.charAt(0)}
-            </span>
-          </div>
+          {photo ? (
+            <img
+              src={photo}
+              alt={`${player.club?.nombre ?? player.nombre} ${player.club?.apellido1 ?? ""}`.trim()}
+              className="h-full w-full object-cover"
+              loading="eager"
+            />
+          ) : (
+            <div className="grid h-full w-full place-items-center">
+              <span className="font-display text-[8rem] leading-none text-primary-foreground/90">
+                {dorsal ?? player.nombre.charAt(0)}
+              </span>
+            </div>
+          )}
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent p-3">
             <EstadoBadge estado={estado} />
             {dorsal != null && (
