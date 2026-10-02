@@ -37,8 +37,6 @@ type Entry = { folder: string; files: Partial<Record<Rareza, File>>; candidates:
 const norm = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[_\-.]+/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
 const fullName = (p: Person) => [p.nombre, p.apellido1, p.apellido2].filter(Boolean).join(" ");
-const RZ_FROM_FILE: Record<string, Rareza> = { comun: "normal", raro: "raro", legendario: "legendario" };
-const TPL_FROM_FILE: Record<string, Rareza> = { ficha_comun: "normal", ficha_raro: "raro", ficha_legendario: "legendario" };
 
 function Fotos() {
   const t = useT();
@@ -48,6 +46,7 @@ function Fotos() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [templates, setTemplates] = useState<Partial<Record<Rareza, File>>>({});
   const [busy, setBusy] = useState(false);
+  const [picked, setPicked] = useState<number | null>(null);
   const [report, setReport] = useState<string[] | null>(null);
   const [filter, setFilter] = useState("");
   const [onlyMissing, setOnlyMissing] = useState(false);
@@ -84,18 +83,26 @@ function Fotos() {
   const onPick = (list: FileList | null) => {
     if (!list) return;
     setReport(null);
+    setPicked(list.length);
     const map = new Map<string, Entry>();
     const tpl: Partial<Record<Rareza, File>> = {};
+    const IMG = /\.(webp|png|jpe?g|avif)$/i;
+    // Nombre de archivo normalizado: sin tildes, mayúsculas ni extensión (común/Comun/rara/legendaria…)
+    const key = (n: string) => norm(n.replace(/\.[^.]+$/, "")).replace(/ /g, "_");
+    const RZ: Record<string, Rareza> = { comun: "normal", normal: "normal", raro: "raro", rara: "raro", legendario: "legendario", legendaria: "legendario" };
+    const TPL: Record<string, Rareza> = { ficha_comun: "normal", ficha_raro: "raro", ficha_rara: "raro", ficha_legendario: "legendario", ficha_legendaria: "legendario" };
     for (const file of Array.from(list)) {
+      if (!IMG.test(file.name)) continue;
       const parts = (file.webkitRelativePath || file.name).split("/");
-      const base = file.name.replace(/\.[^.]+$/, "").toLowerCase();
-      const i = parts.findIndex((x) => x.toLowerCase() === "jugadores");
-      if (parts.some((x) => x.toLowerCase() === "plantillas") && TPL_FROM_FILE[base]) {
-        tpl[TPL_FROM_FILE[base]] = file;
-      } else if (i >= 0 && parts.length === i + 3 && RZ_FROM_FILE[base]) {
-        const folder = parts[i + 1];
+      const base = key(file.name);
+      if (TPL[base]) {
+        tpl[TPL[base]] = file;
+      } else if (RZ[base] && parts.length >= 2) {
+        // La carpeta de la persona es la carpeta que contiene la foto
+        const folder = parts[parts.length - 2];
+        if (["jugadores", "plantillas", "fotos_jugadores"].includes(norm(folder))) continue;
         const e = map.get(folder) ?? { folder, files: {}, candidates: [], chosen: null };
-        e.files[RZ_FROM_FILE[base]] = file;
+        e.files[RZ[base]] = file;
         map.set(folder, e);
       }
     }
@@ -111,12 +118,14 @@ function Fotos() {
   const replacements = entries.flatMap((e) =>
     RAREZAS.filter((rz) => e.files[rz] && existing(e.chosen, rz)).map((rz) => `${fullName(byId.get(e.chosen!)!)} · ${FILE_OF[rz]}`),
   );
+  const canConfirm = Object.keys(templates).length > 0 || entries.some((e) => e.chosen && Object.keys(e.files).length > 0);
   const tplReplace = RAREZAS.filter((rz) => templates[rz] && ci.data?.templates[rz]);
 
   const upload = async (path: string, file: File) =>
     supabase.storage.from(CARD_BUCKET).upload(path, file, { upsert: true, contentType: file.type || undefined, cacheControl: "3600" });
 
   const runImport = async () => {
+    if (!canConfirm) return;
     const reps = [...replacements, ...tplReplace.map((rz) => `${t("Txantiloia", "Plantilla")} ${FILE_OF[rz]}`)];
     if (reps.length && !window.confirm(`${t("Ordezkatuko dira:", "Se reemplazarán:")}\n\n${reps.join("\n")}\n\n${t("Jarraitu?", "¿Continuar?")}`)) return;
     setBusy(true);
@@ -276,7 +285,24 @@ function Fotos() {
                 </tbody>
               </table>
             </div>
-            <button type="button" disabled={busy} onClick={runImport} className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+          </>
+        )}
+        {picked !== null && entries.length === 0 && Object.keys(templates).length === 0 && (
+          <p className="mt-3 text-sm text-destructive">
+            {t(
+              `${picked} fitxategi, baina baliozko argazkirik ez. Egitura: jugadores/Izena_Abizena/comun.webp`,
+              `${picked} archivos leídos, pero ninguna foto válida. Estructura esperada: jugadores/Nombre_Apellido/comun.webp (raro, legendario) y plantillas/ficha_comun.png…`,
+            )}
+          </p>
+        )}
+        {picked !== null && (
+          <>
+            {!canConfirm && (entries.length > 0 || Object.keys(templates).length > 0) && (
+              <p className="mt-3 text-xs text-muted-foreground">
+                {t("Aukeratu pertsona bat karpeta bakoitzeko gutxienez.", "Asigna una persona al menos a una carpeta (o incluye plantillas) para poder confirmar.")}
+              </p>
+            )}
+            <button type="button" disabled={busy || !canConfirm} onClick={runImport} className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
               {busy ? t("Inportatzen…", "Importando…") : t("Berretsi inportazioa", "Confirmar importación")}
             </button>
           </>
