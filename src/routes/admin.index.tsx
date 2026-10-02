@@ -152,6 +152,17 @@ function Admin() {
             to="/admin/password"
           />
         )}
+        {canManageAll && (
+          <Section
+            icon={FileText}
+            title={t("Argazkien kudeaketa", "Gestión de fotografías")}
+            description={t(
+              "Inportatu fotos_jugadores karpeta eta kudeatu fitxen argazkiak.",
+              "Importa la carpeta fotos_jugadores y gestiona las fotos de las fichas.",
+            )}
+            to="/admin/fotos"
+          />
+        )}
       </div>
 
       {canManageAll && <CloseJornada />}

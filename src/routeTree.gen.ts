@@ -24,6 +24,7 @@ import { Route as AdminReglasRouteImport } from './routes/admin.reglas'
 import { Route as AdminPosicionesRouteImport } from './routes/admin.posiciones'
 import { Route as AdminPasswordRouteImport } from './routes/admin.password'
 import { Route as AdminJugadoresRouteImport } from './routes/admin.jugadores'
+import { Route as AdminFotosRouteImport } from './routes/admin.fotos'
 import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -101,6 +102,11 @@ const AdminJugadoresRoute = AdminJugadoresRouteImport.update({
   path: '/admin/jugadores',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminFotosRoute = AdminFotosRouteImport.update({
+  id: '/admin/fotos',
+  path: '/admin/fotos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminDesempenoRoute = AdminDesempenoRouteImport.update({
   id: '/admin/desempeno',
   path: '/admin/desempeno',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
+  '/admin/fotos': typeof AdminFotosRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
+  '/admin/fotos': typeof AdminFotosRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
+  '/admin/fotos': typeof AdminFotosRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/rankings'
     | '/reset-password'
     | '/admin/desempeno'
+    | '/admin/fotos'
     | '/admin/jugadores'
     | '/admin/password'
     | '/admin/posiciones'
@@ -190,6 +200,7 @@ export interface FileRouteTypes {
     | '/rankings'
     | '/reset-password'
     | '/admin/desempeno'
+    | '/admin/fotos'
     | '/admin/jugadores'
     | '/admin/password'
     | '/admin/posiciones'
@@ -208,6 +219,7 @@ export interface FileRouteTypes {
     | '/rankings'
     | '/reset-password'
     | '/admin/desempeno'
+    | '/admin/fotos'
     | '/admin/jugadores'
     | '/admin/password'
     | '/admin/posiciones'
@@ -227,6 +239,7 @@ export interface RootRouteChildren {
   RankingsRoute: typeof RankingsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   AdminDesempenoRoute: typeof AdminDesempenoRoute
+  AdminFotosRoute: typeof AdminFotosRoute
   AdminJugadoresRoute: typeof AdminJugadoresRoute
   AdminPasswordRoute: typeof AdminPasswordRoute
   AdminPosicionesRoute: typeof AdminPosicionesRoute
@@ -345,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminJugadoresRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/fotos': {
+      id: '/admin/fotos'
+      path: '/admin/fotos'
+      fullPath: '/admin/fotos'
+      preLoaderRoute: typeof AdminFotosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/desempeno': {
       id: '/admin/desempeno'
       path: '/admin/desempeno'
@@ -363,6 +383,7 @@ const rootRouteChildren: RootRouteChildren = {
   RankingsRoute: RankingsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   AdminDesempenoRoute: AdminDesempenoRoute,
+  AdminFotosRoute: AdminFotosRoute,
   AdminJugadoresRoute: AdminJugadoresRoute,
   AdminPasswordRoute: AdminPasswordRoute,
   AdminPosicionesRoute: AdminPosicionesRoute,
