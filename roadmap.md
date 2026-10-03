@@ -1,5 +1,7 @@
 # Pendiente
 
+- [x] Fotos por rareza en el listado de jugadores disponibles de la plantilla (verificado con ficha real: carta rara carga raro.png, resto placeholder; diseño y selección sin cambios).
+
 - [x] Compatibilidad PNG/WebP, prioridad WebP y reserva común/placeholder (formatos, MIME y fallos verificados con respuestas locales simuladas; ficha real carga; sin escrituras reales).
 
 - [x] Fondo de fotos con degradado y logo; fotos por rareza en huecos y selección de plantilla (verificado sin guardar alineaciones; cuenta actual sin fotos coincidentes, carga comprobada con respuesta local simulada).
