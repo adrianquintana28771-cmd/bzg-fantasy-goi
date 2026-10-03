@@ -77,10 +77,31 @@ function Home() {
       return data ?? [];
     },
   });
+  // Última jornada con alineaciones cerradas (is_locked), no el cierre de jornada.
+  const { data: lockedJornadas = [] } = useQuery({
+    queryKey: ["home-locked-jornadas"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("jornadas")
+        .select("numero")
+        .eq("is_locked", true)
+        .order("numero", { ascending: false })
+        .limit(1);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const jornadaNum = lockedJornadas[0]?.numero as number | undefined;
   const top5 = ranking.slice(0, 5);
-  const playerOfWeek = ranking[0]?.puntos ? ranking[0] : undefined;
+  const weekRanking = jornadaNum
+    ? ranking
+        .map((r) => ({ ...r, puntos: round2(r.porJornada[jornadaNum] ?? 0) }))
+        .filter((r) => r.puntos !== 0)
+        .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre))
+    : [];
+  const playerOfWeek = weekRanking[0]?.puntos ? weekRanking[0] : undefined;
   const totals = new Map<string, { team: NonNullable<RankedPlayer["team"]>; pts: number }>();
-  for (const r of ranking)
+  for (const r of weekRanking)
     if (r.team) {
       const e = totals.get(r.team.id) ?? { team: r.team, pts: 0 };
       e.pts = round2(e.pts + r.puntos);
