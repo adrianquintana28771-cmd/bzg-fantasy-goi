@@ -8,3 +8,4 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+Player photo surfaces share decorative background layers; lineup photos use the existing club_player_id and exact card rarity, preserving the placeholder when absent.
