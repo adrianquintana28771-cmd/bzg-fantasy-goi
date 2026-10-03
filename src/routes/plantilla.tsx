@@ -12,7 +12,7 @@ import { useAuth } from "@/lib/auth-context";
 import type { Database } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useT, useTd } from "@/lib/i18n";
-import { useCardImages } from "@/lib/card-images";
+import { useCardImages, usePhotoSource, type CardImages } from "@/lib/card-images";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
 
 type Posicion = Database["public"]["Enums"]["plantilla_posicion"];
@@ -142,12 +142,13 @@ interface PoolRow {
 }
 
 /** Foto de la carta: mismo origen para sobres, selector y campo */
-function CardPhoto({ className = "", src, name }: { className?: string; src?: string; name?: string }) {
+function CardPhoto({ className = "", images, pool, name }: { className?: string; images?: CardImages; pool?: PoolRow; name?: string }) {
+  const { src, onError } = usePhotoSource(images, pool?.club_player_id, pool?.rareza ?? "normal");
   if (src) {
     return (
       <div className={`relative overflow-hidden ${className}`}>
         <PlayerPhotoBackground />
-        <img src={src} alt={name ?? ""} className="relative h-full w-full object-cover object-top" />
+        <img src={src} onError={onError} alt={name ?? ""} className="relative h-full w-full object-cover object-top" />
       </div>
     );
   }
@@ -243,9 +244,6 @@ function Inner({ userId }: { userId: string }) {
   const td = useTd();
   const qc = useQueryClient();
   const cardImages = useCardImages();
-  const cardPhoto = (pool: PoolRow) => pool.club_player_id
-    ? cardImages.data?.photos[pool.club_player_id]?.[pool.rareza]
-    : undefined;
 
   const wallet = useQuery({
     queryKey: ["wallet", userId],
@@ -688,7 +686,7 @@ function Inner({ userId }: { userId: string }) {
                   >
                     {c ? (
                       <div className="relative h-full w-full overflow-hidden rounded-full">
-                        <CardPhoto src={cardPhoto(c.pool)} name={c.pool.nombre} className={`h-full w-full ${cardPhoto(c.pool) ? "" : "bg-background p-1"}`} />
+                        <CardPhoto images={cardImages.data} pool={c.pool} name={c.pool.nombre} className="h-full w-full" />
                         <span className="absolute inset-x-0 bottom-0 bg-black/60 text-[10px] leading-tight text-white">
                           {cartaPuntos(c.pool.rating, c.pool.rareza)}
                         </span>
@@ -962,7 +960,7 @@ function Inner({ userId }: { userId: string }) {
                   }}
                   className={`flex w-full items-center justify-between rounded-lg border-2 p-3 text-left ${RAREZA_STYLE[c.pool.rareza]}`}
                 >
-                  <CardPhoto src={cardPhoto(c.pool)} name={c.pool.nombre} className={`mr-3 h-10 w-10 shrink-0 rounded-full ${cardPhoto(c.pool) ? "" : "bg-background p-0.5"}`} />
+                  <CardPhoto images={cardImages.data} pool={c.pool} name={c.pool.nombre} className="mr-3 h-10 w-10 shrink-0 rounded-full" />
                   <div className="min-w-0 flex-1">
                     <div translate="no" className="font-semibold">
                       {c.pool.nombre}
