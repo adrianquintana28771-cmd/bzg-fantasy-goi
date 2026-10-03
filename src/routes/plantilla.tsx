@@ -817,7 +817,15 @@ function Inner({ userId }: { userId: string }) {
                   className={`rounded-lg border-2 p-2 text-xs ${enPista ? "border-primary bg-primary/5" : RAREZA_STYLE[c.pool.rareza]}`}
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <div translate="no" className="truncate font-semibold">{c.pool.nombre}</div>
+                    <div className="flex min-w-0 items-center gap-2">
+                      <CardPhoto
+                        images={cardImages.data}
+                        pool={c.pool}
+                        name={c.pool.nombre}
+                        className="h-9 w-9 shrink-0 rounded-full"
+                      />
+                      <div translate="no" className="truncate font-semibold">{c.pool.nombre}</div>
+                    </div>
                     <div className="font-display text-base text-primary">
                       {cartaPuntos(c.pool.rating, c.pool.rareza)}
                     </div>
