@@ -1,6 +1,6 @@
 # Pendiente
 
-- [ ] Compatibilidad PNG/WebP, prioridad WebP y reserva común/placeholder (verificar sin escrituras reales).
+- [x] Compatibilidad PNG/WebP, prioridad WebP y reserva común/placeholder (formatos, MIME y fallos verificados con respuestas locales simuladas; ficha real carga; sin escrituras reales).
 
 - [x] Fondo de fotos con degradado y logo; fotos por rareza en huecos y selección de plantilla (verificado sin guardar alineaciones; cuenta actual sin fotos coincidentes, carga comprobada con respuesta local simulada).
 
