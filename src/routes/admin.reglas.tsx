@@ -274,26 +274,31 @@ function Fila({
   fijo?: boolean;
 }) {
   const [puntos, setPuntos] = useState(c.puntos);
+  const [nombre, setNombre] = useState(c.nombre);
   const { t, td } = useLang();
-  const cambiado = puntos !== c.puntos;
+  const nombreLimpio = nombre.trim();
+  const nombreCambiado = nombreLimpio !== "" && nombreLimpio !== c.nombre;
+  const cambiado = puntos !== c.puntos || nombreCambiado;
   return (
     <div className="flex flex-wrap items-center gap-3 p-4">
-      <label className="flex min-w-0 flex-1 items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         <input
           type="checkbox"
           checked={c.activo}
           onChange={() => guardar.mutate({ id: c.id, activo: !c.activo })}
+          aria-label={td(c.nombre)}
           className="h-4 w-4 accent-[var(--color-primary)]"
         />
-        <span
-          className={`truncate ${c.activo ? "font-medium" : "text-muted-foreground line-through"}`}
-        >
-          {td(c.nombre)}
-          {c.solo_portero && (
-            <span className="ml-2 rounded bg-secondary px-1 text-[10px] uppercase">{t("atezaina", "portero")}</span>
-          )}
-        </span>
-      </label>
+        <input
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          aria-label={t("Irizpidearen izena", "Nombre del criterio")}
+          className={`min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm ${c.activo ? "font-medium" : "text-muted-foreground line-through"}`}
+        />
+        {c.solo_portero && (
+          <span className="rounded bg-secondary px-1 text-[10px] uppercase">{t("atezaina", "portero")}</span>
+        )}
+      </div>
       <div className="flex items-center gap-2">
         <input
           type="number"
