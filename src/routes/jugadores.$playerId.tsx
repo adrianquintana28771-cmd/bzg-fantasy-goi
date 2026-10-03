@@ -295,8 +295,6 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
     current === "total" ? round2(stats.reduce((a, s) => a + s.puntos, 0)) : round2(ptsFor(current));
   const rowPts = (r: { action_id: string; cantidad: number; puntos: number }) =>
     r.action_id === "gol_encajado" ? golEncajadoPts(r.cantidad) : round2(r.cantidad * r.puntos);
-  const accionesPts = round2(rows.reduce((a, r) => a + rowPts(r), 0));
-  const extra = round2(totalPts - accionesPts);
   const noDisp = current !== "total" && estadoFor(current) === "no_disponible";
 
   return (
