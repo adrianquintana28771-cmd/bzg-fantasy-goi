@@ -26,7 +26,7 @@ import {
 import { useT, useTd, useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { fetchPoolPlayer, fetchTeams, golEncajadoPts, round2 } from "@/lib/club-data";
-import { useCardImages, photoFor } from "@/lib/card-images";
+import { useCardImages, usePhotoSource } from "@/lib/card-images";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
 
 const ESTADO_COLOR: Record<PlayerEstado, string> = {
@@ -129,6 +129,8 @@ function Jugador() {
     },
   });
 
+  const { src: photo, onError: photoError } = usePhotoSource(cardImages.data, q.data?.player.club_player_id, "normal");
+
   if (q.isLoading)
     return (
       <p className="p-10 text-center text-sm text-muted-foreground">
@@ -153,7 +155,6 @@ function Jugador() {
   const total = round2(stats.reduce((a, s) => a + s.puntos, 0));
   const media = stats.length ? round2(total / stats.length) : 0;
   // Foto principal = imagen de rareza común (player_card_images, rareza "normal").
-  const photo = photoFor(cardImages.data, player.club_player_id, "normal");
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -184,6 +185,7 @@ function Jugador() {
               <PlayerPhotoBackground />
               <img
                 src={photo}
+                onError={photoError}
                 alt={`${player.club?.nombre ?? player.nombre} ${player.club?.apellido1 ?? ""}`.trim()}
                 className="relative h-full w-full object-cover object-top"
                 loading="eager"

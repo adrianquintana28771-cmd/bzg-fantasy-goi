@@ -13,6 +13,8 @@ import {
   RAREZAS,
   TEMPLATE_PATH,
   useCardImages,
+  imageFormat,
+  preferredImageFile,
   type Rareza,
 } from "@/lib/card-images";
 
@@ -22,6 +24,10 @@ export const Route = createFileRoute("/admin/fotos")({
       { title: "Gestión de fotografías · BZG Fantasy" },
       { name: "description", content: "Importa y gestiona las fotos de las fichas de jugadores/as." },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Gestión de fotografías · BZG Fantasy" },
+      { property: "og:description", content: "Importa y gestiona las fotos de las fichas de jugadores/as." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: () => (
@@ -96,13 +102,13 @@ function Fotos() {
       const parts = (file.webkitRelativePath || file.name).split("/");
       const base = key(file.name);
       if (TPL[base]) {
-        tpl[TPL[base]] = file;
+        tpl[TPL[base]] = preferredImageFile(tpl[TPL[base]], file);
       } else if (RZ[base] && parts.length >= 2) {
         // La carpeta de la persona es la carpeta que contiene la foto
         const folder = parts[parts.length - 2];
         if (["jugadores", "plantillas", "fotos_jugadores"].includes(norm(folder))) continue;
         const e = map.get(folder) ?? { folder, files: {}, candidates: [], chosen: null };
-        e.files[RZ[base]] = file;
+        e.files[RZ[base]] = preferredImageFile(e.files[RZ[base]], file);
         map.set(folder, e);
       }
     }
@@ -121,8 +127,17 @@ function Fotos() {
   const canConfirm = Object.keys(templates).length > 0 || entries.some((e) => e.chosen && Object.keys(e.files).length > 0);
   const tplReplace = RAREZAS.filter((rz) => templates[rz] && ci.data?.templates[rz]);
 
-  const upload = async (path: string, file: File) =>
-    supabase.storage.from(CARD_BUCKET).upload(path, file, { upsert: true, contentType: file.type || undefined, cacheControl: "3600" });
+  const upload = async (path: string, file: File) => {
+    const format = imageFormat(file.name);
+    if (!format) return { error: { message: t("Irudi-formatu baliogabea.", "Formato de imagen no válido.") } };
+    try {
+      const bitmap = await createImageBitmap(file);
+      bitmap.close();
+    } catch {
+      return { error: { message: t("Irudia ezin da irakurri.", "No se puede leer la imagen.") } };
+    }
+    return supabase.storage.from(CARD_BUCKET).upload(path, file, { upsert: true, contentType: format.contentType, cacheControl: "3600" });
+  };
 
   const runImport = async () => {
     if (!canConfirm) return;
@@ -134,7 +149,9 @@ function Fotos() {
     for (const rz of RAREZAS) {
       const f = templates[rz];
       if (!f) continue;
-      const { error } = await upload(TEMPLATE_PATH[rz], f);
+      const format = imageFormat(f.name);
+      if (!format) continue;
+      const { error } = await upload(TEMPLATE_PATH[rz].replace(/\.png$/, `.${format.extension}`), f);
       if (error) { err++; log.push(`ERROR plantilla ${FILE_OF[rz]}: ${error.message}`); } else ok++;
     }
     for (const e of entries) {
