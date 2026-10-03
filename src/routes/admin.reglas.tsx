@@ -310,7 +310,13 @@ function Fila({
           }`}
         />
         <button
-          onClick={() => guardar.mutate({ id: c.id, puntos })}
+          onClick={() =>
+            guardar.mutate({
+              id: c.id,
+              ...(puntos !== c.puntos ? { puntos } : {}),
+              ...(nombreCambiado ? { nombre: nombreLimpio } : {}),
+            })
+          }
           disabled={!cambiado}
           className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-40"
         >
