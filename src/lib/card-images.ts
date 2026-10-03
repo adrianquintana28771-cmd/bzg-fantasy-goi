@@ -61,7 +61,8 @@ export async function fetchCardImages(): Promise<CardImages> {
   const { data: signed } = await supabase.storage.from(CARD_BUCKET).createSignedUrls(all, 60 * 60 * 6);
   const url = new Map<string, string>();
   for (const s of signed ?? []) if (s.signedUrl && !s.error && s.path) url.set(s.path, s.signedUrl);
-  const out: CardImages = { photos: {}, paths: {}, templates: {}, alternatives: {} };
+  const alternatives: NonNullable<CardImages["alternatives"]> = {};
+  const out: CardImages = { photos: {}, paths: {}, templates: {}, alternatives };
   for (const r of rows) {
     const urls = (candidates.get(`${r.player_id}:${r.rareza}`) ?? []).flatMap((path) => {
       const u = url.get(path);
@@ -69,7 +70,7 @@ export async function fetchCardImages(): Promise<CardImages> {
     });
     (out.paths[r.player_id] ??= {})[r.rareza as Rareza] = r.path;
     if (urls[0]) (out.photos[r.player_id] ??= {})[r.rareza as Rareza] = urls[0];
-    (out.alternatives[r.player_id] ??= {})[r.rareza as Rareza] = urls;
+    (alternatives[r.player_id] ??= {})[r.rareza as Rareza] = urls;
   }
   for (const rz of RAREZAS) {
     const u = (tplCandidates.get(rz) ?? []).map((path) => url.get(path)).find(Boolean);
