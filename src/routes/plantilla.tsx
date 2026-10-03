@@ -12,6 +12,8 @@ import { useAuth } from "@/lib/auth-context";
 import type { Database } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useT, useTd } from "@/lib/i18n";
+import { useCardImages } from "@/lib/card-images";
+import { PlayerPhotoBackground } from "@/components/player-photo-background";
 
 type Posicion = Database["public"]["Enums"]["plantilla_posicion"];
 type Rareza = "normal" | "raro" | "legendario";
@@ -118,6 +120,10 @@ export const Route = createFileRoute("/plantilla")({
         content: "Alinea a tus jugadores en el medio campo y gestiona tus cartas de BZG Fantasy.",
       },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Mi equipo · BZG Fantasy" },
+      { property: "og:description", content: "Alinea a tus jugadores en el medio campo y gestiona tus cartas de BZG Fantasy." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: PlantillaPage,
@@ -129,13 +135,22 @@ interface PoolRow {
   posicion: Posicion;
   rating: number;
   rareza: Rareza;
+  club_player_id?: string | null;
   team_id?: string | null;
   estado?: "disponible" | "dudoso" | "no_disponible";
   club_teams?: { nombre: string } | null;
 }
 
 /** Foto de la carta: mismo origen para sobres, selector y campo */
-function CardPhoto({ className = "" }: { className?: string }) {
+function CardPhoto({ className = "", src, name }: { className?: string; src?: string; name?: string }) {
+  if (src) {
+    return (
+      <div className={`relative overflow-hidden ${className}`}>
+        <PlayerPhotoBackground />
+        <img src={src} alt={name ?? ""} className="relative h-full w-full object-cover object-top" />
+      </div>
+    );
+  }
   return <img src={escudoAsset.url} alt="" aria-hidden="true" className={`object-contain ${className}`} />;
 }
 interface CopyRow {
@@ -227,6 +242,10 @@ function Inner({ userId }: { userId: string }) {
   const t = useT();
   const td = useTd();
   const qc = useQueryClient();
+  const cardImages = useCardImages();
+  const cardPhoto = (pool: PoolRow) => pool.club_player_id
+    ? cardImages.data?.photos[pool.club_player_id]?.[pool.rareza]
+    : undefined;
 
   const wallet = useQuery({
     queryKey: ["wallet", userId],
@@ -248,7 +267,7 @@ function Inner({ userId }: { userId: string }) {
     queryFn: async (): Promise<CopyRow[]> => {
       const { data, error } = await supabase
         .from("user_players")
-        .select("id, player_id, usos, player_pool(id, nombre, posicion, rating, rareza, team_id, estado)")
+        .select("id, player_id, usos, player_pool(id, nombre, posicion, rating, rareza, club_player_id, team_id, estado)")
         .eq("user_id", userId);
       if (error) throw error;
       const { data: teams } = await supabase.from("club_teams").select("id, nombre");
@@ -669,7 +688,7 @@ function Inner({ userId }: { userId: string }) {
                   >
                     {c ? (
                       <div className="relative h-full w-full overflow-hidden rounded-full">
-                        <CardPhoto className="h-full w-full bg-background p-1" />
+                        <CardPhoto src={cardPhoto(c.pool)} name={c.pool.nombre} className={`h-full w-full ${cardPhoto(c.pool) ? "" : "bg-background p-1"}`} />
                         <span className="absolute inset-x-0 bottom-0 bg-black/60 text-[10px] leading-tight text-white">
                           {cartaPuntos(c.pool.rating, c.pool.rareza)}
                         </span>
@@ -943,7 +962,7 @@ function Inner({ userId }: { userId: string }) {
                   }}
                   className={`flex w-full items-center justify-between rounded-lg border-2 p-3 text-left ${RAREZA_STYLE[c.pool.rareza]}`}
                 >
-                  <CardPhoto className="mr-3 h-10 w-10 shrink-0 rounded-full bg-background p-0.5" />
+                  <CardPhoto src={cardPhoto(c.pool)} name={c.pool.nombre} className={`mr-3 h-10 w-10 shrink-0 rounded-full ${cardPhoto(c.pool) ? "" : "bg-background p-0.5"}`} />
                   <div className="min-w-0 flex-1">
                     <div translate="no" className="font-semibold">
                       {c.pool.nombre}

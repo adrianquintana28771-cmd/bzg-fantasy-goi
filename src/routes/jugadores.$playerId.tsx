@@ -27,6 +27,7 @@ import { useT, useTd, useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { fetchPoolPlayer, fetchTeams, golEncajadoPts, round2 } from "@/lib/club-data";
 import { useCardImages, photoFor } from "@/lib/card-images";
+import { PlayerPhotoBackground } from "@/components/player-photo-background";
 
 const ESTADO_COLOR: Record<PlayerEstado, string> = {
   disponible: "var(--color-primary)",
@@ -179,12 +180,15 @@ function Jugador() {
       >
         <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-elevated">
           {photo ? (
-            <img
-              src={photo}
-              alt={`${player.club?.nombre ?? player.nombre} ${player.club?.apellido1 ?? ""}`.trim()}
-              className="h-full w-full object-cover object-top"
-              loading="eager"
-            />
+            <>
+              <PlayerPhotoBackground />
+              <img
+                src={photo}
+                alt={`${player.club?.nombre ?? player.nombre} ${player.club?.apellido1 ?? ""}`.trim()}
+                className="relative h-full w-full object-cover object-top"
+                loading="eager"
+              />
+            </>
           ) : (
             <div className="grid h-full w-full place-items-center">
               <span className="font-display text-[8rem] leading-none text-primary-foreground/90">

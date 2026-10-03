@@ -1,5 +1,7 @@
 # Pendiente
 
+- [ ] Fondo de fotos con degradado y logo; fotos por rareza en huecos y selección de plantilla (verificar sin guardar alineaciones).
+
 - [x] Traducir Misiones al euskera y configurar tutorial, Federación y web BZG como las tres primeras misiones.
 - [x] Dar a cada cuenta nueva 3 sobres normales y 1 premium.
 # Roadmap
