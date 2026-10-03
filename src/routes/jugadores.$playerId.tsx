@@ -344,7 +344,7 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
               )}
             </p>
           )}
-          {rows.length === 0 && extra === 0 && !noDisp && (
+          {rows.length === 0 && !noDisp && (
             <p className="border-t border-border px-5 py-3 text-sm text-muted-foreground">
               {t("Ez dago ekintzarik erregistratuta.", "Sin acciones registradas.")}
             </p>
@@ -366,19 +366,6 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
               </div>
             );
           })}
-          {extra !== 0 && !noDisp && (
-            <div className="grid grid-cols-[4rem_1fr_4rem] items-center border-t border-border px-5 py-3">
-              <span className="font-display text-lg">–</span>
-              <span className="text-center text-sm font-semibold">
-                {t("Partidaren emaitza", "Resultado del partido")}
-              </span>
-              <span
-                className={`text-right font-display text-lg ${extra > 0 ? "text-primary" : "text-destructive"}`}
-              >
-                {extra > 0 ? `+${extra}` : extra}
-              </span>
-            </div>
-          )}
           <div className="flex items-center justify-between bg-primary px-5 py-3 text-primary-foreground">
             <span className="text-xs font-bold uppercase tracking-wide">
               {current === "total"
