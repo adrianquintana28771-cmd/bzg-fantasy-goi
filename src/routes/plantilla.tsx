@@ -33,6 +33,13 @@ const RAREZA_STYLE: Record<Rareza, string> = {
   legendario: "border-[color:var(--gold,#d4a017)] bg-[color:var(--gold,#d4a017)]/15",
 };
 
+/** Fondos por rareza solo en la lista de jugadores disponibles para seleccionar. */
+const RAREZA_PICK_STYLE: Record<Rareza, string> = {
+  normal: "border-muted-foreground/40 bg-muted",
+  raro: "border-sky-500/70 bg-sky-500/20",
+  legendario: "border-[color:var(--gold,#d4a017)] bg-[color:var(--gold,#d4a017)]/25",
+};
+
 /** Puntuación final de la carta: máximo 2 dígitos */
 function cartaPuntos(rating: number, rareza: Rareza) {
   return Math.min(99, Math.round(rating * RAREZA_MULT[rareza]));
@@ -146,13 +153,13 @@ function CardPhoto({ className = "", images, pool, name }: { className?: string;
   const { src, onError } = usePhotoSource(images, pool?.club_player_id, pool?.rareza ?? "normal");
   if (src) {
     return (
-      <div className={`relative overflow-hidden ${className}`}>
+      <div className={cn("relative overflow-hidden", className)}>
         <PlayerPhotoBackground />
         <img src={src} onError={onError} alt={name ?? ""} className="relative h-full w-full object-cover object-top" />
       </div>
     );
   }
-  return <img src={escudoAsset.url} alt="" aria-hidden="true" className={`object-contain ${className}`} />;
+  return <img src={escudoAsset.url} alt="" aria-hidden="true" className={cn("object-contain", className)} />;
 }
 interface CopyRow {
   id: string;
