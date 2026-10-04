@@ -85,13 +85,16 @@ function Home() {
         .from("jornadas")
         .select("numero")
         .eq("is_locked", true)
-        .order("numero", { ascending: false })
-        .limit(1);
+        .order("numero", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
   });
-  const jornadaNum = lockedJornadas[0]?.numero as number | undefined;
+  // Última jornada bloqueada con puntos reales (si la más reciente aún no tiene
+  // puntuaciones, se muestra la anterior bloqueada que sí los tenga).
+  const jornadaNum = lockedJornadas
+    .map((j) => j.numero as number)
+    .find((n) => ranking.some((r) => (r.porJornada[n] ?? 0) !== 0));
   const top5 = ranking.slice(0, 5);
   const weekRanking = jornadaNum
     ? ranking
@@ -181,7 +184,7 @@ function Home() {
                 <div className="text-right">
                   <div className="font-display text-4xl text-primary">{playerOfWeek.puntos}</div>
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                    {t("puntu guztira", "pts totales")}
+                    {t("puntuak jardunaldian", "pts en la jornada")}
                   </div>
                 </div>
               </div>
@@ -203,7 +206,7 @@ function Home() {
               <div className="mt-4 rounded-xl bg-secondary p-4 text-center">
                 <div className="font-display text-4xl text-primary">{topTeam.pts}</div>
                 <div className="text-xs uppercase tracking-widest text-muted-foreground">
-                  {t("Fantasy puntu metatuak", "puntos Fantasy acumulados")}
+                  {t("Fantasy puntuak jardunaldian", "puntos Fantasy en la jornada")}
                 </div>
               </div>
               <Link
