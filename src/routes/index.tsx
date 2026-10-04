@@ -85,13 +85,16 @@ function Home() {
         .from("jornadas")
         .select("numero")
         .eq("is_locked", true)
-        .order("numero", { ascending: false })
-        .limit(1);
+        .order("numero", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
   });
-  const jornadaNum = lockedJornadas[0]?.numero as number | undefined;
+  // Última jornada bloqueada con puntos reales (si la más reciente aún no tiene
+  // puntuaciones, se muestra la anterior bloqueada que sí los tenga).
+  const jornadaNum = lockedJornadas
+    .map((j) => j.numero as number)
+    .find((n) => ranking.some((r) => (r.porJornada[n] ?? 0) !== 0));
   const top5 = ranking.slice(0, 5);
   const weekRanking = jornadaNum
     ? ranking
