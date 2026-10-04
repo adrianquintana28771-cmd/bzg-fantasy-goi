@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Package, Sparkles, X, Lock, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -31,6 +32,13 @@ const RAREZA_STYLE: Record<Rareza, string> = {
   normal: "border-border bg-background",
   raro: "border-sky-500/60 bg-sky-500/10",
   legendario: "border-[color:var(--gold,#d4a017)] bg-[color:var(--gold,#d4a017)]/15",
+};
+
+/** Fondos por rareza solo en la lista de jugadores disponibles para seleccionar. */
+const RAREZA_PICK_STYLE: Record<Rareza, string> = {
+  normal: "border-muted-foreground/40 bg-muted",
+  raro: "border-sky-500/70 bg-sky-500/20",
+  legendario: "border-[color:var(--gold,#d4a017)] bg-[color:var(--gold,#d4a017)]/25",
 };
 
 /** Puntuación final de la carta: máximo 2 dígitos */
@@ -146,13 +154,13 @@ function CardPhoto({ className = "", images, pool, name }: { className?: string;
   const { src, onError } = usePhotoSource(images, pool?.club_player_id, pool?.rareza ?? "normal");
   if (src) {
     return (
-      <div className={`relative overflow-hidden ${className}`}>
+      <div className={cn("relative overflow-hidden", className)}>
         <PlayerPhotoBackground />
         <img src={src} onError={onError} alt={name ?? ""} className="relative h-full w-full object-cover object-top" />
       </div>
     );
   }
-  return <img src={escudoAsset.url} alt="" aria-hidden="true" className={`object-contain ${className}`} />;
+  return <img src={escudoAsset.url} alt="" aria-hidden="true" className={cn("h-full w-full object-contain", className)} />;
 }
 interface CopyRow {
   id: string;
@@ -966,10 +974,12 @@ function Inner({ userId }: { userId: string }) {
                     setDirty(true);
                     setPickSlot(null);
                   }}
-                  className={`flex w-full items-center justify-between rounded-lg border-2 p-3 text-left ${RAREZA_STYLE[c.pool.rareza]}`}
+                  className={`flex w-full items-stretch overflow-hidden rounded-lg border-2 text-left ${RAREZA_PICK_STYLE[c.pool.rareza]}`}
                 >
-                  <CardPhoto images={cardImages.data} pool={c.pool} name={c.pool.nombre} className="mr-3 h-10 w-10 shrink-0 rounded-full" />
-                  <div className="min-w-0 flex-1">
+                  <div className="relative w-16 shrink-0 self-stretch overflow-hidden sm:w-20">
+                    <CardPhoto images={cardImages.data} pool={c.pool} name={c.pool.nombre} className="absolute inset-0" />
+                  </div>
+                  <div className="min-w-0 flex-1 p-3">
                     <div translate="no" className="font-semibold">
                       {c.pool.nombre}
                       {c.pool.club_teams?.nombre ? ` — ${c.pool.club_teams.nombre}` : ""}
@@ -989,7 +999,7 @@ function Inner({ userId }: { userId: string }) {
                       · {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 p-3 text-right">
                     <div className="font-display text-lg text-primary">
                       {cartaPuntos(c.pool.rating, c.pool.rareza)}
                     </div>
