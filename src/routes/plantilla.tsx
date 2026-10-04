@@ -974,10 +974,12 @@ function Inner({ userId }: { userId: string }) {
                     setDirty(true);
                     setPickSlot(null);
                   }}
-                  className={`flex w-full items-center justify-between rounded-lg border-2 p-3 text-left ${RAREZA_STYLE[c.pool.rareza]}`}
+                  className={`flex w-full items-stretch overflow-hidden rounded-lg border-2 text-left ${RAREZA_PICK_STYLE[c.pool.rareza]}`}
                 >
-                  <CardPhoto images={cardImages.data} pool={c.pool} name={c.pool.nombre} className="mr-3 h-10 w-10 shrink-0 rounded-full" />
-                  <div className="min-w-0 flex-1">
+                  <div className="relative w-16 shrink-0 self-stretch overflow-hidden sm:w-20">
+                    <CardPhoto images={cardImages.data} pool={c.pool} name={c.pool.nombre} className="absolute inset-0" />
+                  </div>
+                  <div className="min-w-0 flex-1 p-3">
                     <div translate="no" className="font-semibold">
                       {c.pool.nombre}
                       {c.pool.club_teams?.nombre ? ` — ${c.pool.club_teams.nombre}` : ""}
@@ -997,7 +999,7 @@ function Inner({ userId }: { userId: string }) {
                       · {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 p-3 text-right">
                     <div className="font-display text-lg text-primary">
                       {cartaPuntos(c.pool.rating, c.pool.rareza)}
                     </div>
