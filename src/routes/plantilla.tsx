@@ -160,7 +160,7 @@ function CardPhoto({ className = "", images, pool, name }: { className?: string;
       </div>
     );
   }
-  return <img src={escudoAsset.url} alt="" aria-hidden="true" className={cn("object-contain", className)} />;
+  return <img src={escudoAsset.url} alt="" aria-hidden="true" className={cn("h-full w-full object-contain", className)} />;
 }
 interface CopyRow {
   id: string;
