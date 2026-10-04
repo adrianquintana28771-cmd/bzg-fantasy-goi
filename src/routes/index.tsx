@@ -184,7 +184,7 @@ function Home() {
                 <div className="text-right">
                   <div className="font-display text-4xl text-primary">{playerOfWeek.puntos}</div>
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                    {t("puntu guztira", "pts totales")}
+                    {t("puntuak jardunaldian", "pts en la jornada")}
                   </div>
                 </div>
               </div>
@@ -206,7 +206,7 @@ function Home() {
               <div className="mt-4 rounded-xl bg-secondary p-4 text-center">
                 <div className="font-display text-4xl text-primary">{topTeam.pts}</div>
                 <div className="text-xs uppercase tracking-widest text-muted-foreground">
-                  {t("Fantasy puntu metatuak", "puntos Fantasy acumulados")}
+                  {t("Fantasy puntuak jardunaldian", "puntos Fantasy en la jornada")}
                 </div>
               </div>
               <Link
