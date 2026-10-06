@@ -48,14 +48,14 @@ export async function fetchCardImages(): Promise<CardImages> {
     const rz = r.rareza as Rareza;
     const base = `${r.player_id}/${FILE_OF[rz]}`;
     const files = folders.get(r.player_id);
-    const formats = [`${base}.webp`, `${base}.png`].filter((path) => files?.has(path));
+    const formats = [`${base}.webp`, `${base}.png`, `${base}.jpeg`, `${base}.jpg`].filter((path) => files?.has(path));
     candidates.set(`${r.player_id}:${rz}`, [...new Set([...formats, r.path])]);
   }
   const { data: templateFiles } = await bucket.list("templates", { limit: 100 });
   const templateNames = new Set((templateFiles ?? []).map((f) => `templates/${f.name}`));
   const tplCandidates = new Map(RAREZAS.map((rz) => {
     const base = TEMPLATE_PATH[rz].replace(/\.png$/, "");
-    return [rz, [`${base}.webp`, `${base}.png`].filter((path) => templateNames.has(path))] as const;
+    return [rz, [`${base}.webp`, `${base}.png`, `${base}.jpeg`, `${base}.jpg`].filter((path) => templateNames.has(path))] as const;
   }));
   const all = [...new Set([...candidates.values(), ...tplCandidates.values()].flat())];
   const { data: signed } = await supabase.storage.from(CARD_BUCKET).createSignedUrls(all, 60 * 60 * 6);
