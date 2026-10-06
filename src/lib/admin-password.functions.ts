@@ -1,12 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { passwordSchema } from "@/components/auth-panel";
 
 /** super_admin: cambia la contraseña de un usuario mediante Auth Admin. */
 export const adminSetPassword = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({ userId: z.string().uuid(), password: z.string().min(6).max(72) }).parse(d),
+    // Mismas reglas que el registro: passwordSchema con mensajes en castellano.
+    z.object({ userId: z.string().uuid(), password: passwordSchema((_eus, esp) => esp) }).parse(d),
   )
   .handler(async ({ data, context }) => {
     const { data: ok, error: roleErr } = await context.supabase.rpc("has_role", {

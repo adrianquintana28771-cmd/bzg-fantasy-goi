@@ -8,6 +8,7 @@ import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
 import { adminSetPassword } from "@/lib/admin-password.functions";
+import { passwordSchema } from "@/components/auth-panel";
 
 export const Route = createFileRoute("/admin/password")({
   head: () => ({
@@ -57,7 +58,8 @@ function Page() {
   const save = async () => {
     setMsg(null);
     if (!sel) return;
-    if (pw.length < 6) return setMsg(t("Gutxienez 6 karaktere.", "Mínimo 6 caracteres."));
+    const check = passwordSchema(t).safeParse(pw);
+    if (!check.success) return setMsg(check.error.issues[0]?.message ?? t("Pasahitz baliogabea.", "Contraseña no válida."));
     if (pw !== pw2) return setMsg(t("Pasahitzak ez datoz bat.", "Las contraseñas no coinciden."));
     if (!window.confirm(t(`${selected?.username ?? ""} erabiltzailearen pasahitza aldatu?`, `¿Cambiar la contraseña de ${selected?.username ?? ""}?`))) return;
     setBusy(true);
