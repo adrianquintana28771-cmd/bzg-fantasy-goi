@@ -198,6 +198,7 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
           .from("misiones")
           .select("id, nombre, descripcion, recompensa_sobres, tipo_sobre, requiere_qr, semanal, espera_segundos")
           .eq("is_active", true)
+          .is("caduca_at", null)
           .order("created_at"),
         supabase.from("user_misiones").select("mision_id, claimed_at").eq("user_id", userId),
       ]);
@@ -263,7 +264,9 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       toast.error(
         e.message.includes("canjeado")
           ? t("Kode hau trukatu duzu jada", "Ya has canjeado este código")
-          : t("Kodea ez da baliozkoa", "Código no válido"),
+          : e.message.includes("caducado")
+            ? t("Kode hau iraungita dago", "Este código ha caducado")
+            : t("Kodea ez da baliozkoa", "Código no válido"),
       ),
   });
 
