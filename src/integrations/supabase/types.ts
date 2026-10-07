@@ -968,9 +968,7 @@ export type Database = {
       }
     }
     Functions: {
-      admin_create_mission_code:
-        | { Args: { _codigo: string }; Returns: string }
-        | { Args: { _codigo: string; _nombre?: string }; Returns: string }
+      admin_create_mission_code: { Args: { _codigo: string }; Returns: string }
       admin_save_player: {
         Args: {
           _activo: boolean
