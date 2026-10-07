@@ -584,6 +584,7 @@ export type Database = {
       }
       misiones: {
         Row: {
+          caduca_at: string | null
           codigo_qr: string | null
           created_at: string
           descripcion: string
@@ -597,6 +598,7 @@ export type Database = {
           tipo_sobre: string
         }
         Insert: {
+          caduca_at?: string | null
           codigo_qr?: string | null
           created_at?: string
           descripcion: string
@@ -610,6 +612,7 @@ export type Database = {
           tipo_sobre?: string
         }
         Update: {
+          caduca_at?: string | null
           codigo_qr?: string | null
           created_at?: string
           descripcion?: string
@@ -965,6 +968,7 @@ export type Database = {
       }
     }
     Functions: {
+      admin_create_mission_code: { Args: { _codigo: string }; Returns: string }
       admin_save_player: {
         Args: {
           _activo: boolean
