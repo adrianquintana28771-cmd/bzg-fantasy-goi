@@ -154,6 +154,17 @@ function Admin() {
         )}
         {canManageAll && (
           <Section
+            icon={ClipboardList}
+            title={t("Misio-kodeak", "Códigos de misión")}
+            description={t(
+              "Sortu misio-kodeak (4 orduz aktibo) eta ikusi aktiboak.",
+              "Crea códigos de misión (activos 4 horas) y consulta los activos.",
+            )}
+            to="/admin/codigos"
+          />
+        )}
+        {canManageAll && (
+          <Section
             icon={FileText}
             title={t("Argazkien kudeaketa", "Gestión de fotografías")}
             description={t(
