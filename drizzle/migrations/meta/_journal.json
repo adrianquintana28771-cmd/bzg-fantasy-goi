@@ -15,6 +15,13 @@
       "when": 1791388974401,
       "tag": "0001_mission_codes_expiry",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791481082080,
+      "tag": "0002_mission_codes_grants",
+      "breakpoints": true
     }
   ]
 }
