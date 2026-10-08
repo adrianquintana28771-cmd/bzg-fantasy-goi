@@ -33,12 +33,8 @@ function Page() {
     queryKey: ["admin-mission-codes"],
     enabled: canManageAll,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("misiones")
-        .select("id, codigo_qr, caduca_at, created_at")
-        .not("caduca_at", "is", null)
-        .gt("caduca_at", new Date().toISOString())
-        .order("caduca_at");
+      const { data, error } = await supabase.rpc("admin_list_mission_codes");
+      if (error) throw error;
       return data ?? [];
     },
     refetchInterval: 60000,
@@ -59,9 +55,9 @@ function Page() {
     setBusy(false);
     if (error) {
       setMsg(
-        error.message.includes("ya activo")
+        error.message.includes("ya está activo")
           ? t("Kode hori aktibo dago jada.", "Ese código ya está activo.")
-          : error.message.includes("inválido")
+          : error.message.includes("no válido")
             ? t("Kodea: 3-40 karaktere, letrak, zenbakiak, - edo _.", "Código: 3-40 caracteres, letras, números, - o _.")
             : error.message,
       );
