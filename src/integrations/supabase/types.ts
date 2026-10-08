@@ -969,6 +969,14 @@ export type Database = {
     }
     Functions: {
       admin_create_mission_code: { Args: { _codigo: string }; Returns: string }
+      admin_list_mission_codes: {
+        Args: never
+        Returns: {
+          caduca_at: string
+          codigo_qr: string
+          id: string
+        }[]
+      }
       admin_save_player: {
         Args: {
           _activo: boolean
