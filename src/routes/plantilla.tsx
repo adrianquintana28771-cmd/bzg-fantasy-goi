@@ -47,7 +47,7 @@ function cartaPuntos(rating: number, rareza: Rareza) {
   return Math.min(99, Math.round(rating * RAREZA_MULT[rareza]));
 }
 
-const fmtPts = (n: number) => String(Math.round(n * 100) / 100).replace(".", ",");
+const fmtPts = (n: number) => displayPts(n);
 const fmtMult = (m: number) => `×${String(m).replace(".", ",")}`;
 
 /** Muestra base de la jornada · multiplicador de rareza → total final (solo visual) */
