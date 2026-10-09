@@ -333,13 +333,13 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
             );
           })}
           <div className="flex items-center justify-between bg-primary px-5 py-3 text-primary-foreground">
-            <span className="text-xs font-bold uppercase tracking-wide">
-              {current === "total"
-                ? t("Denboraldiko guztira", "Total temporada")
-                : t("Jardunaldiko guztira", "Total jornada")}
-            </span>
-            <span className="font-display text-xl">{totalPts}</span>
-          </div>
+  <span className="text-xs font-bold uppercase tracking-wide">
+    {current === "total"
+      ? t("Denboraldiko guztira", "Total temporada")
+      : t("Jardunaldiko guztira", "Total jornada")}
+  </span>
+  <span className="font-display text-xl">{displayPts(totalPts)}</span>
+</div>
         </>
       )}
     </div>
