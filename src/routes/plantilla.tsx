@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import type { Database } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { displayPts } from "@/lib/utils";
 import { useT, useTd } from "@/lib/i18n";
 import { useCardImages, usePhotoSource, type CardImages } from "@/lib/card-images";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
@@ -129,7 +130,10 @@ export const Route = createFileRoute("/plantilla")({
       },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Mi equipo · BZG Fantasy" },
-      { property: "og:description", content: "Alinea a tus jugadores en el medio campo y gestiona tus cartas de BZG Fantasy." },
+      {
+        property: "og:description",
+        content: "Alinea a tus jugadores en el medio campo y gestiona tus cartas de BZG Fantasy.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -150,7 +154,17 @@ interface PoolRow {
 }
 
 /** Foto de la carta: mismo origen para sobres, selector y campo */
-function CardPhoto({ className = "", images, pool, name }: { className?: string; images?: CardImages; pool?: PoolRow; name?: string }) {
+function CardPhoto({
+  className = "",
+  images,
+  pool,
+  name,
+}: {
+  className?: string;
+  images?: CardImages;
+  pool?: PoolRow;
+  name?: string;
+}) {
   const { src, onError } = usePhotoSource(images, pool?.club_player_id, pool?.rareza ?? "normal");
   if (src) {
     return (
@@ -160,7 +174,9 @@ function CardPhoto({ className = "", images, pool, name }: { className?: string;
       </div>
     );
   }
-  return <img src={escudoAsset.url} alt="" aria-hidden="true" className={cn("h-full w-full object-contain", className)} />;
+  return (
+    <img src={escudoAsset.url} alt="" aria-hidden="true" className={cn("h-full w-full object-contain", className)} />
+  );
 }
 interface CopyRow {
   id: string;
@@ -273,7 +289,9 @@ function Inner({ userId }: { userId: string }) {
     queryFn: async (): Promise<CopyRow[]> => {
       const { data, error } = await supabase
         .from("user_players")
-        .select("id, player_id, usos, player_pool(id, nombre, posicion, rating, rareza, club_player_id, team_id, estado)")
+        .select(
+          "id, player_id, usos, player_pool(id, nombre, posicion, rating, rareza, club_player_id, team_id, estado)",
+        )
         .eq("user_id", userId);
       if (error) throw error;
       const { data: teams } = await supabase.from("club_teams").select("id, nombre");
@@ -284,9 +302,7 @@ function Inner({ userId }: { userId: string }) {
               ...c,
               player_pool: {
                 ...c.player_pool,
-                club_teams: c.player_pool.team_id
-                  ? { nombre: tmap.get(c.player_pool.team_id) ?? "" }
-                  : null,
+                club_teams: c.player_pool.team_id ? { nombre: tmap.get(c.player_pool.team_id) ?? "" } : null,
               },
             }
           : c,
@@ -298,9 +314,7 @@ function Inner({ userId }: { userId: string }) {
   const positions = useQuery({
     queryKey: ["pool-positions"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("player_pool_positions")
-        .select("player_id, posicion");
+      const { data, error } = await supabase.from("player_pool_positions").select("player_id, posicion");
       if (error) throw error;
       const map = new Map<string, Posicion[]>();
       (data ?? []).forEach((r) => {
@@ -351,34 +365,28 @@ function Inner({ userId }: { userId: string }) {
         .eq("jornada_numero", jornada.data!.numero);
       if (error) throw error;
       const map = new Map<string, number>();
-      (data ?? []).forEach((s) =>
-        map.set(s.player_id, (map.get(s.player_id) ?? 0) + Number(s.puntos)),
-      );
+      (data ?? []).forEach((s) => map.set(s.player_id, (map.get(s.player_id) ?? 0) + Number(s.puntos)));
       return map;
     },
   });
 
   const ptsJornada = (id: string) => jornadaPts.data?.get(id) ?? 0;
 
-
   const historial = useQuery({
     queryKey: ["historial-jornadas", userId],
     queryFn: async () => {
-      const [{ data: lineups }, { data: stats }, { data: pool }, { data: frozen }] =
-        await Promise.all([
-          supabase.from("lineups").select("*, jornadas(numero, nombre)").eq("user_id", userId),
-          supabase.from("player_jornada_stats").select("player_id, jornada_numero, puntos"),
-          supabase.from("player_pool").select("id, nombre, rareza"),
-          supabase
-            .from("jornada_alineaciones_congeladas")
-            .select("jornada_id, posicion, player_id")
-            .eq("user_id", userId),
-        ]);
+      const [{ data: lineups }, { data: stats }, { data: pool }, { data: frozen }] = await Promise.all([
+        supabase.from("lineups").select("*, jornadas(numero, nombre)").eq("user_id", userId),
+        supabase.from("player_jornada_stats").select("player_id, jornada_numero, puntos"),
+        supabase.from("player_pool").select("id, nombre, rareza"),
+        supabase
+          .from("jornada_alineaciones_congeladas")
+          .select("jornada_id, posicion, player_id")
+          .eq("user_id", userId),
+      ]);
       const nameById = new Map((pool ?? []).map((p) => [p.id, p.nombre]));
       const rarezaById = new Map((pool ?? []).map((p) => [p.id, p.rareza as Rareza]));
-      const ptsKey = new Map(
-        (stats ?? []).map((s) => [`${s.player_id}|${s.jornada_numero}`, Number(s.puntos)]),
-      );
+      const ptsKey = new Map((stats ?? []).map((s) => [`${s.player_id}|${s.jornada_numero}`, Number(s.puntos)]));
       /** Alineación congelada por jornada (fuente histórica de jornadas cerradas) */
       const frozenByJornada = new Map<string, Map<Posicion, string | null>>();
       (frozen ?? []).forEach((f) => {
@@ -386,11 +394,7 @@ function Inner({ userId }: { userId: string }) {
         m.set(f.posicion as Posicion, f.player_id);
         frozenByJornada.set(f.jornada_id, m);
       });
-      return (
-        (lineups ?? []) as unknown as Array<
-          LineupRow & { jornadas: { numero: number; nombre: string } | null }
-        >
-      )
+      return ((lineups ?? []) as unknown as Array<LineupRow & { jornadas: { numero: number; nombre: string } | null }>)
         .filter((l) => !!l.jornadas)
         .map((l) => {
           const numero = l.jornadas!.numero;
@@ -406,9 +410,7 @@ function Inner({ userId }: { userId: string }) {
                   base: ptsKey.get(`${pid}|${numero}`) ?? 0,
                   puntos:
                     Math.round(
-                      (ptsKey.get(`${pid}|${numero}`) ?? 0) *
-                        RAREZA_MULT[rarezaById.get(pid) ?? "normal"] *
-                        100,
+                      (ptsKey.get(`${pid}|${numero}`) ?? 0) * RAREZA_MULT[rarezaById.get(pid) ?? "normal"] * 100,
                     ) / 100,
                 }
               : null;
@@ -453,10 +455,7 @@ function Inner({ userId }: { userId: string }) {
           usable: !!activa,
         };
       })
-      .sort(
-        (a, b) =>
-          cartaPuntos(b.pool.rating, b.pool.rareza) - cartaPuntos(a.pool.rating, a.pool.rareza),
-      );
+      .sort((a, b) => cartaPuntos(b.pool.rating, b.pool.rareza) - cartaPuntos(a.pool.rating, a.pool.rareza));
   }, [inventory.data]);
 
   const [slotDraft, setSlotDraft] = useState<Record<Posicion, string | null>>({
@@ -559,14 +558,10 @@ function Inner({ userId }: { userId: string }) {
 
   const saveLineupMut = useMutation({
     mutationFn: async () => {
-      if (!jornada.data)
-        throw new Error(t("Ez dago jardunaldi aktiborik", "No hay jornada activa"));
+      if (!jornada.data) throw new Error(t("Ez dago jardunaldi aktiborik", "No hay jornada activa"));
       const { error } = await supabase
         .from("lineups")
-        .upsert(
-          { user_id: userId, jornada_id: jornada.data.id, ...slotDraft },
-          { onConflict: "user_id,jornada_id" },
-        );
+        .upsert({ user_id: userId, jornada_id: jornada.data.id, ...slotDraft }, { onConflict: "user_id,jornada_id" });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -581,8 +576,7 @@ function Inner({ userId }: { userId: string }) {
   const alignedIds = new Set(Object.values(slotDraft).filter(Boolean) as string[]);
   const locked = !!lineup.data?.locked || !!jornada.data?.is_locked;
 
-  const cardById = (id: string | null | undefined) =>
-    id ? (cards.find((c) => c.pool.id === id) ?? null) : null;
+  const cardById = (id: string | null | undefined) => (id ? (cards.find((c) => c.pool.id === id) ?? null) : null);
 
   /** Todas las posiciones en las que puede jugar (mínimo la principal) */
   const posList = (id: string, principal: Posicion): Posicion[] => {
@@ -601,9 +595,7 @@ function Inner({ userId }: { userId: string }) {
   /** Puntuación estimada de la jornada (sin límite de visualización) */
   const puntosJornada = Math.round(
     (Object.values(slotDraft).filter(Boolean) as string[]).reduce(
-      (acc, id) =>
-        acc +
-        (cardById(id) ? cartaPuntos(cardById(id)!.pool.rating, cardById(id)!.pool.rareza) : 0),
+      (acc, id) => acc + (cardById(id) ? cartaPuntos(cardById(id)!.pool.rating, cardById(id)!.pool.rareza) : 0),
       0,
     ) / 8,
   );
@@ -644,17 +636,15 @@ function Inner({ userId }: { userId: string }) {
           disabled={openSobreMut.isPending || (wallet.data?.premium ?? 0) <= 0}
           className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[color:var(--gold,#d4a017)] bg-card p-3 text-sm font-bold disabled:opacity-40"
         >
-          <Sparkles className="h-5 w-5 text-[color:var(--gold,#d4a017)]" />{" "}
-          {t("Premiuma", "Premium")} ({wallet.data?.premium ?? 0})
+          <Sparkles className="h-5 w-5 text-[color:var(--gold,#d4a017)]" /> {t("Premiuma", "Premium")} (
+          {wallet.data?.premium ?? 0})
         </button>
       </section>
 
       {/* Medio campo */}
       <section className="overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="font-display text-lg">
-            {t("Jardunaldiko alineazioa", "Alineación de la jornada")}
-          </h2>
+          <h2 className="font-display text-lg">{t("Jardunaldiko alineazioa", "Alineación de la jornada")}</h2>
           {locked ? (
             <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
               <Lock className="h-3.5 w-3.5" /> {t("Blokeatuta", "Bloqueada")}
@@ -694,7 +684,12 @@ function Inner({ userId }: { userId: string }) {
                   >
                     {c ? (
                       <div className="relative h-full w-full overflow-hidden rounded-full">
-                        <CardPhoto images={cardImages.data} pool={c.pool} name={c.pool.nombre} className="h-full w-full" />
+                        <CardPhoto
+                          images={cardImages.data}
+                          pool={c.pool}
+                          name={c.pool.nombre}
+                          className="h-full w-full"
+                        />
                         <span className="absolute inset-x-0 bottom-0 bg-black/60 text-[10px] leading-tight text-white">
                           {cartaPuntos(c.pool.rating, c.pool.rareza)}
                         </span>
@@ -703,7 +698,10 @@ function Inner({ userId }: { userId: string }) {
                       POS_SHORT[slot]
                     )}
                   </div>
-                  <div translate="no" className="max-w-[90px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                  <div
+                    translate="no"
+                    className="max-w-[90px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white"
+                  >
                     {c ? c.pool.nombre : POS_LABEL[slot]}
                   </div>
                   {c && (
@@ -725,9 +723,7 @@ function Inner({ userId }: { userId: string }) {
 
       {/* Historial de jornadas */}
       <section className="rounded-2xl border border-border bg-card p-4">
-        <h2 className="mb-3 font-display text-lg">
-          {t("Aurreko jardunaldiak", "Jornadas anteriores")}
-        </h2>
+        <h2 className="mb-3 font-display text-lg">{t("Aurreko jardunaldiak", "Jornadas anteriores")}</h2>
         {(historial.data ?? []).length > 0 && (
           <div className="mb-3 flex gap-2 overflow-x-auto pb-2">
             <button
@@ -758,46 +754,41 @@ function Inner({ userId }: { userId: string }) {
         )}
         {(historial.data ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            {t(
-              "Oraindik ez duzu jardunaldirik lerrokatu.",
-              "Todavía no has alineado ninguna jornada.",
-            )}
+            {t("Oraindik ez duzu jardunaldirik lerrokatu.", "Todavía no has alineado ninguna jornada.")}
           </p>
         ) : (
           <div className="space-y-3">
             {(historial.data ?? [])
               .filter((h) => histJor === null || h.numero === histJor)
               .map((h) => (
-              <div key={h.jornadaId} className="rounded-xl border border-border p-3">
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold">{td(h.nombre)}</div>
-                  <div className="text-right">
-                    <div className="font-display text-2xl text-primary">{h.total}</div>
-                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                      pts
+                <div key={h.jornadaId} className="rounded-xl border border-border p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold">{td(h.nombre)}</div>
+                    <div className="text-right">
+                      <div className="font-display text-2xl text-primary">{h.total}</div>
+                      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</div>
                     </div>
                   </div>
+                  <ul className="mt-2 grid grid-cols-2 gap-1 sm:grid-cols-3">
+                    {h.alineados.map((p) => (
+                      <li
+                        key={p.slot}
+                        className="flex items-center justify-between gap-1 rounded-md bg-secondary px-2 py-1 text-[11px]"
+                      >
+                        <span className="truncate">
+                          <span className="font-bold">{POS_SHORT[p.slot]}</span> <span translate="no">{p.nombre}</span>
+                        </span>
+                        <PuntosRareza
+                          base={p.base}
+                          rareza={p.rareza}
+                          className="shrink-0 text-[10px]"
+                          finalClass={p.puntos < 0 ? "text-destructive" : "text-foreground"}
+                        />
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="mt-2 grid grid-cols-2 gap-1 sm:grid-cols-3">
-                  {h.alineados.map((p) => (
-                    <li
-                      key={p.slot}
-                      className="flex items-center justify-between gap-1 rounded-md bg-secondary px-2 py-1 text-[11px]"
-                    >
-                      <span className="truncate">
-                        <span className="font-bold">{POS_SHORT[p.slot]}</span> <span translate="no">{p.nombre}</span>
-                      </span>
-                      <PuntosRareza
-                        base={p.base}
-                        rareza={p.rareza}
-                        className="shrink-0 text-[10px]"
-                        finalClass={p.puntos < 0 ? "text-destructive" : "text-foreground"}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+              ))}
           </div>
         )}
       </section>
@@ -832,7 +823,9 @@ function Inner({ userId }: { userId: string }) {
                         name={c.pool.nombre}
                         className="h-9 w-9 shrink-0 rounded-full"
                       />
-                      <div translate="no" className="truncate font-semibold">{c.pool.nombre}</div>
+                      <div translate="no" className="truncate font-semibold">
+                        {c.pool.nombre}
+                      </div>
                     </div>
                     <div className="font-display text-base text-primary">
                       {cartaPuntos(c.pool.rating, c.pool.rareza)}
@@ -845,13 +838,10 @@ function Inner({ userId }: { userId: string }) {
                   </div>
                   <div className="mt-1 flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase">
-                      {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])} {fmtMult(RAREZA_MULT[c.pool.rareza])}
+                      {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])}{" "}
+                      {fmtMult(RAREZA_MULT[c.pool.rareza])}
                     </span>
-                    {c.total > 1 && (
-                      <span className="rounded bg-secondary px-1 text-[10px] font-bold">
-                        x{c.total}
-                      </span>
-                    )}
+                    {c.total > 1 && <span className="rounded bg-secondary px-1 text-[10px] font-bold">x{c.total}</span>}
                   </div>
                   <div
                     className={`text-[10px] font-semibold ${c.usosRestantes <= 1 ? "text-destructive" : "text-muted-foreground"}`}
@@ -859,9 +849,7 @@ function Inner({ userId }: { userId: string }) {
                     {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
                   </div>
                   <div className="flex flex-wrap items-center gap-x-1 text-[10px] font-semibold">
-                    <span className="text-muted-foreground">
-                      {t("Jardunaldia", "Jornada")}:
-                    </span>
+                    <span className="text-muted-foreground">{t("Jardunaldia", "Jornada")}:</span>
                     <PuntosRareza base={ptsJornada(c.pool.id)} rareza={c.pool.rareza} />
                   </div>
                 </li>
@@ -891,16 +879,11 @@ function Inner({ userId }: { userId: string }) {
           {sobreRevelado ? (
             <div className="animate-in fade-in zoom-in-95 duration-300">
               <DialogHeader>
-                <DialogTitle className="font-display text-2xl">
-                  {t("Gutunazal berria!", "¡Nuevo sobre!")}
-                </DialogTitle>
+                <DialogTitle className="font-display text-2xl">{t("Gutunazal berria!", "¡Nuevo sobre!")}</DialogTitle>
               </DialogHeader>
               <div className="mt-4 grid grid-cols-3 gap-2">
                 {(sobreResult ?? []).map((p, i) => (
-                  <div
-                    key={`${p.id}-${i}`}
-                    className={`rounded-lg border-2 p-3 text-center ${RAREZA_STYLE[p.rareza]}`}
-                  >
+                  <div key={`${p.id}-${i}`} className={`rounded-lg border-2 p-3 text-center ${RAREZA_STYLE[p.rareza]}`}>
                     <div className="relative mb-1">
                       <CardPhoto className="mx-auto h-16 w-full" />
                       {cardById(p.id)?.pool.club_teams?.nombre && (
@@ -909,10 +892,10 @@ function Inner({ userId }: { userId: string }) {
                         </div>
                       )}
                     </div>
-                    <div className="font-display text-3xl text-primary">
-                      {cartaPuntos(p.rating, p.rareza)}
+                    <div className="font-display text-3xl text-primary">{cartaPuntos(p.rating, p.rareza)}</div>
+                    <div translate="no" className="truncate text-xs font-semibold">
+                      {p.nombre}
                     </div>
-                    <div translate="no" className="truncate text-xs font-semibold">{p.nombre}</div>
                     <div className="text-[10px] uppercase text-muted-foreground">
                       {t(RAREZA_LABEL_EU[p.rareza], RAREZA_LABEL_ES[p.rareza])}
                     </div>
@@ -922,9 +905,7 @@ function Inner({ userId }: { userId: string }) {
             </div>
           ) : (
             <>
-              <DialogTitle className="sr-only">
-                {t("Gutunazala irekitzen", "Abriendo sobre")}
-              </DialogTitle>
+              <DialogTitle className="sr-only">{t("Gutunazala irekitzen", "Abriendo sobre")}</DialogTitle>
               <img
                 src={sobreAperturaAsset.url}
                 alt=""
@@ -977,7 +958,12 @@ function Inner({ userId }: { userId: string }) {
                   className={`flex w-full items-stretch overflow-hidden rounded-lg border-2 text-left ${RAREZA_PICK_STYLE[c.pool.rareza]}`}
                 >
                   <div className="relative w-16 shrink-0 self-stretch overflow-hidden sm:w-20">
-                    <CardPhoto images={cardImages.data} pool={c.pool} name={c.pool.nombre} className="absolute inset-0" />
+                    <CardPhoto
+                      images={cardImages.data}
+                      pool={c.pool}
+                      name={c.pool.nombre}
+                      className="absolute inset-0"
+                    />
                   </div>
                   <div className="min-w-0 flex-1 p-3">
                     <div translate="no" className="font-semibold">
@@ -1000,18 +986,12 @@ function Inner({ userId }: { userId: string }) {
                     </div>
                   </div>
                   <div className="shrink-0 p-3 text-right">
-                    <div className="font-display text-lg text-primary">
-                      {cartaPuntos(c.pool.rating, c.pool.rareza)}
-                    </div>
+                    <div className="font-display text-lg text-primary">{cartaPuntos(c.pool.rating, c.pool.rareza)}</div>
                     <div className="text-[10px] text-muted-foreground">
                       {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
                     </div>
                     <div className="text-[10px] font-semibold">
-                      <PuntosRareza
-                        base={ptsJornada(c.pool.id)}
-                        rareza={c.pool.rareza}
-                        className="justify-end"
-                      />
+                      <PuntosRareza base={ptsJornada(c.pool.id)} rareza={c.pool.rareza} className="justify-end" />
                     </div>
                   </div>
                 </button>
@@ -1026,12 +1006,7 @@ function Inner({ userId }: { userId: string }) {
 function Court({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative w-full" style={{ aspectRatio: "1 / 1.25" }}>
-      <img
-        src={campoAsset.url}
-        alt=""
-        aria-hidden
-        className="absolute inset-0 h-full w-full object-cover"
-      />
+      <img src={campoAsset.url} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
       {/* velo suave para que los huecos se lean bien sobre el campo */}
       <div className="absolute inset-0 bg-black/10" />
       <div className="absolute inset-0">{children}</div>
