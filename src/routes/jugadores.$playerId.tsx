@@ -207,18 +207,16 @@ function Jugador() {
             </span>
             {team && <span className="rounded bg-secondary px-2 py-0.5 text-muted-foreground">{team.nombre}</span>}
             <span className="rounded bg-[color:var(--gold,#d4a017)]/20 px-2 py-0.5 font-bold text-foreground">
-  {displayPts(total)} pts
-</span>
-              {total} pts
+              {displayPts(total)} pts
             </span>
           </div>
         </div>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
-  <MiniStat label={t("Jardunaldiak", "Jornadas")} value={stats.length} />
-  <MiniStat label={t("Batez bestekoa", "Media")} value={displayPts(media)} />
-  <MiniStat label={t("Guztira", "Total")} value={displayPts(total)} />
-</div>
+          <MiniStat label={t("Jardunaldiak", "Jornadas")} value={stats.length} />
+          <MiniStat label={t("Batez bestekoa", "Media")} value={displayPts(media)} />
+          <MiniStat label={t("Guztira", "Total")} value={displayPts(total)} />
+        </div>
       </div>
 
       <Desempeno stats={stats} actions={actions} />
@@ -333,13 +331,13 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
             );
           })}
           <div className="flex items-center justify-between bg-primary px-5 py-3 text-primary-foreground">
-  <span className="text-xs font-bold uppercase tracking-wide">
-    {current === "total"
-      ? t("Denboraldiko guztira", "Total temporada")
-      : t("Jardunaldiko guztira", "Total jornada")}
-  </span>
-  <span className="font-display text-xl">{displayPts(totalPts)}</span>
-</div>
+            <span className="text-xs font-bold uppercase tracking-wide">
+              {current === "total"
+                ? t("Denboraldiko guztira", "Total temporada")
+                : t("Jardunaldiko guztira", "Total jornada")}
+            </span>
+            <span className="font-display text-xl">{displayPts(totalPts)}</span>
+          </div>
         </>
       )}
     </div>
