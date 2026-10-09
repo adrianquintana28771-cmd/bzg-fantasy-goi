@@ -614,7 +614,7 @@ function Inner({ userId }: { userId: string }) {
           </p>
         </div>
         <div className="rounded-xl bg-primary/10 px-4 py-2 text-center">
-          <div className="font-display text-2xl text-primary">{puntosJornada}</div>
+          <div className="font-display text-2xl text-primary">{displayPts(puntosJornada)}</div>
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
             {t("jardunaldiko ptak", "pts jornada")}
           </div>
