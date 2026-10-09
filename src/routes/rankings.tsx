@@ -278,7 +278,7 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
               </div>
             </div>
             <div className="text-right">
-              <div className="font-display text-2xl text-primary">{displayPts(u.puntos)}</div>
+              <div className="font-display text-2xl text-primary">{String(u.puntos).replace(".", ",")}</div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</div>
             </div>
           </li>
