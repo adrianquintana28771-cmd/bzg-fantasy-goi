@@ -20,6 +20,7 @@ import { Route as AdminCodigosRouteImport } from './routes/admin.codigos'
 import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
 import { Route as AdminFotosRouteImport } from './routes/admin.fotos'
 import { Route as AdminJugadoresRouteImport } from './routes/admin.jugadores'
+import { Route as AdminMisionesRouteImport } from './routes/admin.misiones'
 import { Route as AdminPasswordRouteImport } from './routes/admin.password'
 import { Route as AdminPosicionesRouteImport } from './routes/admin.posiciones'
 import { Route as AdminReglasRouteImport } from './routes/admin.reglas'
@@ -83,6 +84,11 @@ const AdminJugadoresRoute = AdminJugadoresRouteImport.update({
   path: '/admin/jugadores',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminMisionesRoute = AdminMisionesRouteImport.update({
+  id: '/admin/misiones',
+  path: '/admin/misiones',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminPasswordRoute = AdminPasswordRouteImport.update({
   id: '/admin/password',
   path: '/admin/password',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
+  '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
+  '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
+  '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/admin/desempeno'
     | '/admin/fotos'
     | '/admin/jugadores'
+    | '/admin/misiones'
     | '/admin/password'
     | '/admin/posiciones'
     | '/admin/reglas'
@@ -213,6 +223,7 @@ export interface FileRouteTypes {
     | '/admin/desempeno'
     | '/admin/fotos'
     | '/admin/jugadores'
+    | '/admin/misiones'
     | '/admin/password'
     | '/admin/posiciones'
     | '/admin/reglas'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/admin/desempeno'
     | '/admin/fotos'
     | '/admin/jugadores'
+    | '/admin/misiones'
     | '/admin/password'
     | '/admin/posiciones'
     | '/admin/reglas'
@@ -254,6 +266,7 @@ export interface RootRouteChildren {
   AdminDesempenoRoute: typeof AdminDesempenoRoute
   AdminFotosRoute: typeof AdminFotosRoute
   AdminJugadoresRoute: typeof AdminJugadoresRoute
+  AdminMisionesRoute: typeof AdminMisionesRoute
   AdminPasswordRoute: typeof AdminPasswordRoute
   AdminPosicionesRoute: typeof AdminPosicionesRoute
   AdminReglasRoute: typeof AdminReglasRoute
@@ -343,6 +356,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminJugadoresRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/misiones': {
+      id: '/admin/misiones'
+      path: '/admin/misiones'
+      fullPath: '/admin/misiones'
+      preLoaderRoute: typeof AdminMisionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/password': {
       id: '/admin/password'
       path: '/admin/password'
@@ -406,6 +426,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDesempenoRoute: AdminDesempenoRoute,
   AdminFotosRoute: AdminFotosRoute,
   AdminJugadoresRoute: AdminJugadoresRoute,
+  AdminMisionesRoute: AdminMisionesRoute,
   AdminPasswordRoute: AdminPasswordRoute,
   AdminPosicionesRoute: AdminPosicionesRoute,
   AdminReglasRoute: AdminReglasRoute,

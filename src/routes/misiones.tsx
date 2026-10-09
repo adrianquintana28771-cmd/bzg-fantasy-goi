@@ -37,6 +37,7 @@ interface MisionRow {
   requiere_qr: boolean | null;
   semanal: boolean;
   espera_segundos: number;
+  enlace: string | null;
 }
 
 function weekStart() {
@@ -196,7 +197,7 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       const [{ data: ms }, { data: um }] = await Promise.all([
         supabase
           .from("misiones")
-          .select("id, nombre, descripcion, recompensa_sobres, tipo_sobre, requiere_qr, semanal, espera_segundos")
+          .select("id, nombre, descripcion, recompensa_sobres, tipo_sobre, requiere_qr, semanal, espera_segundos, enlace")
           .eq("is_active", true)
           .is("caduca_at", null)
           .order("created_at"),
@@ -384,10 +385,20 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
                     <Button type="button" size="sm" variant="secondary" onClick={openGuidedTour}>
                       <BookOpen aria-hidden /> {actionLabel}
                     </Button>
+                  ) : !copy?.url && !mision.enlace ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      disabled={claimMut.isPending}
+                      onClick={() => claimMut.mutate(mision.id)}
+                    >
+                      {t("Osatu", "Completar")}
+                    </Button>
                   ) : (
                     <Button asChild size="sm" variant="secondary">
                       <a
-                        href={copy?.url}
+                        href={copy?.url ?? mision.enlace ?? undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => {

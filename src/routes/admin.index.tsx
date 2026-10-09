@@ -165,6 +165,17 @@ function Admin() {
         )}
         {canManageAll && (
           <Section
+            icon={ClipboardList}
+            title={t("Misioen kudeaketa", "Gestión de misiones")}
+            description={t(
+              "Sortu, editatu edo ezabatu misioak, aukerako estekarekin.",
+              "Crea, edita o elimina misiones, con enlace opcional.",
+            )}
+            to="/admin/misiones"
+          />
+        )}
+        {canManageAll && (
+          <Section
             icon={FileText}
             title={t("Argazkien kudeaketa", "Gestión de fotografías")}
             description={t(
