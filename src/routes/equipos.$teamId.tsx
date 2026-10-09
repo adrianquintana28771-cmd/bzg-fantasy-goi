@@ -164,7 +164,7 @@ function EquipoDetalle() {
                 {posicionesDe(p.club_player_id) || POS_LABEL[p.posicion as keyof typeof POS_LABEL] || p.posicion}
               </div>
             </div>
-            <span className="font-display text-xl text-primary">{round2(pts[p.id] ?? 0)}</span>
+            <span className="font-display text-xl text-primary">{displayPts(pts[p.id] ?? 0)}</span>
           </Link>
         ))}
       </div>
