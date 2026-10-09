@@ -2,16 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  Cell,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
+import { displayPts } from "@/lib/utils";
+import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { CategoryBadge } from "@/components/fantasy-ui";
 import { JornadaBar, useCalendarJornadas, type JornadaSel } from "@/components/jornada-bar";
@@ -93,9 +85,7 @@ function Jugador() {
       if (player.club_player_id) {
         const { data, error } = await supabase
           .from("club_match_actions")
-          .select(
-            "cantidad,action_id,club_matches(jornada),club_action_types(nombre,puntos,orden,activo)",
-          )
+          .select("cantidad,action_id,club_matches(jornada),club_action_types(nombre,puntos,orden,activo)")
           .eq("player_id", player.club_player_id);
         if (error) throw error;
         type Row = {
@@ -132,17 +122,11 @@ function Jugador() {
   const { src: photo, onError: photoError } = usePhotoSource(cardImages.data, q.data?.player.club_player_id, "normal");
 
   if (q.isLoading)
-    return (
-      <p className="p-10 text-center text-sm text-muted-foreground">
-        {t("Kargatzen…", "Cargando…")}
-      </p>
-    );
+    return <p className="p-10 text-center text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>;
   if (!q.data)
     return (
       <div className="mx-auto max-w-2xl p-10 text-center">
-        <h1 className="font-display text-3xl">
-          {t("Jokalaria ez da aurkitu", "Jugador/a no encontrado/a")}
-        </h1>
+        <h1 className="font-display text-3xl">{t("Jokalaria ez da aurkitu", "Jugador/a no encontrado/a")}</h1>
         <Link to="/equipos" className="mt-4 inline-block text-primary hover:underline">
           {t("Atzera", "Volver")}
         </Link>
@@ -201,9 +185,7 @@ function Jugador() {
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent p-3">
             <EstadoBadge estado={estado} />
             {dorsal != null && (
-              <span className="rounded bg-black/40 px-2 py-0.5 text-[11px] font-semibold text-white">
-                #{dorsal}
-              </span>
+              <span className="rounded bg-black/40 px-2 py-0.5 text-[11px] font-semibold text-white">#{dorsal}</span>
             )}
           </div>
         </div>
@@ -223,11 +205,7 @@ function Jugador() {
             <span className="rounded bg-primary/15 px-2 py-0.5 font-medium text-primary">
               {POS_LABEL[player.posicion as keyof typeof POS_LABEL] ?? player.posicion}
             </span>
-            {team && (
-              <span className="rounded bg-secondary px-2 py-0.5 text-muted-foreground">
-                {team.nombre}
-              </span>
-            )}
+            {team && <span className="rounded bg-secondary px-2 py-0.5 text-muted-foreground">{team.nombre}</span>}
             <span className="rounded bg-[color:var(--gold,#d4a017)]/20 px-2 py-0.5 font-bold text-foreground">
               {total} pts
             </span>
@@ -246,11 +224,7 @@ function Jugador() {
       <JornadasChart rows={stats} />
 
       <p className="mt-4 text-xs text-muted-foreground">
-        🔒{" "}
-        {t(
-          "Adingabeen datu pertsonalak babestuta daude.",
-          "Los datos personales de menores están protegidos.",
-        )}
+        🔒 {t("Adingabeen datu pertsonalak babestuta daude.", "Los datos personales de menores están protegidos.")}
       </p>
     </div>
   );
@@ -262,9 +236,9 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
   const { data: calendar = [] } = useCalendarJornadas();
   const jornadas = useMemo(
     () =>
-      Array.from(
-        new Set([...calendar, ...stats.map((s) => s.jornada), ...actions.map((a) => a.jornada)]),
-      ).sort((a, b) => a - b),
+      Array.from(new Set([...calendar, ...stats.map((s) => s.jornada), ...actions.map((a) => a.jornada)])).sort(
+        (a, b) => a - b,
+      ),
     [calendar, stats, actions],
   );
   const [current, setSel] = useState<JornadaSel>("total");
@@ -288,20 +262,15 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
     g.cantidad += a.cantidad;
     grouped.set(a.action_id, g);
   }
-  const rows = [...grouped.values()]
-    .filter((r) => r.cantidad > 0)
-    .sort((a, b) => a.orden - b.orden);
-  const totalPts =
-    current === "total" ? round2(stats.reduce((a, s) => a + s.puntos, 0)) : round2(ptsFor(current));
+  const rows = [...grouped.values()].filter((r) => r.cantidad > 0).sort((a, b) => a.orden - b.orden);
+  const totalPts = current === "total" ? round2(stats.reduce((a, s) => a + s.puntos, 0)) : round2(ptsFor(current));
   const rowPts = (r: { action_id: string; cantidad: number; puntos: number }) =>
     r.action_id === "gol_encajado" ? golEncajadoPts(r.cantidad) : round2(r.cantidad * r.puntos);
   const noDisp = current !== "total" && estadoFor(current) === "no_disponible";
 
   return (
     <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-      <h2 className="px-5 pt-5 font-display text-xl">
-        {t("Jardunaldiko errendimendua", "Desempeño por jornada")}
-      </h2>
+      <h2 className="px-5 pt-5 font-display text-xl">{t("Jardunaldiko errendimendua", "Desempeño por jornada")}</h2>
       {jornadas.length === 0 ? (
         <p className="px-5 pb-5 pt-2 text-sm text-muted-foreground">
           {t("Oraindik ez du jardunaldirik jokatu.", "Aún no ha jugado ninguna jornada.")}
@@ -336,10 +305,7 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
           </div>
           {noDisp && (
             <p className="border-t border-border px-5 py-3 text-sm text-destructive">
-              {t(
-                "Jardunaldi honetan ez eskuragarri: 0 puntu.",
-                "No disponible esta jornada: puntúa 0.",
-              )}
+              {t("Jardunaldi honetan ez eskuragarri: 0 puntu.", "No disponible esta jornada: puntúa 0.")}
             </p>
           )}
           {rows.length === 0 && !noDisp && (
@@ -394,9 +360,7 @@ function JornadasChart({ rows }: { rows: JStat[] }) {
   const data = rows.map((r) => ({ jornada: `J${r.jornada}`, pts: r.puntos, estado: r.estado }));
   return (
     <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-card">
-      <h2 className="font-display text-xl">
-        {t("Jardunaldiko puntuazioa", "Puntuación por jornada")}
-      </h2>
+      <h2 className="font-display text-xl">{t("Jardunaldiko puntuazioa", "Puntuación por jornada")}</h2>
       <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
         {(Object.keys(ESTADO_COLOR) as PlayerEstado[]).map((e) => (
           <span key={e} className="inline-flex items-center gap-1">
@@ -450,9 +414,7 @@ function EstadoBadge({ estado }: { estado: PlayerEstado }) {
     no_disponible: "bg-destructive text-white",
   };
   return (
-    <span
-      className={`rounded-md px-2 py-1 text-[11px] font-bold uppercase tracking-wide shadow ${style[estado]}`}
-    >
+    <span className={`rounded-md px-2 py-1 text-[11px] font-bold uppercase tracking-wide shadow ${style[estado]}`}>
       {EST_LABEL[estado]}
     </span>
   );
