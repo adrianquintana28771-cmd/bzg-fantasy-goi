@@ -114,7 +114,7 @@ function EquipoDetalle() {
           </div>
         </div>
         <div className="rounded-xl bg-primary/10 p-4 text-right">
-          <div className="font-display text-3xl text-primary">{total}</div>
+          <div className="font-display text-3xl text-primary">{displayPts(total)}</div>
           <div className="text-xs uppercase tracking-widest text-muted-foreground">
             {t("puntu guztira", "pts totales")}
           </div>
