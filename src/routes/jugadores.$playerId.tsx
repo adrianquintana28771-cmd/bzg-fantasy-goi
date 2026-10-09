@@ -207,6 +207,8 @@ function Jugador() {
             </span>
             {team && <span className="rounded bg-secondary px-2 py-0.5 text-muted-foreground">{team.nombre}</span>}
             <span className="rounded bg-[color:var(--gold,#d4a017)]/20 px-2 py-0.5 font-bold text-foreground">
+  {displayPts(total)} pts
+</span>
               {total} pts
             </span>
           </div>
