@@ -215,10 +215,10 @@ function Jugador() {
         </div>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
-          <MiniStat label={t("Jardunaldiak", "Jornadas")} value={stats.length} />
-          <MiniStat label={t("Batez bestekoa", "Media")} value={media} />
-          <MiniStat label={t("Guztira", "Total")} value={total} />
-        </div>
+  <MiniStat label={t("Jardunaldiak", "Jornadas")} value={stats.length} />
+  <MiniStat label={t("Batez bestekoa", "Media")} value={displayPts(media)} />
+  <MiniStat label={t("Guztira", "Total")} value={displayPts(total)} />
+</div>
       </div>
 
       <Desempeno stats={stats} actions={actions} />
