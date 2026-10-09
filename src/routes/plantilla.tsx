@@ -765,7 +765,7 @@ function Inner({ userId }: { userId: string }) {
                   <div className="flex items-center justify-between">
                     <div className="font-semibold">{td(h.nombre)}</div>
                     <div className="text-right">
-                      <div className="font-display text-2xl text-primary">{h.total}</div>
+                      <div className="font-display text-2xl text-primary">{displayPts(h.total)}</div>
                       <div className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</div>
                     </div>
                   </div>
