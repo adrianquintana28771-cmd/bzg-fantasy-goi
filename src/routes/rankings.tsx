@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { displayPts } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPlayerRanking } from "@/lib/club-data";
@@ -48,14 +49,12 @@ function Rankings() {
   const [jor, setJor] = useState<JornadaSel>("total");
   const { data: jornadas = [] } = useCalendarJornadas();
 
-  const allTeams = [
-    ...new Map(ranking.flatMap((r) => (r.team ? [[r.team.id, r.team]] : []))).values(),
-  ].sort((a, b) => a.nombre.localeCompare(b.nombre));
-  const teams = allTeams.filter(
-    (tm) => (!category || tm.categoria === category) && (!gender || tm.sexo === gender),
+  const allTeams = [...new Map(ranking.flatMap((r) => (r.team ? [[r.team.id, r.team]] : []))).values()].sort((a, b) =>
+    a.nombre.localeCompare(b.nombre),
   );
-  const catOptions = (["cadete", "juvenil", "senior"] as const).filter(
-    (k) => allTeams.some((tm) => tm.categoria === k && (!gender || tm.sexo === gender)),
+  const teams = allTeams.filter((tm) => (!category || tm.categoria === category) && (!gender || tm.sexo === gender));
+  const catOptions = (["cadete", "juvenil", "senior"] as const).filter((k) =>
+    allTeams.some((tm) => tm.categoria === k && (!gender || tm.sexo === gender)),
   );
   const genderOptions = (["masculino", "femenino"] as const).filter((g) =>
     allTeams.some((tm) => tm.sexo === g && (!category || tm.categoria === category)),
@@ -70,11 +69,7 @@ function Rankings() {
         (!gender || r.team?.sexo === gender) &&
         (!teamId || r.team?.id === teamId),
     )
-    .map((r) =>
-      jor === "total"
-        ? r
-        : { ...r, puntos: r.porJornada[jor] ?? 0, jornadas: r.porJornada[jor] ? 1 : 0 },
-    )
+    .map((r) => (jor === "total" ? r : { ...r, puntos: r.porJornada[jor] ?? 0, jornadas: r.porJornada[jor] ? 1 : 0 }))
     .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre));
 
   return (
@@ -127,12 +122,8 @@ function Rankings() {
             </Select>
             <Select value={gender} onChange={setGender} label={t("Sexua", "Sexo")}>
               <option value="">{t("Guztiak", "Todos")}</option>
-              {genderOptions.includes("masculino") && (
-                <option value="masculino">{t("Gizonezkoa", "Masculino")}</option>
-              )}
-              {genderOptions.includes("femenino") && (
-                <option value="femenino">{t("Emakumezkoa", "Femenino")}</option>
-              )}
+              {genderOptions.includes("masculino") && <option value="masculino">{t("Gizonezkoa", "Masculino")}</option>}
+              {genderOptions.includes("femenino") && <option value="femenino">{t("Emakumezkoa", "Femenino")}</option>}
             </Select>
             <Select value={teamId} onChange={setTeamId} label={t("Taldea", "Equipo")}>
               <option value="">{t("Guztiak", "Todos")}</option>
@@ -145,9 +136,7 @@ function Rankings() {
           </div>
 
           <div className="mt-6 space-y-2">
-            {isLoading && (
-              <p className="text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>
-            )}
+            {isLoading && <p className="text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>}
             {sorted.map((p, i) => (
               <RankedPlayerRow key={p.id} p={p} rank={i + 1} />
             ))}
@@ -197,10 +186,7 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
   const q = useQuery({
     queryKey: ["user-ranking"],
     queryFn: async () => {
-      const [tot, por] = await Promise.all([
-        supabase.rpc("user_ranking"),
-        supabase.rpc("user_ranking_by_jornada"),
-      ]);
+      const [tot, por] = await Promise.all([supabase.rpc("user_ranking"), supabase.rpc("user_ranking_by_jornada")]);
       if (tot.error) throw tot.error;
       if (por.error) throw por.error;
       const porUser: Record<string, Record<number, number>> = {};
@@ -209,10 +195,7 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
       }
       return (tot.data ?? []).map((r) => ({
         userId: r.user_id as string,
-        nombre:
-          (r.username as string | null) ??
-          (r.display_name as string | null) ??
-          t("Erabiltzailea", "Usuario"),
+        nombre: (r.username as string | null) ?? (r.display_name as string | null) ?? t("Erabiltzailea", "Usuario"),
         puntos: Math.round(Number(r.puntos) * 100) / 100,
         jornadas: Number(r.jornadas),
         porJornada: porUser[r.user_id] ?? {},
@@ -223,13 +206,9 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
   useEffect(() => {
     const channel = supabase
       .channel("user-ranking-live")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "player_jornada_stats" },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["user-ranking"] });
-        },
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "player_jornada_stats" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["user-ranking"] });
+      })
       .on("postgres_changes", { event: "*", schema: "public", table: "lineups" }, () => {
         queryClient.invalidateQueries({ queryKey: ["user-ranking"] });
       })
@@ -259,9 +238,7 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
           "Cada usuario suma los puntos de los 7 jugadores/as que alineó en cada jornada.",
         )}
       </p>
-      {q.isLoading && (
-        <p className="mt-6 text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>
-      )}
+      {q.isLoading && <p className="mt-6 text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>}
       {!q.isLoading && rows.length === 0 && (
         <div className="mt-6 rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">
           {t(
@@ -301,9 +278,7 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
               </div>
             </div>
             <div className="text-right">
-              <div className="font-display text-2xl text-primary">
-                {String(u.puntos).replace(".", ",")}
-              </div>
+              <div className="font-display text-2xl text-primary">{String(u.puntos).replace(".", ",")}</div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</div>
             </div>
           </li>
