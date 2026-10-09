@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { displayPts } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPlayerRanking } from "@/lib/club-data";
