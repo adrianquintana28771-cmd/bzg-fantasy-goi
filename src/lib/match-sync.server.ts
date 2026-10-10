@@ -150,7 +150,7 @@ export async function syncAll(admin: SupabaseClient) {
       detalle = `${r.actualizados} actualizados, ${r.creados} nuevos`;
     } catch (e) {
       ok = false;
-      detalle = `Error: ${e instanceof Error ? e.message : String(e)}`.slice(0, 300);
+      detalle = `Error: ${e instanceof Error ? e.message : (e as { message?: string })?.message ?? JSON.stringify(e)}`.slice(0, 300);
     }
     await admin
       .from("match_sources")
