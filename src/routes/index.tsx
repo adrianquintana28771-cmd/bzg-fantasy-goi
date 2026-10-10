@@ -283,11 +283,9 @@ function Home() {
               <h2 className="mb-3 font-display text-xl">{icon} {title}</h2>
               <div className="space-y-2">
                 {(leaders?.[key] ?? []).map((p, i) => (
-                  <Link
+                  <div
                     key={p.id}
-                    to="/jugadores/$playerId"
-                    params={{ playerId: p.id }}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated"
+                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card"
                   >
                     <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
                     <div className="min-w-0 flex-1">
@@ -297,7 +295,7 @@ function Home() {
                       )}
                     </div>
                     <span className="font-display text-lg">{p.total}</span>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </div>
