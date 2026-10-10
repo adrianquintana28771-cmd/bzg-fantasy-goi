@@ -19,6 +19,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminCodigosRouteImport } from './routes/admin.codigos'
 import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
 import { Route as AdminFotosRouteImport } from './routes/admin.fotos'
+import { Route as AdminFuentesRouteImport } from './routes/admin.fuentes'
 import { Route as AdminJugadoresRouteImport } from './routes/admin.jugadores'
 import { Route as AdminMisionesRouteImport } from './routes/admin.misiones'
 import { Route as AdminPasswordRouteImport } from './routes/admin.password'
@@ -78,6 +79,11 @@ const AdminDesempenoRoute = AdminDesempenoRouteImport.update({
 const AdminFotosRoute = AdminFotosRouteImport.update({
   id: '/admin/fotos',
   path: '/admin/fotos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFuentesRoute = AdminFuentesRouteImport.update({
+  id: '/admin/fuentes',
+  path: '/admin/fuentes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminJugadoresRoute = AdminJugadoresRouteImport.update({
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fuentes': typeof AdminFuentesRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fuentes': typeof AdminFuentesRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fuentes': typeof AdminFuentesRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/admin/codigos'
     | '/admin/desempeno'
     | '/admin/fotos'
+    | '/admin/fuentes'
     | '/admin/jugadores'
     | '/admin/misiones'
     | '/admin/password'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/admin/codigos'
     | '/admin/desempeno'
     | '/admin/fotos'
+    | '/admin/fuentes'
     | '/admin/jugadores'
     | '/admin/misiones'
     | '/admin/password'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/admin/codigos'
     | '/admin/desempeno'
     | '/admin/fotos'
+    | '/admin/fuentes'
     | '/admin/jugadores'
     | '/admin/misiones'
     | '/admin/password'
@@ -278,6 +290,7 @@ export interface RootRouteChildren {
   AdminCodigosRoute: typeof AdminCodigosRoute
   AdminDesempenoRoute: typeof AdminDesempenoRoute
   AdminFotosRoute: typeof AdminFotosRoute
+  AdminFuentesRoute: typeof AdminFuentesRoute
   AdminJugadoresRoute: typeof AdminJugadoresRoute
   AdminMisionesRoute: typeof AdminMisionesRoute
   AdminPasswordRoute: typeof AdminPasswordRoute
@@ -363,6 +376,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFotosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/fuentes': {
+      id: '/admin/fuentes'
+      path: '/admin/fuentes'
+      fullPath: '/admin/fuentes'
+      preLoaderRoute: typeof AdminFuentesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/jugadores': {
       id: '/admin/jugadores'
       path: '/admin/jugadores'
@@ -446,6 +466,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCodigosRoute: AdminCodigosRoute,
   AdminDesempenoRoute: AdminDesempenoRoute,
   AdminFotosRoute: AdminFotosRoute,
+  AdminFuentesRoute: AdminFuentesRoute,
   AdminJugadoresRoute: AdminJugadoresRoute,
   AdminMisionesRoute: AdminMisionesRoute,
   AdminPasswordRoute: AdminPasswordRoute,
