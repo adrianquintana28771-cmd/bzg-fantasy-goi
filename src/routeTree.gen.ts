@@ -28,6 +28,7 @@ import { Route as EquiposIndexRouteImport } from './routes/equipos.index'
 import { Route as EquiposTeamIdRouteImport } from './routes/equipos.$teamId'
 import { Route as JugadoresPlayerIdRouteImport } from './routes/jugadores.$playerId'
 import { Route as PartidosIndexRouteImport } from './routes/partidos.index'
+import { Route as ApiPublicHooksSyncMatchesRouteImport } from './routes/api/public/hooks/sync-matches'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -124,6 +125,12 @@ const PartidosIndexRoute = PartidosIndexRouteImport.update({
   path: '/partidos/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksSyncMatchesRoute =
+  ApiPublicHooksSyncMatchesRouteImport.update({
+    id: '/api/public/hooks/sync-matches',
+    path: '/api/public/hooks/sync-matches',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/equipos/': typeof EquiposIndexRoute
   '/partidos/': typeof PartidosIndexRoute
+  '/api/public/hooks/sync-matches': typeof ApiPublicHooksSyncMatchesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -166,6 +174,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/equipos': typeof EquiposIndexRoute
   '/partidos': typeof PartidosIndexRoute
+  '/api/public/hooks/sync-matches': typeof ApiPublicHooksSyncMatchesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -188,6 +197,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/equipos/': typeof EquiposIndexRoute
   '/partidos/': typeof PartidosIndexRoute
+  '/api/public/hooks/sync-matches': typeof ApiPublicHooksSyncMatchesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/equipos/'
     | '/partidos/'
+    | '/api/public/hooks/sync-matches'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/equipos'
     | '/partidos'
+    | '/api/public/hooks/sync-matches'
   id:
     | '__root__'
     | '/'
@@ -253,6 +265,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/equipos/'
     | '/partidos/'
+    | '/api/public/hooks/sync-matches'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -275,6 +288,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   EquiposIndexRoute: typeof EquiposIndexRoute
   PartidosIndexRoute: typeof PartidosIndexRoute
+  ApiPublicHooksSyncMatchesRoute: typeof ApiPublicHooksSyncMatchesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -412,6 +426,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PartidosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/sync-matches': {
+      id: '/api/public/hooks/sync-matches'
+      path: '/api/public/hooks/sync-matches'
+      fullPath: '/api/public/hooks/sync-matches'
+      preLoaderRoute: typeof ApiPublicHooksSyncMatchesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -435,6 +456,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   EquiposIndexRoute: EquiposIndexRoute,
   PartidosIndexRoute: PartidosIndexRoute,
+  ApiPublicHooksSyncMatchesRoute: ApiPublicHooksSyncMatchesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
