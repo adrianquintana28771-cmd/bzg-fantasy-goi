@@ -185,6 +185,17 @@ function Admin() {
             to="/admin/fotos"
           />
         )}
+        {canManageAll && (
+          <Section
+            icon={Calendar}
+            title={t("Partiden iturriak", "Fuentes de partidos")}
+            description={t(
+              "Federazioko egutegiak: ikusi, editatu, aktibatu edo gehitu iturriak.",
+              "Calendarios de la Federación: ver, editar, activar o añadir fuentes.",
+            )}
+            to="/admin/fuentes"
+          />
+        )}
       </div>
 
       {canManageAll && <CloseJornada />}
