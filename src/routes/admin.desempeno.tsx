@@ -246,16 +246,29 @@ function Desempeno() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("club_match_actions")
-        .select("player_id")
+        .select("player_id, club_players(nombre,apellido1,apellido2)")
         .eq("match_id", matchId)
         .neq("player_id", playerId)
         .in("action_id", ["parada", "gol_encajado", "lanzamiento_fuera", "asistencia_portero", "gk_victoria", "gk_empate", "gk_derrota"])
         .gt("cantidad", 0);
       if (error) throw error;
-      return new Set((data ?? []).map((r) => r.player_id)).size;
+      const names = new Map<string, string>();
+      for (const r of (data ?? []) as unknown as { player_id: string; club_players: { nombre: string; apellido1: string | null; apellido2: string | null } | null }[])
+        names.set(r.player_id, r.club_players ? [r.club_players.nombre, r.club_players.apellido1].filter(Boolean).join(" ") : "?");
+      return [...names.values()];
     },
   });
-  const variosPorteros = (otrosPorteros.data ?? 0) > 0;
+  const otrosNombres = otrosPorteros.data ?? [];
+  const variosPorteros = otrosNombres.length > 0;
+  // Cuenta este portero si tiene alguna acción de portería anotada
+  const yoActivo = ["parada", "gol_encajado", "lanzamiento_fuera", "asistencia_portero", "gk_victoria", "gk_empate", "gk_derrota"].some((id) => (counts[id] ?? 0) > 0);
+  const nPorteros = otrosNombres.length + (yoActivo ? 1 : 0);
+  const golAction = (actions.data ?? []).find((a) => a.id === "gol_encajado");
+  const golesN = counts.gol_encajado ?? 0;
+  const golDesglose = (golAction?.tramos ?? []).map((tr) => {
+    const n = Math.max(0, Math.min(golesN, tr.hasta ?? golesN) - (tr.desde - 1));
+    return { ...tr, n, pts: Math.round(n * tr.puntos * 100) / 100 };
+  });
 
   const accionPts = (a: ActionRow) => {
     const n = counts[a.id] ?? 0;
@@ -506,6 +519,41 @@ function Desempeno() {
               </div>
             </div>
           </div>
+
+          {esPortero && (
+            <div className="mt-4 rounded-2xl border border-border bg-card p-4 text-sm">
+              <div className="font-semibold">
+                {t("Partidako atezainak", "Porteros/as en este partido")}: {nPorteros}
+              </div>
+              <div translate="no" className="text-xs text-muted-foreground">
+                {[yoActivo ? fullName(player) : null, ...otrosNombres].filter(Boolean).join(" · ") || "—"}
+              </div>
+              <div className="mt-3 font-semibold">{t("Jasotako golak", "Goles en contra")}: {golesN}</div>
+              {variosPorteros ? (
+                <div className="text-xs text-muted-foreground">
+                  {t("2+ atezain → −1 gol bakoitzeko (tarterik gabe)", "2+ porteros/as → −1 por gol (sin tramos)")}:{" "}
+                  {golesN} × −1 = <span className="font-semibold text-destructive">{-golesN}</span>
+                </div>
+              ) : golDesglose.length ? (
+                <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground">
+                  {golDesglose.map((d) => (
+                    <li key={d.desde}>
+                      {d.desde}–{d.hasta ?? "∞"}: {d.n} × {String(d.puntos).replace(".", ",")} = {String(d.pts).replace(".", ",")}
+                    </li>
+                  ))}
+                  <li className="font-semibold text-foreground">
+                    {t("Guztira", "Total")}: {String(golAction ? tramoPts(golesN, golAction.tramos ?? []) : 0).replace(".", ",")}
+                  </li>
+                </ul>
+              ) : null}
+              <div className="mt-3 font-semibold">
+                % {t("geldiketak", "paradas")}: {pct == null ? "—" : `${String(pct).replace(".", ",")} %`}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {counts.parada ?? 0} / ({counts.parada ?? 0} + {counts.lanzamiento_fuera ?? 0} + {golesN}) × 100 → +{String(pctPts).replace(".", ",")} pts
+              </div>
+            </div>
+          )}
 
           {grupos.map((g) => (
             <div key={g} className="mt-6">
