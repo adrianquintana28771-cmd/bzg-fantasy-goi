@@ -246,16 +246,29 @@ function Desempeno() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("club_match_actions")
-        .select("player_id")
+        .select("player_id, club_players(nombre,apellido1,apellido2)")
         .eq("match_id", matchId)
         .neq("player_id", playerId)
         .in("action_id", ["parada", "gol_encajado", "lanzamiento_fuera", "asistencia_portero", "gk_victoria", "gk_empate", "gk_derrota"])
         .gt("cantidad", 0);
       if (error) throw error;
-      return new Set((data ?? []).map((r) => r.player_id)).size;
+      const names = new Map<string, string>();
+      for (const r of (data ?? []) as unknown as { player_id: string; club_players: { nombre: string; apellido1: string | null; apellido2: string | null } | null }[])
+        names.set(r.player_id, r.club_players ? [r.club_players.nombre, r.club_players.apellido1].filter(Boolean).join(" ") : "?");
+      return [...names.values()];
     },
   });
-  const variosPorteros = (otrosPorteros.data ?? 0) > 0;
+  const otrosNombres = otrosPorteros.data ?? [];
+  const variosPorteros = otrosNombres.length > 0;
+  // Cuenta este portero si tiene alguna acción de portería anotada
+  const yoActivo = ["parada", "gol_encajado", "lanzamiento_fuera", "asistencia_portero", "gk_victoria", "gk_empate", "gk_derrota"].some((id) => (counts[id] ?? 0) > 0);
+  const nPorteros = otrosNombres.length + (yoActivo ? 1 : 0);
+  const golAction = (actions.data ?? []).find((a) => a.id === "gol_encajado");
+  const golesN = counts.gol_encajado ?? 0;
+  const golDesglose = (golAction?.tramos ?? []).map((tr) => {
+    const n = Math.max(0, Math.min(golesN, tr.hasta ?? golesN) - (tr.desde - 1));
+    return { ...tr, n, pts: Math.round(n * tr.puntos * 100) / 100 };
+  });
 
   const accionPts = (a: ActionRow) => {
     const n = counts[a.id] ?? 0;
