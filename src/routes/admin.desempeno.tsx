@@ -249,7 +249,7 @@ function Desempeno() {
         .select("player_id")
         .eq("match_id", matchId)
         .neq("player_id", playerId)
-        .in("action_id", ["parada", "gol_encajado", "lanzamiento_fuera"])
+        .in("action_id", ["parada", "gol_encajado", "lanzamiento_fuera", "asistencia_portero", "gk_victoria", "gk_empate", "gk_derrota"])
         .gt("cantidad", 0);
       if (error) throw error;
       return new Set((data ?? []).map((r) => r.player_id)).size;
