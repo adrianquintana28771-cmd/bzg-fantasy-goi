@@ -17,7 +17,7 @@ import {
 } from "@/lib/fantasy/types";
 import { useT, useTd, useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
-import { fetchPoolPlayer, fetchTeams, golEncajadoPts, round2 } from "@/lib/club-data";
+import { fetchPoolPlayer, fetchTeams, round2, tramoPts, type Tramo } from "@/lib/club-data";
 import { useCardImages, usePhotoSource } from "@/lib/card-images";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
 
@@ -58,6 +58,7 @@ type ActionRow = {
   puntos: number;
   cantidad: number;
   orden: number;
+  tramos?: Tramo[] | null;
 };
 type JStat = { jornada: number; puntos: number; estado: PlayerEstado };
 
@@ -85,7 +86,7 @@ function Jugador() {
       if (player.club_player_id) {
         const { data, error } = await supabase
           .from("club_match_actions")
-          .select("cantidad,action_id,club_matches(jornada),club_action_types(nombre,puntos,orden,activo)")
+          .select("cantidad,action_id,club_matches(jornada),club_action_types(nombre,puntos,orden,activo,tramos)")
           .eq("player_id", player.club_player_id);
         if (error) throw error;
         type Row = {
@@ -97,6 +98,7 @@ function Jugador() {
             puntos: number;
             orden: number;
             activo: boolean;
+            tramos: Tramo[] | null;
           } | null;
         };
         actions = ((data ?? []) as unknown as Row[])
@@ -107,6 +109,7 @@ function Jugador() {
             nombre: r.club_action_types!.nombre,
             puntos: Number(r.club_action_types!.puntos),
             orden: r.club_action_types!.orden,
+            tramos: r.club_action_types!.tramos,
             cantidad: r.cantidad,
           }));
       }
@@ -249,7 +252,7 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
   const filtered = current === "total" ? actions : actions.filter((a) => a.jornada === current);
   const grouped = new Map<
     string,
-    { action_id: string; nombre: string; puntos: number; cantidad: number; orden: number }
+    { action_id: string; nombre: string; puntos: number; cantidad: number; orden: number; tramos?: Tramo[] | null }
   >();
   for (const a of filtered) {
     const g = grouped.get(a.action_id) ?? {
@@ -258,14 +261,17 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
       puntos: a.puntos,
       cantidad: 0,
       orden: a.orden,
+      tramos: a.tramos,
     };
     g.cantidad += a.cantidad;
     grouped.set(a.action_id, g);
   }
   const rows = [...grouped.values()].filter((r) => r.cantidad > 0).sort((a, b) => a.orden - b.orden);
   const totalPts = current === "total" ? round2(stats.reduce((a, s) => a + s.puntos, 0)) : round2(ptsFor(current));
-  const rowPts = (r: { action_id: string; cantidad: number; puntos: number }) =>
-    r.action_id === "gol_encajado" ? golEncajadoPts(r.cantidad) : round2(r.cantidad * r.puntos);
+  const rowPts = (r: { action_id: string; cantidad: number; puntos: number; tramos?: Tramo[] | null }) =>
+    (r.action_id === "gol_encajado" || r.action_id === "parada") && r.tramos?.length
+      ? tramoPts(r.cantidad, r.tramos)
+      : round2(r.cantidad * r.puntos);
   const noDisp = current !== "total" && estadoFor(current) === "no_disponible";
 
   return (
