@@ -50,6 +50,13 @@
       "when": 1791655907844,
       "tag": "0006_match_sources",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791655932330,
+      "tag": "0007_match_sync_cron_token",
+      "breakpoints": true
     }
   ]
 }

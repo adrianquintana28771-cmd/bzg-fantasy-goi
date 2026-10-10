@@ -1078,6 +1078,10 @@ export type Database = {
         }
         Returns: string
       }
+      check_cron_token: {
+        Args: { _nombre: string; _token: string }
+        Returns: boolean
+      }
       claim_mision: { Args: { _mision_id: string }; Returns: number }
       claim_qr: { Args: { _codigo: string }; Returns: number }
       close_jornada: { Args: { _jornada_id: string }; Returns: undefined }
