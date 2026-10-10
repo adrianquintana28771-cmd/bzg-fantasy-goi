@@ -26,6 +26,7 @@ export type Database = {
           puntos: number
           solo_entrenador: boolean
           solo_portero: boolean
+          tramos: Json | null
           updated_at: string
         }
         Insert: {
@@ -39,6 +40,7 @@ export type Database = {
           puntos?: number
           solo_entrenador?: boolean
           solo_portero?: boolean
+          tramos?: Json | null
           updated_at?: string
         }
         Update: {
@@ -52,6 +54,7 @@ export type Database = {
           puntos?: number
           solo_entrenador?: boolean
           solo_portero?: boolean
+          tramos?: Json | null
           updated_at?: string
         }
         Relationships: []
@@ -1053,6 +1056,8 @@ export type Database = {
         Args: { _activo: boolean; _player_id: string }
         Returns: undefined
       }
+      tramo_pct_pts: { Args: { _pct: number; _tramos: Json }; Returns: number }
+      tramo_pts: { Args: { _n: number; _tramos: Json }; Returns: number }
       user_ranking: {
         Args: never
         Returns: {
