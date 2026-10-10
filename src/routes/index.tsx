@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trophy, Users, Shield, ArrowRight, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchPlayerRanking, round2, type RankedPlayer } from "@/lib/club-data";
+import { fetchPlayerRanking, fetchStatLeaders, round2, type RankedPlayer } from "@/lib/club-data";
 import { RankedPlayerRow } from "@/components/ranked-player-row";
 import { CategoryBadge } from "@/components/fantasy-ui";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
@@ -62,6 +62,10 @@ function Home() {
   const { data: ranking = [] } = useQuery({
     queryKey: ["player-ranking"],
     queryFn: fetchPlayerRanking,
+  });
+  const { data: leaders } = useQuery({
+    queryKey: ["home-stat-leaders"],
+    queryFn: fetchStatLeaders,
   });
   const { data: matches = [] } = useQuery({
     queryKey: ["home-next-matches"],
@@ -267,6 +271,37 @@ function Home() {
               })}
             </div>
           </div>
+        </div>
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {([
+            ["goles", "⚽", t("Golak", "Goles")],
+            ["paradas", "🧤", t("Geldiketak", "Paradas")],
+            ["asistencias", "🎯", t("Asistentziak", "Asistencias")],
+            ["robos", "🛡️", t("Baloi lapurketak", "Robos de balón")],
+          ] as const).map(([key, icon, title]) => (
+            <div key={key}>
+              <h2 className="mb-3 font-display text-xl">{icon} {title}</h2>
+              <div className="space-y-2">
+                {(leaders?.[key] ?? []).map((p, i) => (
+                  <Link
+                    key={p.id}
+                    to="/jugadores/$playerId"
+                    params={{ playerId: p.id }}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated"
+                  >
+                    <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+                      {p.equipo && (
+                        <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
+                      )}
+                    </div>
+                    <span className="font-display text-lg">{p.total}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>
