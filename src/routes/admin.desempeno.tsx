@@ -520,6 +520,41 @@ function Desempeno() {
             </div>
           </div>
 
+          {esPortero && (
+            <div className="mt-4 rounded-2xl border border-border bg-card p-4 text-sm">
+              <div className="font-semibold">
+                {t("Partidako atezainak", "Porteros/as en este partido")}: {nPorteros}
+              </div>
+              <div translate="no" className="text-xs text-muted-foreground">
+                {[yoActivo ? fullName(player) : null, ...otrosNombres].filter(Boolean).join(" · ") || "—"}
+              </div>
+              <div className="mt-3 font-semibold">{t("Jasotako golak", "Goles en contra")}: {golesN}</div>
+              {variosPorteros ? (
+                <div className="text-xs text-muted-foreground">
+                  {t("2+ atezain → −1 gol bakoitzeko (tarterik gabe)", "2+ porteros/as → −1 por gol (sin tramos)")}:{" "}
+                  {golesN} × −1 = <span className="font-semibold text-destructive">{-golesN}</span>
+                </div>
+              ) : golDesglose.length ? (
+                <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground">
+                  {golDesglose.map((d) => (
+                    <li key={d.desde}>
+                      {d.desde}–{d.hasta ?? "∞"}: {d.n} × {String(d.puntos).replace(".", ",")} = {String(d.pts).replace(".", ",")}
+                    </li>
+                  ))}
+                  <li className="font-semibold text-foreground">
+                    {t("Guztira", "Total")}: {String(golAction ? tramoPts(golesN, golAction.tramos ?? []) : 0).replace(".", ",")}
+                  </li>
+                </ul>
+              ) : null}
+              <div className="mt-3 font-semibold">
+                % {t("geldiketak", "paradas")}: {pct == null ? "—" : `${String(pct).replace(".", ",")} %`}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {counts.parada ?? 0} / ({counts.parada ?? 0} + {counts.lanzamiento_fuera ?? 0} + {golesN}) × 100 → +{String(pctPts).replace(".", ",")} pts
+              </div>
+            </div>
+          )}
+
           {grupos.map((g) => (
             <div key={g} className="mt-6">
               <h2 className="font-display text-lg capitalize">{td(g)}</h2>
