@@ -19,6 +19,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminCodigosRouteImport } from './routes/admin.codigos'
 import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
 import { Route as AdminFotosRouteImport } from './routes/admin.fotos'
+import { Route as AdminFuentesRouteImport } from './routes/admin.fuentes'
 import { Route as AdminJugadoresRouteImport } from './routes/admin.jugadores'
 import { Route as AdminMisionesRouteImport } from './routes/admin.misiones'
 import { Route as AdminPasswordRouteImport } from './routes/admin.password'
@@ -28,6 +29,7 @@ import { Route as EquiposIndexRouteImport } from './routes/equipos.index'
 import { Route as EquiposTeamIdRouteImport } from './routes/equipos.$teamId'
 import { Route as JugadoresPlayerIdRouteImport } from './routes/jugadores.$playerId'
 import { Route as PartidosIndexRouteImport } from './routes/partidos.index'
+import { Route as ApiPublicHooksSyncMatchesRouteImport } from './routes/api/public/hooks/sync-matches'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -79,6 +81,11 @@ const AdminFotosRoute = AdminFotosRouteImport.update({
   path: '/admin/fotos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminFuentesRoute = AdminFuentesRouteImport.update({
+  id: '/admin/fuentes',
+  path: '/admin/fuentes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminJugadoresRoute = AdminJugadoresRouteImport.update({
   id: '/admin/jugadores',
   path: '/admin/jugadores',
@@ -124,6 +131,12 @@ const PartidosIndexRoute = PartidosIndexRouteImport.update({
   path: '/partidos/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksSyncMatchesRoute =
+  ApiPublicHooksSyncMatchesRouteImport.update({
+    id: '/api/public/hooks/sync-matches',
+    path: '/api/public/hooks/sync-matches',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -135,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fuentes': typeof AdminFuentesRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
@@ -145,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/equipos/': typeof EquiposIndexRoute
   '/partidos/': typeof PartidosIndexRoute
+  '/api/public/hooks/sync-matches': typeof ApiPublicHooksSyncMatchesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -156,6 +171,7 @@ export interface FileRoutesByTo {
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fuentes': typeof AdminFuentesRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
@@ -166,6 +182,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/equipos': typeof EquiposIndexRoute
   '/partidos': typeof PartidosIndexRoute
+  '/api/public/hooks/sync-matches': typeof ApiPublicHooksSyncMatchesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -178,6 +195,7 @@ export interface FileRoutesById {
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fuentes': typeof AdminFuentesRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
@@ -188,6 +206,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/equipos/': typeof EquiposIndexRoute
   '/partidos/': typeof PartidosIndexRoute
+  '/api/public/hooks/sync-matches': typeof ApiPublicHooksSyncMatchesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -201,6 +220,7 @@ export interface FileRouteTypes {
     | '/admin/codigos'
     | '/admin/desempeno'
     | '/admin/fotos'
+    | '/admin/fuentes'
     | '/admin/jugadores'
     | '/admin/misiones'
     | '/admin/password'
@@ -211,6 +231,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/equipos/'
     | '/partidos/'
+    | '/api/public/hooks/sync-matches'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -222,6 +243,7 @@ export interface FileRouteTypes {
     | '/admin/codigos'
     | '/admin/desempeno'
     | '/admin/fotos'
+    | '/admin/fuentes'
     | '/admin/jugadores'
     | '/admin/misiones'
     | '/admin/password'
@@ -232,6 +254,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/equipos'
     | '/partidos'
+    | '/api/public/hooks/sync-matches'
   id:
     | '__root__'
     | '/'
@@ -243,6 +266,7 @@ export interface FileRouteTypes {
     | '/admin/codigos'
     | '/admin/desempeno'
     | '/admin/fotos'
+    | '/admin/fuentes'
     | '/admin/jugadores'
     | '/admin/misiones'
     | '/admin/password'
@@ -253,6 +277,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/equipos/'
     | '/partidos/'
+    | '/api/public/hooks/sync-matches'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -265,6 +290,7 @@ export interface RootRouteChildren {
   AdminCodigosRoute: typeof AdminCodigosRoute
   AdminDesempenoRoute: typeof AdminDesempenoRoute
   AdminFotosRoute: typeof AdminFotosRoute
+  AdminFuentesRoute: typeof AdminFuentesRoute
   AdminJugadoresRoute: typeof AdminJugadoresRoute
   AdminMisionesRoute: typeof AdminMisionesRoute
   AdminPasswordRoute: typeof AdminPasswordRoute
@@ -275,6 +301,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   EquiposIndexRoute: typeof EquiposIndexRoute
   PartidosIndexRoute: typeof PartidosIndexRoute
+  ApiPublicHooksSyncMatchesRoute: typeof ApiPublicHooksSyncMatchesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -349,6 +376,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFotosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/fuentes': {
+      id: '/admin/fuentes'
+      path: '/admin/fuentes'
+      fullPath: '/admin/fuentes'
+      preLoaderRoute: typeof AdminFuentesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/jugadores': {
       id: '/admin/jugadores'
       path: '/admin/jugadores'
@@ -412,6 +446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PartidosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/sync-matches': {
+      id: '/api/public/hooks/sync-matches'
+      path: '/api/public/hooks/sync-matches'
+      fullPath: '/api/public/hooks/sync-matches'
+      preLoaderRoute: typeof ApiPublicHooksSyncMatchesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -425,6 +466,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCodigosRoute: AdminCodigosRoute,
   AdminDesempenoRoute: AdminDesempenoRoute,
   AdminFotosRoute: AdminFotosRoute,
+  AdminFuentesRoute: AdminFuentesRoute,
   AdminJugadoresRoute: AdminJugadoresRoute,
   AdminMisionesRoute: AdminMisionesRoute,
   AdminPasswordRoute: AdminPasswordRoute,
@@ -435,6 +477,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   EquiposIndexRoute: EquiposIndexRoute,
   PartidosIndexRoute: PartidosIndexRoute,
+  ApiPublicHooksSyncMatchesRoute: ApiPublicHooksSyncMatchesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

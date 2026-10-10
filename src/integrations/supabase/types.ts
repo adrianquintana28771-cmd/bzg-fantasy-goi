@@ -149,9 +149,11 @@ export type Database = {
       }
       club_matches: {
         Row: {
+          competicion: string | null
           created_at: string
           es_local: boolean
           fecha: string
+          fuente_id: string | null
           goles_contra: number
           goles_favor: number
           hora: string | null
@@ -163,9 +165,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          competicion?: string | null
           created_at?: string
           es_local?: boolean
           fecha: string
+          fuente_id?: string | null
           goles_contra?: number
           goles_favor?: number
           hora?: string | null
@@ -177,9 +181,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          competicion?: string | null
           created_at?: string
           es_local?: boolean
           fecha?: string
+          fuente_id?: string | null
           goles_contra?: number
           goles_favor?: number
           hora?: string | null
@@ -191,6 +197,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "club_matches_fuente_id_fkey"
+            columns: ["fuente_id"]
+            isOneToOne: false
+            referencedRelation: "match_sources"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "club_matches_season_id_fkey"
             columns: ["season_id"]
@@ -581,6 +594,53 @@ export type Database = {
             columns: ["portero"]
             isOneToOne: false
             referencedRelation: "player_pool"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_sources: {
+        Row: {
+          activo: boolean
+          created_at: string
+          equipo_fed: string | null
+          id: string
+          nombre: string
+          team_id: string | null
+          ultima_sync: string | null
+          ultimo_resultado: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          equipo_fed?: string | null
+          id?: string
+          nombre: string
+          team_id?: string | null
+          ultima_sync?: string | null
+          ultimo_resultado?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          equipo_fed?: string | null
+          id?: string
+          nombre?: string
+          team_id?: string | null
+          ultima_sync?: string | null
+          ultimo_resultado?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_sources_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "club_teams"
             referencedColumns: ["id"]
           },
         ]
@@ -1017,6 +1077,10 @@ export type Database = {
           _team_ids: string[]
         }
         Returns: string
+      }
+      check_cron_token: {
+        Args: { _nombre: string; _token: string }
+        Returns: boolean
       }
       claim_mision: { Args: { _mision_id: string }; Returns: number }
       claim_qr: { Args: { _codigo: string }; Returns: number }
