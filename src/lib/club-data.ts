@@ -73,6 +73,30 @@ export const golEncajadoPts = (goles: number) => {
   return -round2(t1 + t2 + t3 + t4);
 };
 
+/** Tramo configurable de criterios de portero (mismo formato que la BD). */
+export type Tramo = { desde: number; hasta: number | null; puntos: number };
+
+/** Puntos por unidad acumulativos por tramos (paradas, goles en contra). Igual que public.tramo_pts. */
+export const tramoPts = (n: number, tramos: Tramo[]) =>
+  round2(
+    tramos.reduce(
+      (acc, t) => acc + t.puntos * Math.max(0, Math.min(n, t.hasta ?? n) - (t.desde - 1)),
+      0,
+    ),
+  );
+
+/** Puntos fijos del tramo de % que contiene el valor. Igual que public.tramo_pct_pts. */
+export const tramoPctPts = (pct: number, tramos: Tramo[]) =>
+  [...tramos]
+    .sort((a, b) => b.desde - a.desde)
+    .find((t) => pct >= t.desde && (t.hasta == null || pct <= t.hasta))?.puntos ?? 0;
+
+/** % de paradas = paradas / (paradas + fuera + goles) × 100, o null si no hay lanzamientos. */
+export const pctParadas = (par: number, fue: number, gol: number) => {
+  const den = par + fue + gol;
+  return den > 0 ? round2((par * 100) / den) : null;
+};
+
 export type RankedPlayer = {
   id: string;
   nombre: string;
