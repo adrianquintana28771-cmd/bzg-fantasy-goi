@@ -298,7 +298,7 @@ function Home() {
                   >
                     <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+                      <LeaderName p={p} />
                       {p.equipo && (
                         <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
                       )}
@@ -319,7 +319,7 @@ function Home() {
                 >
                   <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+                    <LeaderName p={p} />
                     {p.equipo && (
                       <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
                     )}
@@ -339,7 +339,7 @@ function Home() {
                 >
                   <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+                    <LeaderName p={p} />
                     {p.equipo && (
                       <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
                     )}
