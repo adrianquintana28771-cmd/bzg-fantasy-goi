@@ -1039,6 +1039,14 @@ export type Database = {
     Functions: {
       admin_create_mission_code: { Args: { _codigo: string }; Returns: string }
       admin_delete_mision: { Args: { _id: string }; Returns: undefined }
+      admin_get_sobre_config: {
+        Args: never
+        Returns: {
+          pct_legendario: number
+          pct_normal: number
+          pct_raro: number
+        }[]
+      }
       admin_list_mission_codes: {
         Args: never
         Returns: {
@@ -1077,6 +1085,10 @@ export type Database = {
           _team_ids: string[]
         }
         Returns: string
+      }
+      admin_save_sobre_config: {
+        Args: { _legendario: number; _normal: number; _raro: number }
+        Returns: undefined
       }
       check_cron_token: {
         Args: { _nombre: string; _token: string }
