@@ -140,8 +140,28 @@ export async function fetchPlayerRanking(): Promise<RankedPlayer[]> {
     .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre));
 }
 
+/** player_pool.id por club_players.id (para enlazar a la ficha de jugador/a). */
+async function poolIdsByClubPlayer(playerIds: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (!playerIds.length) return out;
+  const { data, error } = await supabase
+    .from("player_pool")
+    .select("id,club_player_id")
+    .in("club_player_id", playerIds);
+  if (error) throw error;
+  for (const r of (data ?? []) as { id: string; club_player_id: string }[])
+    if (r.club_player_id && !out.has(r.club_player_id)) out.set(r.club_player_id, r.id);
+  return out;
+}
+
 // Top 5 acumulado por acción (cantidades reales, no puntos Fantasy).
-export type StatLeader = { id: string; nombre: string; equipo: string | null; total: number };
+export type StatLeader = {
+  id: string;
+  nombre: string;
+  equipo: string | null;
+  total: number;
+  poolId: string | null;
+};
 export const STAT_LEADER_ACTIONS = {
   goles: ["gol", "gol_7m"],
   paradas: ["parada"],
