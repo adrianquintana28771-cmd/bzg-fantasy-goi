@@ -45,6 +45,9 @@
   --gradient-card: linear-gradient(160deg, color-mix(in oklab, var(--primary) 8%, var(--card)) 0%, var(--card) 100%);
   --player-photo-red: oklch(0.62 0.22 27);
   --player-photo-white: oklch(1 0 0);
+  --color-player-photo-white: var(--player-photo-white);
+  --color-equipo-template-ink: oklch(0.14 0 0);
+  --color-equipo-template-surface: oklch(0 0 0);
   --player-photo-green: oklch(0.52 0.17 148);
   --gradient-player-photo: linear-gradient(to bottom, var(--player-photo-red) 0%, var(--player-photo-white) 50%, var(--player-photo-green) 100%);
 }
