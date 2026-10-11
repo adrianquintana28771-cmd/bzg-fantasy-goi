@@ -1,5 +1,7 @@
 # Pendiente
 
+- [x] Inicio: los nombres de las 6 clasificaciones (goles, paradas, asistencias, robos, % paradas y media de puntos) son enlaces a la ficha de cada jugador/a, con su identificador real; cálculos, orden y diseño intactos.
+
 - [x] Añadir vista Admin de auditoría de puntos por jornada, origen registrado/autocalculado y diferencias, sin modificar datos; seis pruebas de cálculo correctas.
 - [ ] Comprobar vista de auditoría con sesión super_admin (sesión actual es usuario normal, acceso denegado correctamente).
 
