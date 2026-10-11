@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trophy, Users, Shield, ArrowRight, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchPlayerRanking, fetchStatLeaders, fetchSavePctLeaders, fetchAvgPtsLeaders, round2, type RankedPlayer } from "@/lib/club-data";
 import { displayPts } from "@/lib/utils";
@@ -9,19 +10,36 @@ import { CategoryBadge } from "@/components/fantasy-ui";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
 
-/** Nombre clicable de las clasificaciones: enlaza con la ficha de jugador/a existente. */
-function LeaderName({ p }: { p: { nombre: string; poolId: string | null } }) {
+/** Fila de clasificación: todo el rectángulo enlaza con la ficha de jugador/a. */
+function LeaderRow({
+  p,
+  rank,
+  value,
+}: {
+  p: { nombre: string; equipo: string | null; poolId: string | null };
+  rank: number;
+  value: ReactNode;
+}) {
+  const inner = (
+    <>
+      <span className="w-5 text-center font-display text-lg text-primary">{rank}</span>
+      <div className="min-w-0 flex-1">
+        <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+        {p.equipo && (
+          <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
+        )}
+      </div>
+      <span className="font-display text-lg">{value}</span>
+    </>
+  );
+  const cls =
+    "flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated";
   return p.poolId ? (
-    <Link
-      to="/jugadores/$playerId"
-      params={{ playerId: p.poolId }}
-      translate="no"
-      className="truncate font-semibold underline-offset-2 hover:underline"
-    >
-      {p.nombre}
+    <Link to="/jugadores/$playerId" params={{ playerId: p.poolId }} className={cls}>
+      {inner}
     </Link>
   ) : (
-    <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+    <div className={cls}>{inner}</div>
   );
 }
 
@@ -308,19 +326,7 @@ function Home() {
               <h2 className="mb-3 font-display text-xl">{icon} {title}</h2>
               <div className="space-y-2">
                 {(leaders?.[key] ?? []).map((p, i) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card"
-                  >
-                    <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
-                    <div className="min-w-0 flex-1">
-                      <LeaderName p={p} />
-                      {p.equipo && (
-                        <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
-                      )}
-                    </div>
-                    <span className="font-display text-lg">{p.total}</span>
-                  </div>
+                  <LeaderRow key={p.id} p={p} rank={i + 1} value={p.total} />
                 ))}
               </div>
             </div>
@@ -329,19 +335,12 @@ function Home() {
             <h2 className="mb-3 font-display text-xl">📈 {t("% paradas (media)", "% paradas (media)")}</h2>
             <div className="space-y-2">
               {savePctLeaders.map((p, i) => (
-                <div
+                <LeaderRow
                   key={p.id}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card"
-                >
-                  <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
-                  <div className="min-w-0 flex-1">
-                    <LeaderName p={p} />
-                    {p.equipo && (
-                      <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
-                    )}
-                  </div>
-                  <span className="font-display text-lg">{String(p.valor).replace(".", ",")} %</span>
-                </div>
+                  p={p}
+                  rank={i + 1}
+                  value={`${String(p.valor).replace(".", ",")} %`}
+                />
               ))}
             </div>
           </div>
@@ -349,19 +348,12 @@ function Home() {
             <h2 className="mb-3 font-display text-xl">⭐ {t("Puntu batez bestekoa", "Media de puntos")}</h2>
             <div className="space-y-2">
               {avgPtsLeaders.map((p, i) => (
-                <div
+                <LeaderRow
                   key={p.id}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card"
-                >
-                  <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
-                  <div className="min-w-0 flex-1">
-                    <LeaderName p={p} />
-                    {p.equipo && (
-                      <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
-                    )}
-                  </div>
-                  <span className="font-display text-lg">{displayPts(p.valor)}</span>
-                </div>
+                  p={p}
+                  rank={i + 1}
+                  value={displayPts(p.valor)}
+                />
               ))}
             </div>
           </div>
