@@ -196,42 +196,40 @@ function EquipoCard({
   const template = images?.templates[pool.rareza];
   const nombre = pool.nombre.trim().split(/\s+/).slice(0, 2).join(" ");
   return (
-    <div className={cn("relative w-full overflow-hidden text-left", pool.rareza === "normal" ? "aspect-[1074/772]" : "aspect-[1131/763]")}>
-      <div className="absolute inset-0" aria-hidden="true">
+    <div className="grid w-full grid-cols-2 items-stretch overflow-hidden rounded-lg border border-border bg-card text-left text-card-foreground">
+      <div className="relative min-h-64 overflow-hidden" aria-hidden="true">
         {template && (
-          <img src={template} alt="" className="h-full w-full object-fill" />
+          <img src={template} alt="" className={cn("absolute top-0 h-full w-auto max-w-none", pool.rareza === "normal" ? "left-0" : "-left-[5%]")} />
         )}
         <CardPhoto
           images={images}
           pool={pool}
           name={pool.nombre}
-          className={cn("absolute top-[19%] h-[73%] [clip-path:polygon(0_8%,10%_4%,25%_1%,50%_0,75%_1%,90%_4%,100%_8%,100%_79%,50%_100%,0_79%)]", pool.rareza === "normal" ? "left-[4.5%] w-[39%]" : "left-[7%] w-[37%]")}
+          className="absolute left-[9%] top-[19%] h-[73%] w-[82%] [clip-path:polygon(0_8%,10%_4%,25%_1%,50%_0,75%_1%,90%_4%,100%_8%,100%_79%,50%_100%,0_79%)]"
         />
       </div>
-      <div aria-hidden="true" className="absolute left-[51.4%] top-[1%] h-[57%] w-[46%] bg-equipo-template-surface [clip-path:polygon(0_0,100%_0,100%_100%,0_85%)]" />
-      <div className="absolute left-[54%] top-[3%] flex w-[42%] flex-col gap-1 text-player-photo-white">
+      <div className="flex min-w-0 flex-col justify-center gap-2 p-3 text-xs">
         <div translate="no" title={pool.nombre} className="break-words text-sm font-semibold">{nombre}</div>
-        {pool.club_teams?.nombre && <div translate="no" className="break-words text-[10px] font-semibold leading-tight">{pool.club_teams.nombre}</div>}
-        <div className="break-words text-[10px] uppercase leading-tight">{posiciones.map((p) => POS_SHORT[p]).join(" · ")}</div>
-        <div className="text-[9px] font-bold uppercase leading-tight">
+        <div className="break-words text-[10px] uppercase text-muted-foreground">{posiciones.map((p) => POS_SHORT[p]).join(" · ")}</div>
+        <div className="text-[10px] font-bold uppercase">
           {t(RAREZA_LABEL_EU[pool.rareza], RAREZA_LABEL_ES[pool.rareza])} {fmtMult(RAREZA_MULT[pool.rareza])}
           {total > 1 && <span className="ml-1">x{total}</span>}
         </div>
+        {pool.club_teams?.nombre && <div translate="no" className="break-words text-[10px] text-muted-foreground">{pool.club_teams.nombre}</div>}
         {pool.estado && pool.estado !== "disponible" && (
-          <div className="text-[10px]">
+          <div className={pool.estado === "dudoso" ? "text-warning" : "text-destructive"}>
             {pool.estado === "dudoso" ? t("Zalantzazkoa", "Dudoso") : t("Ez eskuragarri", "No disponible")}
           </div>
         )}
-      </div>
-      <div className="absolute left-[54%] top-[59%] flex w-[42%] flex-col gap-0.5 text-[10px] leading-tight text-equipo-template-ink">
-        <div>
-          {t("Erabilerak", "Usos")}: <span className="font-bold">{usos}/{MAX_USOS}</span>
+        <div className={cn("text-[10px] font-semibold", usos <= 1 ? "text-destructive" : "text-muted-foreground")}>
+          {t("Geratzen diren erabilerak", "Usos restantes")}: {usos}/{MAX_USOS}
         </div>
-        <div>
-          {t("Jardunaldia", "Jornada")}: <PuntosRareza base={puntos} rareza={pool.rareza} baseClass="text-equipo-template-ink" finalClass="text-equipo-template-ink font-bold" />
+        <div className="text-[10px] font-semibold">
+          <div className="text-muted-foreground">{t("Jardunaldia", "Jornada")}:</div>
+          <PuntosRareza base={puntos} rareza={pool.rareza} />
         </div>
-        <div>
-          {t("Batez bestekoa", "Media")}: <span className="font-bold">{displayPts(media)} pts</span>
+        <div className="text-[10px] text-muted-foreground">
+          {t("Batez bestekoa", "Media")}: <span className="font-semibold text-foreground">{displayPts(media)} pts</span>
         </div>
       </div>
     </div>
@@ -866,7 +864,7 @@ function Inner({ userId }: { userId: string }) {
             {t("gutunazalak lortzeko.", "para conseguir sobres.")}
           </p>
         ) : (
-          <ul className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {cards.map((c) => {
               const enPista = alignedIds.has(c.pool.id);
               return (
