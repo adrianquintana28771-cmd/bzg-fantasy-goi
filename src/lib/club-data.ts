@@ -191,3 +191,74 @@ export async function fetchStatLeaders(): Promise<Record<StatLeaderKey, StatLead
   }
   return out;
 }
+
+// Top 5 por medias (no acumulados): % medio de paradas por jornada y media de puntos por jornada.
+export type AvgLeader = { id: string; nombre: string; equipo: string | null; valor: number };
+
+/** Media de los % de parada por jornada (solo jornadas con lanzamientos). */
+export async function fetchSavePctLeaders(): Promise<AvgLeader[]> {
+  const rows: { player_id: string; action_id: string; cantidad: number; jornada: number | null }[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from("club_match_actions")
+      .select("player_id, action_id, cantidad, club_matches(jornada)")
+      .in("action_id", ["parada", "lanzamiento_fuera", "gol_encajado"])
+      .range(from, from + 999);
+    if (error) throw error;
+    for (const r of (data ?? []) as any[])
+      rows.push({ player_id: r.player_id, action_id: r.action_id, cantidad: r.cantidad, jornada: r.club_matches?.jornada ?? null });
+    if (!data || data.length < 1000) break;
+  }
+  const playerIds = [...new Set(rows.map((r) => r.player_id))];
+  const { data: players } = playerIds.length
+    ? await supabase
+        .from("club_players")
+        .select("id, nombre, apellido1, alias, club_player_teams(club_teams(nombre))")
+        .in("id", playerIds)
+    : { data: [] as any[] };
+  const info = new Map<string, { nombre: string; equipo: string | null }>();
+  for (const p of (players ?? []) as any[]) {
+    info.set(p.id, {
+      nombre: p.alias || [p.nombre, p.apellido1].filter(Boolean).join(" "),
+      equipo: p.club_player_teams?.[0]?.club_teams?.nombre ?? null,
+    });
+  }
+  // Sumas por jugador y jornada; el % se calcula por jornada y luego se promedia.
+  const per = new Map<string, Map<number, { par: number; fue: number; gol: number }>>();
+  for (const r of rows) {
+    if (r.jornada == null) continue;
+    const m = per.get(r.player_id) ?? new Map();
+    const j = m.get(r.jornada) ?? { par: 0, fue: 0, gol: 0 };
+    if (r.action_id === "parada") j.par += r.cantidad ?? 0;
+    else if (r.action_id === "lanzamiento_fuera") j.fue += r.cantidad ?? 0;
+    else j.gol += r.cantidad ?? 0;
+    m.set(r.jornada, j);
+    per.set(r.player_id, m);
+  }
+  return [...per]
+    .map(([id, m]) => {
+      const pcts = [...m.values()]
+        .map((j) => pctParadas(j.par, j.fue, j.gol))
+        .filter((p): p is number => p != null);
+      const valor = pcts.length ? round2(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
+      return valor != null && info.has(id) ? { id, valor, ...info.get(id)! } : null;
+    })
+    .filter((x): x is AvgLeader => x != null)
+    .sort((a, b) => b.valor - a.valor || a.nombre.localeCompare(b.nombre))
+    .slice(0, 5);
+}
+
+/** Media de puntos Fantasy por jornada (solo jornadas con puntos distintos de 0). */
+export async function fetchAvgPtsLeaders(): Promise<AvgLeader[]> {
+  const ranking = await fetchPlayerRanking();
+  return ranking
+    .filter((r) => r.jornadas > 0)
+    .map((r) => ({
+      id: r.id,
+      nombre: r.nombre,
+      equipo: r.team?.nombre ?? null,
+      valor: round2(r.puntos / r.jornadas),
+    }))
+    .sort((a, b) => b.valor - a.valor || a.nombre.localeCompare(b.nombre))
+    .slice(0, 5);
+}
