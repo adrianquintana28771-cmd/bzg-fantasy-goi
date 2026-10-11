@@ -20,6 +20,10 @@ export const Route = createFileRoute("/admin/")({
     meta: [
       { title: "Administración · BZG Fantasy" },
       { name: "description", content: "Panel de administración del club." },
+      { property: "og:title", content: "Administración · BZG Fantasy" },
+      { property: "og:description", content: "Panel de gestión y auditoría de BZG Fantasy." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -108,6 +112,9 @@ function Admin() {
       </div>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
+        {isSuperAdmin && (
+          <Section icon={ClipboardList} title={t("Puntuazioen auditoria", "Auditoría de puntuaciones")} description={t("Jardunaldiko puntuak eta haien jatorria.", "Puntos por jornada y su origen.")} to="/admin/auditoria" />
+        )}
         {canManageAll && (
           <Section
             icon={Settings}

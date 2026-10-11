@@ -25,11 +25,11 @@ function AuditPage() {
   const [rarity, setRarity] = useState('normal');
   const [unexpected, setUnexpected] = useState(false);
   const calendar = useQuery({ queryKey: ['audit-jornadas'], enabled: isSuperAdmin, queryFn: async () => {
-    const { data, error } = await supabase.from('jornadas').select('numero').order('numero', { ascending: false });
+    const { data, error } = await supabase.from('jornadas').select('numero,is_active').order('numero', { ascending: false });
     if (error) throw error;
     return data ?? [];
   } });
-  const selected = jornada ?? calendar.data?.[0]?.numero;
+  const selected = jornada ?? calendar.data?.find(j => j.is_active)?.numero ?? calendar.data?.[0]?.numero;
   const audit = useQuery({ queryKey: ['score-audit', selected], enabled: isSuperAdmin && selected != null, queryFn: () => fetchScoreAudit(selected ?? 0) });
   if (!isSuperAdmin) return <p className="p-8">{t('super_admin bakarrik.', 'Solo super_admin.')}</p>;
   const rows = (audit.data ?? []).filter(p => {
