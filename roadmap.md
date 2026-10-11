@@ -1,5 +1,7 @@
 # Pendiente
 
+- [ ] Revisar puntuaciones por jornada de jugadores, porteros y entrenadores; quitar autocalculos de entrenadores y comprobar Eneko Espeso J3 sin alterar acciones registradas.
+
 - [x] Equipo: usar solo la mitad derecha de cada plantilla, foto en su hueco y datos en el resto; tres fichas por fila en inventario y selector.
 
 - [x] Equipo: reutilizar las fichas existentes por rareza con foto en su hueco e información actual (nombre y primer apellido, posiciones, usos, puntos de jornada y media), sin cambiar cálculos; comprobado con sesión real sin escrituras.
