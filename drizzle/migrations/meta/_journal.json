@@ -78,6 +78,13 @@
       "when": 1791724837758,
       "tag": "0010_coach_recorded_performance_only",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791739062262,
+      "tag": "0011_fix_jare_j1_field_stats",
+      "breakpoints": true
     }
   ]
 }
