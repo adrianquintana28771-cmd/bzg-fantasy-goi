@@ -16,6 +16,8 @@ import { displayPts } from "@/lib/utils";
 import { useT, useTd } from "@/lib/i18n";
 import { useCardImages, usePhotoSource, type CardImages } from "@/lib/card-images";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
+import { Button } from "@/components/ui/button";
+import { round2 } from "@/lib/club-data";
 
 type Posicion = Database["public"]["Enums"]["plantilla_posicion"];
 type Rareza = "normal" | "raro" | "legendario";
@@ -33,13 +35,6 @@ const RAREZA_STYLE: Record<Rareza, string> = {
   normal: "border-border bg-background",
   raro: "border-sky-500/60 bg-sky-500/10",
   legendario: "border-[color:var(--gold,#d4a017)] bg-[color:var(--gold,#d4a017)]/15",
-};
-
-/** Fondos por rareza solo en la lista de jugadores disponibles para seleccionar. */
-const RAREZA_PICK_STYLE: Record<Rareza, string> = {
-  normal: "border-muted-foreground/40 bg-muted",
-  raro: "border-sky-500/70 bg-sky-500/20",
-  legendario: "border-[color:var(--gold,#d4a017)] bg-[color:var(--gold,#d4a017)]/25",
 };
 
 /** Puntuación final de la carta: máximo 2 dígitos */
@@ -183,6 +178,62 @@ interface CopyRow {
   player_id: string;
   usos: number;
   player_pool: PoolRow | null;
+}
+
+/** Existing template front and photo aperture; only used by Equipo's inventory and picker. */
+function EquipoCard({
+  pool, images, posiciones, usos, total, puntos, media,
+}: {
+  pool: PoolRow;
+  images?: CardImages;
+  posiciones: Posicion[];
+  usos: number;
+  total: number;
+  puntos: number;
+  media: number;
+}) {
+  const t = useT();
+  const template = images?.templates[pool.rareza];
+  const nombre = pool.nombre.trim().split(/\s+/).slice(0, 2).join(" ");
+  return (
+    <div className="grid w-full grid-cols-2 items-stretch overflow-hidden rounded-lg border border-border bg-card text-left text-card-foreground">
+      <div className="relative min-h-64 overflow-hidden" aria-hidden="true">
+        {template && (
+          <img src={template} alt="" className={cn("absolute top-0 h-full w-auto max-w-none", pool.rareza === "normal" ? "left-0" : "-left-[5%]")} />
+        )}
+        <CardPhoto
+          images={images}
+          pool={pool}
+          name={pool.nombre}
+          className="absolute left-[9%] top-[19%] h-[73%] w-[82%] [clip-path:polygon(0_8%,10%_4%,25%_1%,50%_0,75%_1%,90%_4%,100%_8%,100%_79%,50%_100%,0_79%)]"
+        />
+      </div>
+      <div className="flex min-w-0 flex-col justify-center gap-2 p-3 text-xs">
+        <div translate="no" title={pool.nombre} className="break-words text-sm font-semibold">{nombre}</div>
+        <div className="break-words text-[10px] uppercase text-muted-foreground">{posiciones.map((p) => POS_SHORT[p]).join(" · ")}</div>
+        <div className="text-[10px] font-bold uppercase">
+          {t(RAREZA_LABEL_EU[pool.rareza], RAREZA_LABEL_ES[pool.rareza])} {fmtMult(RAREZA_MULT[pool.rareza])}
+          {total > 1 && <span className="ml-1">x{total}</span>}
+        </div>
+        {pool.club_teams?.nombre && <div translate="no" className="break-words text-[10px] text-muted-foreground">{pool.club_teams.nombre}</div>}
+        {pool.estado && pool.estado !== "disponible" && (
+          <div className={pool.estado === "dudoso" ? "text-warning" : "text-destructive"}>
+            {pool.estado === "dudoso" ? t("Zalantzazkoa", "Dudoso") : t("Ez eskuragarri", "No disponible")}
+          </div>
+        )}
+        <div className={cn("text-[10px] font-semibold", usos <= 1 ? "text-destructive" : "text-muted-foreground")}>
+          {t("Geratzen diren erabilerak", "Usos restantes")}: {usos}/{MAX_USOS}
+        </div>
+        <div className="text-[10px] font-semibold">
+          <div className="text-muted-foreground">{t("Jardunaldia", "Jornada")}:</div>
+          <PuntosRareza base={puntos} rareza={pool.rareza} />
+        </div>
+        <div className="text-[10px] text-muted-foreground">
+          {t("Batez bestekoa", "Media")}: <span className="font-semibold text-foreground">{displayPts(media)} pts</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 interface JornadaRow {
   id: string;
@@ -361,16 +412,22 @@ function Inner({ userId }: { userId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("player_jornada_stats")
-        .select("player_id, puntos")
-        .eq("jornada_numero", jornada.data!.numero);
+        .select("player_id, puntos, jornada_numero");
       if (error) throw error;
       const map = new Map<string, number>();
-      (data ?? []).forEach((s) => map.set(s.player_id, (map.get(s.player_id) ?? 0) + Number(s.puntos)));
-      return map;
+      const totals = new Map<string, { puntos: number; jornadas: number }>();
+      (data ?? []).forEach((s) => {
+        if (s.jornada_numero === jornada.data?.numero) map.set(s.player_id, (map.get(s.player_id) ?? 0) + Number(s.puntos));
+        const previous = totals.get(s.player_id) ?? { puntos: 0, jornadas: 0 };
+        totals.set(s.player_id, { puntos: previous.puntos + Number(s.puntos), jornadas: previous.jornadas + 1 });
+      });
+      // Same base-point average shown on the existing player information page.
+      const medias = new Map([...totals].map(([id, stats]) => [id, round2(round2(stats.puntos) / stats.jornadas)]));
+      return { puntos: map, medias };
     },
   });
 
-  const ptsJornada = (id: string) => jornadaPts.data?.get(id) ?? 0;
+  const ptsJornada = (id: string) => jornadaPts.data?.puntos.get(id) ?? 0;
 
   const historial = useQuery({
     queryKey: ["historial-jornadas", userId],
@@ -807,51 +864,15 @@ function Inner({ userId }: { userId: string }) {
             {t("gutunazalak lortzeko.", "para conseguir sobres.")}
           </p>
         ) : (
-          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {cards.map((c) => {
               const enPista = alignedIds.has(c.pool.id);
               return (
                 <li
                   key={c.pool.id}
-                  className={`rounded-lg border-2 p-2 text-xs ${enPista ? "border-primary bg-primary/5" : RAREZA_STYLE[c.pool.rareza]}`}
+                  className={cn("min-w-0 rounded-lg", enPista && "ring-2 ring-primary")}
                 >
-                  <div className="flex items-center justify-between gap-1">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <CardPhoto
-                        images={cardImages.data}
-                        pool={c.pool}
-                        name={c.pool.nombre}
-                        className="h-9 w-9 shrink-0 rounded-full"
-                      />
-                      <div translate="no" className="truncate font-semibold">
-                        {c.pool.nombre}
-                      </div>
-                    </div>
-                    <div className="font-display text-base text-primary">
-                      {cartaPuntos(c.pool.rating, c.pool.rareza)}
-                    </div>
-                  </div>
-                  <div className="truncate text-[10px] uppercase tracking-wide text-muted-foreground">
-                    {posList(c.pool.id, c.pool.posicion)
-                      .map((p) => POS_SHORT[p])
-                      .join(" · ")}
-                  </div>
-                  <div className="mt-1 flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase">
-                      {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])}{" "}
-                      {fmtMult(RAREZA_MULT[c.pool.rareza])}
-                    </span>
-                    {c.total > 1 && <span className="rounded bg-secondary px-1 text-[10px] font-bold">x{c.total}</span>}
-                  </div>
-                  <div
-                    className={`text-[10px] font-semibold ${c.usosRestantes <= 1 ? "text-destructive" : "text-muted-foreground"}`}
-                  >
-                    {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-x-1 text-[10px] font-semibold">
-                    <span className="text-muted-foreground">{t("Jardunaldia", "Jornada")}:</span>
-                    <PuntosRareza base={ptsJornada(c.pool.id)} rareza={c.pool.rareza} />
-                  </div>
+                  <EquipoCard pool={c.pool} images={cardImages.data} posiciones={posList(c.pool.id, c.pool.posicion)} usos={c.usosRestantes} total={c.total} puntos={ptsJornada(c.pool.id)} media={jornadaPts.data?.medias.get(c.pool.id) ?? 0} />
                 </li>
               );
             })}
@@ -948,53 +969,19 @@ function Inner({ userId }: { userId: string }) {
             )}
             {pickSlot &&
               eligibleForSlot(pickSlot).map((c) => (
-                <button
+                <Button
                   key={c.pool.id}
+                  variant="ghost"
                   onClick={() => {
-                    setSlotDraft((d) => ({ ...d, [pickSlot!]: c.pool.id }));
+                    if (!pickSlot) return;
+                    setSlotDraft((d) => ({ ...d, [pickSlot]: c.pool.id }));
                     setDirty(true);
                     setPickSlot(null);
                   }}
-                  className={`flex w-full items-stretch overflow-hidden rounded-lg border-2 text-left ${RAREZA_PICK_STYLE[c.pool.rareza]}`}
+                  className="h-auto w-full min-w-0 whitespace-normal rounded-lg p-0"
                 >
-                  <div className="relative w-16 shrink-0 self-stretch overflow-hidden sm:w-20">
-                    <CardPhoto
-                      images={cardImages.data}
-                      pool={c.pool}
-                      name={c.pool.nombre}
-                      className="absolute inset-0"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1 p-3">
-                    <div translate="no" className="font-semibold">
-                      {c.pool.nombre}
-                      {c.pool.club_teams?.nombre ? ` — ${c.pool.club_teams.nombre}` : ""}
-                      {c.pool.estado && c.pool.estado !== "disponible" && (
-                        <span className={c.pool.estado === "dudoso" ? "text-warning" : "text-destructive"}>
-                          {" — "}
-                          {c.pool.estado === "dudoso"
-                            ? t("Zalantzazkoa", "Dudoso")
-                            : t("Ez eskuragarri", "No disponible")}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[10px] uppercase text-muted-foreground">
-                      {posList(c.pool.id, c.pool.posicion)
-                        .map((p) => POS_SHORT[p])
-                        .join(" · ")}{" "}
-                      · {t(RAREZA_LABEL_EU[c.pool.rareza], RAREZA_LABEL_ES[c.pool.rareza])}
-                    </div>
-                  </div>
-                  <div className="shrink-0 p-3 text-right">
-                    <div className="font-display text-lg text-primary">{cartaPuntos(c.pool.rating, c.pool.rareza)}</div>
-                    <div className="text-[10px] text-muted-foreground">
-                      {t("Erabilerak", "Usos")} {c.usosRestantes}/{MAX_USOS}
-                    </div>
-                    <div className="text-[10px] font-semibold">
-                      <PuntosRareza base={ptsJornada(c.pool.id)} rareza={c.pool.rareza} className="justify-end" />
-                    </div>
-                  </div>
-                </button>
+                  <EquipoCard pool={c.pool} images={cardImages.data} posiciones={posList(c.pool.id, c.pool.posicion)} usos={c.usosRestantes} total={c.total} puntos={ptsJornada(c.pool.id)} media={jornadaPts.data?.medias.get(c.pool.id) ?? 0} />
+                </Button>
               ))}
           </div>
         </DialogContent>
