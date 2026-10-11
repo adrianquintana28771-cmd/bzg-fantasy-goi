@@ -101,43 +101,6 @@ export const Route = createFileRoute("/plantilla")({
   component: PlantillaPage,
 });
 
-interface PoolRow {
-  id: string;
-  nombre: string;
-  posicion: Posicion;
-  rating: number;
-  rareza: Rareza;
-  club_player_id?: string | null;
-  team_id?: string | null;
-  estado?: "disponible" | "dudoso" | "no_disponible";
-  club_teams?: { nombre: string } | null;
-}
-
-/** Foto de la carta: mismo origen para sobres, selector y campo */
-function CardPhoto({
-  className = "",
-  images,
-  pool,
-  name,
-}: {
-  className?: string;
-  images?: CardImages;
-  pool?: PoolRow;
-  name?: string;
-}) {
-  const { src, onError } = usePhotoSource(images, pool?.club_player_id, pool?.rareza ?? "normal");
-  if (src) {
-    return (
-      <div className={cn("relative overflow-hidden", className)}>
-        <PlayerPhotoBackground />
-        <img src={src} onError={onError} alt={name ?? ""} className="relative h-full w-full object-cover object-top" />
-      </div>
-    );
-  }
-  return (
-    <img src={escudoAsset.url} alt="" aria-hidden="true" className={cn("h-full w-full object-contain", className)} />
-  );
-}
 interface CopyRow {
   id: string;
   player_id: string;
