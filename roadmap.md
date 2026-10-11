@@ -1,10 +1,10 @@
 # Pendiente
 
-- [ ] Equipo: reutilizar las fichas existentes por rareza con foto en su hueco e información actual (nombre y primer apellido, posiciones, usos, puntos de jornada y media), sin cambiar cálculos.
+- [x] Equipo: reutilizar las fichas existentes por rareza con foto en su hueco e información actual (nombre y primer apellido, posiciones, usos, puntos de jornada y media), sin cambiar cálculos; comprobado con sesión real sin escrituras.
 
 - [x] Selector de jugadores de Equipo: foto a la izquierda a altura completa de la tarjeta, info a la derecha y fondo gris/azul/dorado según rareza (solo en esas tarjetas; resto de vistas sin cambios).
 - [ ] Publicar en bzgfantasy.app los cambios ya verificados en la vista previa (portada con última jornada cerrada, selector de jornadas en Mi equipo, tarjetas del selector).
-- [ ] Fichas visuales por rareza: faltan las tres plantillas gráficas (común, rara, legendaria) que debe aportar el usuario.
+- [x] Fichas visuales por rareza: las tres plantillas gráficas existentes se reutilizan en Mis jugadores y el selector de Equipo.
 - [ ] Nora Aretxaga y Mario López tienen sus fotos guardadas como .jpeg pero su ficha apunta a .png: se ven con el marcador de reserva. Fuera del alcance actual, se corregirá si se pide.
 
 
