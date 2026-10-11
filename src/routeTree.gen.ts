@@ -16,6 +16,7 @@ import { Route as PlantillaRouteImport } from './routes/plantilla'
 import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
 import { Route as AdminCodigosRouteImport } from './routes/admin.codigos'
 import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
 import { Route as AdminFotosRouteImport } from './routes/admin.fotos'
@@ -64,6 +65,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAuditoriaRoute = AdminAuditoriaRouteImport.update({
+  id: '/admin/auditoria',
+  path: '/admin/auditoria',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminCodigosRoute = AdminCodigosRouteImport.update({
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
@@ -192,6 +200,7 @@ export interface FileRoutesById {
   '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/plantilla'
     | '/rankings'
     | '/reset-password'
+    | '/admin/auditoria'
     | '/admin/codigos'
     | '/admin/desempeno'
     | '/admin/fotos'
@@ -240,6 +250,7 @@ export interface FileRouteTypes {
     | '/plantilla'
     | '/rankings'
     | '/reset-password'
+    | '/admin/auditoria'
     | '/admin/codigos'
     | '/admin/desempeno'
     | '/admin/fotos'
@@ -263,6 +274,7 @@ export interface FileRouteTypes {
     | '/plantilla'
     | '/rankings'
     | '/reset-password'
+    | '/admin/auditoria'
     | '/admin/codigos'
     | '/admin/desempeno'
     | '/admin/fotos'
@@ -287,6 +299,7 @@ export interface RootRouteChildren {
   PlantillaRoute: typeof PlantillaRoute
   RankingsRoute: typeof RankingsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  AdminAuditoriaRoute: typeof AdminAuditoriaRoute
   AdminCodigosRoute: typeof AdminCodigosRoute
   AdminDesempenoRoute: typeof AdminDesempenoRoute
   AdminFotosRoute: typeof AdminFotosRoute
@@ -353,6 +366,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/auditoria': {
+      id: '/admin/auditoria'
+      path: '/admin/auditoria'
+      fullPath: '/admin/auditoria'
+      preLoaderRoute: typeof AdminAuditoriaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/codigos': {
@@ -463,6 +483,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlantillaRoute: PlantillaRoute,
   RankingsRoute: RankingsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  AdminAuditoriaRoute: AdminAuditoriaRoute,
   AdminCodigosRoute: AdminCodigosRoute,
   AdminDesempenoRoute: AdminDesempenoRoute,
   AdminFotosRoute: AdminFotosRoute,
