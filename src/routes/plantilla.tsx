@@ -58,17 +58,6 @@ const POS_LABEL: Record<Posicion, string> = {
   entrenador: "Entrenatzailea",
 };
 
-const POS_SHORT: Record<Posicion, string> = {
-  portero: "PT",
-  extremo_izq: "EI",
-  extremo_der: "ED",
-  lateral_izq: "LI",
-  lateral_der: "LD",
-  central: "C",
-  pivote: "P",
-  entrenador: "ENT",
-};
-
 const SLOTS: Posicion[] = [
   "portero",
   "extremo_izq",
