@@ -7,6 +7,8 @@ import { fetchPlayerRanking, fetchStatLeaders, fetchSavePctLeaders, fetchAvgPtsL
 import { displayPts } from "@/lib/utils";
 import { RankedPlayerRow } from "@/components/ranked-player-row";
 import { CategoryBadge } from "@/components/fantasy-ui";
+import { EquipoCard, type PoolRow, type Posicion } from "@/components/equipo-card";
+import { useCardImages } from "@/lib/card-images";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
 
@@ -150,6 +152,31 @@ function Home() {
         .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre))
     : [];
   const playerOfWeek = weekRanking[0]?.puntos ? weekRanking[0] : undefined;
+  const cardImages = useCardImages();
+  // Carta del jugador/a de la jornada: misma ficha visual que en «Mi equipo».
+  const { data: powPool } = useQuery({
+    queryKey: ["home-pow-pool", playerOfWeek?.id],
+    enabled: !!playerOfWeek,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("player_pool")
+        .select("id,nombre,posicion,rating,rareza,estado,club_player_id,team_id")
+        .eq("id", playerOfWeek!.id)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      let teamNombre = "";
+      if (data.team_id) {
+        const { data: team } = await supabase
+          .from("club_teams")
+          .select("nombre")
+          .eq("id", data.team_id)
+          .maybeSingle();
+        teamNombre = team?.nombre ?? "";
+      }
+      return { ...data, club_teams: teamNombre ? { nombre: teamNombre } : null } as unknown as PoolRow;
+    },
+  });
   const totals = new Map<string, { team: NonNullable<RankedPlayer["team"]>; pts: number }>();
   for (const r of weekRanking)
     if (r.team) {
@@ -219,6 +246,16 @@ function Home() {
                 <Trophy className="h-5 w-5 text-gold" style={{ color: "var(--gold)" }} />
               </div>
               <div className="mt-3 flex items-center gap-4">
+                {powPool ? (
+                  <div className="w-28 shrink-0 sm:w-32">
+                    <EquipoCard
+                      pool={powPool}
+                      images={cardImages.data}
+                      posiciones={[powPool.posicion as Posicion]}
+                      puntos={playerOfWeek.puntos}
+                    />
+                  </div>
+                ) : null}
                 <div className="flex-1">
                   <div translate="no" className="font-display text-2xl">{playerOfWeek.nombre}</div>
                   <div className="text-sm text-muted-foreground">
