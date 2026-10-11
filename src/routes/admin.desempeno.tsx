@@ -277,8 +277,9 @@ function Desempeno() {
     return n * Number(a.puntos);
   };
   const pctAction = (actions.data ?? []).find((a) => a.id === PCT_ID);
+  // Sin paradas, lanzamientos fuera ni goles en contra, el % cuenta como 0 y se calcula igual.
   const pct = esPortero
-    ? pctParadas(counts.parada ?? 0, counts.lanzamiento_fuera ?? 0, counts.gol_encajado ?? 0)
+    ? (pctParadas(counts.parada ?? 0, counts.lanzamiento_fuera ?? 0, counts.gol_encajado ?? 0) ?? 0)
     : null;
   const pctPts = pct != null && pctAction?.tramos?.length ? tramoPctPts(pct, pctAction.tramos) : 0;
 
