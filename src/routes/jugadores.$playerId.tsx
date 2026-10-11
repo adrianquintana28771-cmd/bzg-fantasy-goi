@@ -60,6 +60,7 @@ type ActionRow = {
   orden: number;
   tramos?: Tramo[] | null;
   pts: number;
+  pct?: number;
 };
 type JStat = { jornada: number; puntos: number; estado: PlayerEstado };
 
@@ -167,6 +168,7 @@ function Jugador() {
                 orden: pctType.orden,
                 cantidad: 1,
                 pts,
+                pct,
               });
           }
         }
@@ -310,7 +312,15 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
   const filtered = current === "total" ? actions : actions.filter((a) => a.jornada === current);
   const grouped = new Map<
     string,
-    { action_id: string; nombre: string; puntos: number; cantidad: number; orden: number; pts: number }
+    {
+      action_id: string;
+      nombre: string;
+      puntos: number;
+      cantidad: number;
+      orden: number;
+      pts: number;
+      pcts: number[];
+    }
   >();
   for (const a of filtered) {
     const g = grouped.get(a.action_id) ?? {
@@ -320,9 +330,11 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
       cantidad: 0,
       orden: a.orden,
       pts: 0,
+      pcts: [],
     };
     g.cantidad += a.cantidad;
     g.pts = round2(g.pts + a.pts);
+    if (a.pct != null) g.pcts.push(a.pct);
     grouped.set(a.action_id, g);
   }
   const rows = [...grouped.values()].filter((r) => r.cantidad > 0).sort((a, b) => a.orden - b.orden);
@@ -377,13 +389,23 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
           )}
           {rows.map((r) => {
             const p = rowPts(r);
+            const pctMedia = r.pcts.length
+              ? round2(r.pcts.reduce((s, x) => s + x, 0) / r.pcts.length)
+              : null;
             return (
               <div
                 key={r.nombre}
                 className="grid grid-cols-[4rem_1fr_4rem] items-center border-t border-border px-5 py-3"
               >
                 <span className="font-display text-lg">{r.cantidad}</span>
-                <span className="text-center text-sm font-semibold">{td(r.nombre)}</span>
+                <span className="text-center text-sm font-semibold">
+                  {td(r.nombre)}
+                  {pctMedia != null && (
+                    <span className="ml-1 font-normal text-muted-foreground">
+                      ({String(pctMedia.toFixed(2)).replace(".", ",")} %)
+                    </span>
+                  )}
+                </span>
                 <span
                   className={`text-right font-display text-lg ${p > 0 ? "text-primary" : p < 0 ? "text-destructive" : "text-muted-foreground"}`}
                 >
