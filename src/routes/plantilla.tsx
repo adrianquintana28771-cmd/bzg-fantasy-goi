@@ -208,7 +208,7 @@ function EquipoCard({
           className={cn("absolute top-[19%] h-[73%] [clip-path:polygon(0_8%,10%_4%,25%_1%,50%_0,75%_1%,90%_4%,100%_8%,100%_79%,50%_100%,0_79%)]", pool.rareza === "normal" ? "left-[4.5%] w-[39%]" : "left-[7%] w-[37%]")}
         />
       </div>
-      <div aria-hidden="true" className="absolute left-[51.4%] top-[1%] h-[57%] w-[46%] bg-equipo-template-surface [clip-path:polygon(0_0,100%_0,100%_100%,0_42%)]" />
+      <div aria-hidden="true" className="absolute left-[51.4%] top-[1%] h-[57%] w-[46%] bg-equipo-template-surface [clip-path:polygon(0_0,100%_0,100%_100%,0_85%)]" />
       <div className="absolute left-[54%] top-[3%] flex w-[42%] flex-col gap-1 text-player-photo-white">
         <div translate="no" title={pool.nombre} className="break-words text-sm font-semibold">{nombre}</div>
         {pool.club_teams?.nombre && <div translate="no" className="break-words text-[10px] font-semibold leading-tight">{pool.club_teams.nombre}</div>}
