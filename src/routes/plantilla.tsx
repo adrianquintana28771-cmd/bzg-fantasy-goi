@@ -208,8 +208,11 @@ function EquipoCard({
           className={cn("absolute top-[19%] h-[73%] [clip-path:polygon(0_8%,10%_4%,25%_1%,50%_0,75%_1%,90%_4%,100%_8%,100%_79%,50%_100%,0_79%)]", pool.rareza === "normal" ? "left-[4.5%] w-[39%]" : "left-[7%] w-[37%]")}
         />
       </div>
-      <div className="absolute left-[54%] top-[2%] w-[42%] text-player-photo-white">
+      <div aria-hidden="true" className="absolute left-[51.4%] top-[1%] h-[57%] w-[46%] bg-equipo-template-surface [clip-path:polygon(0_0,100%_0,100%_100%,0_42%)]" />
+      <div className="absolute left-[54%] top-[3%] flex w-[42%] flex-col gap-1 text-player-photo-white">
         <div translate="no" title={pool.nombre} className="break-words text-sm font-semibold">{nombre}</div>
+        {pool.club_teams?.nombre && <div translate="no" className="break-words text-[10px] font-semibold leading-tight">{pool.club_teams.nombre}</div>}
+        <div className="break-words text-[10px] uppercase leading-tight">{posiciones.map((p) => POS_SHORT[p]).join(" · ")}</div>
         <div className="text-[9px] font-bold uppercase leading-tight">
           {t(RAREZA_LABEL_EU[pool.rareza], RAREZA_LABEL_ES[pool.rareza])} {fmtMult(RAREZA_MULT[pool.rareza])}
           {total > 1 && <span className="ml-1">x{total}</span>}
@@ -220,20 +223,15 @@ function EquipoCard({
           </div>
         )}
       </div>
-      {pool.club_teams?.nombre && <div translate="no" className="absolute left-[74%] top-[27%] w-[22%] break-words text-[9px] font-semibold leading-none text-player-photo-white">{pool.club_teams.nombre}</div>}
-      <div className="absolute left-[74%] top-[35%] w-[22%] break-words text-[9px] font-semibold uppercase leading-none text-player-photo-white">{posiciones.map((p) => POS_SHORT[p]).join(" · ")}</div>
-      <div className="absolute left-[55.5%] top-[19%] flex w-[14%] flex-col gap-0.5 text-center text-[9px] leading-none text-equipo-template-ink">
+      <div className="absolute left-[54%] top-[49%] flex w-[42%] flex-col gap-1 text-[10px] leading-tight text-equipo-template-ink">
         <div>
-          <div>{t("Erabilerak", "Usos")}</div>
-          <div className="font-bold">{usos}/{MAX_USOS}</div>
+          {t("Erabilerak", "Usos")}: <span className="font-bold">{usos}/{MAX_USOS}</span>
         </div>
         <div>
-          <div>{t("Jardunaldia", "Jornada")}</div>
-          <div className="font-bold" title={`${fmtPts(puntos)} · ${fmtMult(RAREZA_MULT[pool.rareza])} → ${fmtPts(puntos * RAREZA_MULT[pool.rareza])} pts`}>{fmtPts(puntos * RAREZA_MULT[pool.rareza])} pts</div>
+          {t("Jardunaldia", "Jornada")}: <PuntosRareza base={puntos} rareza={pool.rareza} baseClass="text-equipo-template-ink" finalClass="text-equipo-template-ink font-bold" />
         </div>
         <div>
-          <div>{t("Batez b.", "Media")}</div>
-          <div className="font-bold">{displayPts(media)} pts</div>
+          {t("Batez bestekoa", "Media")}: <span className="font-bold">{displayPts(media)} pts</span>
         </div>
       </div>
     </div>

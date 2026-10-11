@@ -1,6 +1,6 @@
 # Pendiente
 
-- [ ] Equipo: usar también la mitad derecha de las plantillas originales, sin panel añadido ni cambios de lógica.
+- [ ] Equipo: foto únicamente en la mitad izquierda; reutilizar la derecha para información sin mostrar un segundo hueco de foto ni cambiar la lógica.
 
 - [x] Equipo: reutilizar las fichas existentes por rareza con foto en su hueco e información actual (nombre y primer apellido, posiciones, usos, puntos de jornada y media), sin cambiar cálculos; comprobado con sesión real sin escrituras.
 
