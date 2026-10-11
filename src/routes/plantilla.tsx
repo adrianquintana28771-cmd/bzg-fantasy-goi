@@ -223,7 +223,7 @@ function EquipoCard({
           </div>
         )}
       </div>
-      <div className="absolute left-[54%] top-[49%] flex w-[42%] flex-col gap-1 text-[10px] leading-tight text-equipo-template-ink">
+      <div className="absolute left-[54%] top-[59%] flex w-[42%] flex-col gap-0.5 text-[10px] leading-tight text-equipo-template-ink">
         <div>
           {t("Erabilerak", "Usos")}: <span className="font-bold">{usos}/{MAX_USOS}</span>
         </div>
