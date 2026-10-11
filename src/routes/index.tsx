@@ -236,6 +236,16 @@ function Home() {
                 <Trophy className="h-5 w-5 text-gold" style={{ color: "var(--gold)" }} />
               </div>
               <div className="mt-3 flex items-center gap-4">
+                {powPool ? (
+                  <div className="w-28 shrink-0 sm:w-32">
+                    <EquipoCard
+                      pool={powPool}
+                      images={cardImages.data}
+                      posiciones={[powPool.posicion as Posicion]}
+                      puntos={playerOfWeek.puntos}
+                    />
+                  </div>
+                ) : null}
                 <div className="flex-1">
                   <div translate="no" className="font-display text-2xl">{playerOfWeek.nombre}</div>
                   <div className="text-sm text-muted-foreground">
