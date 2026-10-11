@@ -6,16 +6,13 @@ import { Package, Sparkles, X, Lock, Save } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
 import campoAsset from "@/assets/campo-bzg.png.asset.json";
-import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 import sobreAperturaAsset from "@/assets/sobre-apertura.webp.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
-import type { Database } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { displayPts } from "@/lib/utils";
 import { useT, useTd } from "@/lib/i18n";
-import { useCardImages, usePhotoSource, type CardImages } from "@/lib/card-images";
-import { PlayerPhotoBackground } from "@/components/player-photo-background";
+import { useCardImages } from "@/lib/card-images";
 import { Button } from "@/components/ui/button";
 import { round2 } from "@/lib/club-data";
 
