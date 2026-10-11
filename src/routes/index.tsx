@@ -160,11 +160,21 @@ function Home() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("player_pool")
-        .select("id,nombre,posicion,rating,rareza,estado,club_player_id,club_teams(nombre)")
+        .select("id,nombre,posicion,rating,rareza,estado,club_player_id,team_id")
         .eq("id", playerOfWeek!.id)
         .maybeSingle();
       if (error) throw error;
-      return (data as unknown as PoolRow | null) ?? null;
+      if (!data) return null;
+      let teamNombre = "";
+      if (data.team_id) {
+        const { data: team } = await supabase
+          .from("club_teams")
+          .select("nombre")
+          .eq("id", data.team_id)
+          .maybeSingle();
+        teamNombre = team?.nombre ?? "";
+      }
+      return { ...data, club_teams: teamNombre ? { nombre: teamNombre } : null } as unknown as PoolRow;
     },
   });
   const totals = new Map<string, { team: NonNullable<RankedPlayer["team"]>; pts: number }>();
