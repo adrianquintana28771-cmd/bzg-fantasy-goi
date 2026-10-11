@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trophy, Users, Shield, ArrowRight, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchPlayerRanking, fetchStatLeaders, round2, type RankedPlayer } from "@/lib/club-data";
+import { fetchPlayerRanking, fetchStatLeaders, fetchSavePctLeaders, fetchAvgPtsLeaders, round2, type RankedPlayer } from "@/lib/club-data";
+import { displayPts } from "@/lib/utils";
 import { RankedPlayerRow } from "@/components/ranked-player-row";
 import { CategoryBadge } from "@/components/fantasy-ui";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
@@ -66,6 +67,14 @@ function Home() {
   const { data: leaders } = useQuery({
     queryKey: ["home-stat-leaders"],
     queryFn: fetchStatLeaders,
+  });
+  const { data: savePctLeaders = [] } = useQuery({
+    queryKey: ["home-save-pct-leaders"],
+    queryFn: fetchSavePctLeaders,
+  });
+  const { data: avgPtsLeaders = [] } = useQuery({
+    queryKey: ["home-avg-pts-leaders"],
+    queryFn: fetchAvgPtsLeaders,
   });
   const { data: matches = [] } = useQuery({
     queryKey: ["home-next-matches"],
