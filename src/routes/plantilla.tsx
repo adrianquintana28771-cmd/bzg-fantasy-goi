@@ -19,18 +19,21 @@ import { PlayerPhotoBackground } from "@/components/player-photo-background";
 import { Button } from "@/components/ui/button";
 import { round2 } from "@/lib/club-data";
 
-type Posicion = Database["public"]["Enums"]["plantilla_posicion"];
-type Rareza = "normal" | "raro" | "legendario";
+import {
+  CardPhoto,
+  EquipoCard,
+  MAX_USOS,
+  POS_SHORT,
+  PuntosRareza,
+  RAREZA_LABEL_ES,
+  RAREZA_LABEL_EU,
+  RAREZA_MULT,
+  fmtMult,
+  type PoolRow,
+  type Posicion,
+  type Rareza,
+} from "@/components/equipo-card";
 
-const MAX_USOS = 3;
-
-const RAREZA_MULT: Record<Rareza, number> = { normal: 1, raro: 1.3, legendario: 1.5 };
-const RAREZA_LABEL_ES: Record<Rareza, string> = { normal: "Normal", raro: "Raro", legendario: "Legendario" };
-const RAREZA_LABEL_EU: Record<Rareza, string> = {
-  normal: "Normala",
-  raro: "Bitxia",
-  legendario: "Legendarioa",
-};
 const RAREZA_STYLE: Record<Rareza, string> = {
   normal: "border-border bg-background",
   raro: "border-sky-500/60 bg-sky-500/10",
@@ -43,33 +46,6 @@ function cartaPuntos(rating: number, rareza: Rareza) {
 }
 
 const fmtPts = (n: number) => displayPts(n);
-const fmtMult = (m: number) => `×${String(m).replace(".", ",")}`;
-
-/** Muestra base de la jornada · multiplicador de rareza → total final (solo visual) */
-function PuntosRareza({
-  base,
-  rareza,
-  className = "",
-  baseClass = "text-muted-foreground",
-  finalClass = "text-primary",
-}: {
-  base: number;
-  rareza: Rareza;
-  className?: string;
-  baseClass?: string;
-  finalClass?: string;
-}) {
-  const mult = RAREZA_MULT[rareza];
-  return (
-    <span className={`inline-flex flex-wrap items-center gap-x-1 tabular-nums ${className}`}>
-      <span className={baseClass}>{fmtPts(base)}</span>
-      <span className={`${baseClass} opacity-60`}>·</span>
-      <span className={baseClass}>{fmtMult(mult)}</span>
-      <span className={`${baseClass} opacity-60`}>→</span>
-      <span className={finalClass}>{fmtPts(base * mult)} pts</span>
-    </span>
-  );
-}
 
 const POS_LABEL: Record<Posicion, string> = {
   portero: "Atezaina",
