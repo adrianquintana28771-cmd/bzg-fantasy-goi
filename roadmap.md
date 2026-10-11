@@ -1,5 +1,7 @@
 # Pendiente
 
+- [ ] Añadir vista Admin de auditoría de puntos por jornada, origen registrado/autocalculado y diferencias, sin modificar datos.
+
 - [x] Revisar puntuaciones por jornada: retirados autocalculos de entrenadores, corregidos 5 casos (15 cartas); Eneko J3=0 verificado en ficha real, pruebas SQL correctas y 666 filas de jugadores/porteros intactas.
 
 - [x] Equipo: usar solo la mitad derecha de cada plantilla, foto en su hueco y datos en el resto; tres fichas por fila en inventario y selector.
