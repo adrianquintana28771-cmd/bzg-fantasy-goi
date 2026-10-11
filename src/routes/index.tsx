@@ -9,6 +9,22 @@ import { CategoryBadge } from "@/components/fantasy-ui";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
 
+/** Nombre clicable de las clasificaciones: enlaza con la ficha de jugador/a existente. */
+function LeaderName({ p }: { p: { nombre: string; poolId: string | null } }) {
+  return p.poolId ? (
+    <Link
+      to="/jugadores/$playerId"
+      params={{ playerId: p.poolId }}
+      translate="no"
+      className="truncate font-semibold underline-offset-2 hover:underline"
+    >
+      {p.nombre}
+    </Link>
+  ) : (
+    <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+  );
+}
+
 const SITE = "https://bzg-fantasy-goi.lovable.app";
 const HOME_TITLE = "BZG Fantasy Eskubaloia | Fantasy de balonmano de Etxebarri";
 const HOME_DESC =
@@ -298,7 +314,7 @@ function Home() {
                   >
                     <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+                      <LeaderName p={p} />
                       {p.equipo && (
                         <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
                       )}
@@ -319,7 +335,7 @@ function Home() {
                 >
                   <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+                    <LeaderName p={p} />
                     {p.equipo && (
                       <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
                     )}
@@ -339,7 +355,7 @@ function Home() {
                 >
                   <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+                    <LeaderName p={p} />
                     {p.equipo && (
                       <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
                     )}
