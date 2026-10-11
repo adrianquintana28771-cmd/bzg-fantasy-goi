@@ -7,6 +7,8 @@ import { fetchPlayerRanking, fetchStatLeaders, fetchSavePctLeaders, fetchAvgPtsL
 import { displayPts } from "@/lib/utils";
 import { RankedPlayerRow } from "@/components/ranked-player-row";
 import { CategoryBadge } from "@/components/fantasy-ui";
+import { EquipoCard, type PoolRow, type Posicion } from "@/components/equipo-card";
+import { useCardImages } from "@/lib/card-images";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
 
