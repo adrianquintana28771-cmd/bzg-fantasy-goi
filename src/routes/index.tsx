@@ -309,6 +309,46 @@ function Home() {
               </div>
             </div>
           ))}
+          <div>
+            <h2 className="mb-3 font-display text-xl">📈 {t("% paradas (media)", "% paradas (media)")}</h2>
+            <div className="space-y-2">
+              {savePctLeaders.map((p, i) => (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card"
+                >
+                  <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+                    {p.equipo && (
+                      <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
+                    )}
+                  </div>
+                  <span className="font-display text-lg">{String(p.valor).replace(".", ",")} %</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h2 className="mb-3 font-display text-xl">⭐ {t("Puntu batez bestekoa", "Media de puntos")}</h2>
+            <div className="space-y-2">
+              {avgPtsLeaders.map((p, i) => (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card"
+                >
+                  <span className="w-5 text-center font-display text-lg text-primary">{i + 1}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-semibold" translate="no">{p.nombre}</div>
+                    {p.equipo && (
+                      <div className="truncate text-xs text-muted-foreground" translate="no">{p.equipo}</div>
+                    )}
+                  </div>
+                  <span className="font-display text-lg">{displayPts(p.valor)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </div>
