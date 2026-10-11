@@ -152,6 +152,21 @@ function Home() {
         .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre))
     : [];
   const playerOfWeek = weekRanking[0]?.puntos ? weekRanking[0] : undefined;
+  const cardImages = useCardImages();
+  // Carta del jugador/a de la jornada: misma ficha visual que en «Mi equipo».
+  const { data: powPool } = useQuery({
+    queryKey: ["home-pow-pool", playerOfWeek?.id],
+    enabled: !!playerOfWeek,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("player_pool")
+        .select("id,nombre,posicion,rating,rareza,estado,club_player_id,club_teams(nombre)")
+        .eq("id", playerOfWeek!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as unknown as PoolRow | null) ?? null;
+    },
+  });
   const totals = new Map<string, { team: NonNullable<RankedPlayer["team"]>; pts: number }>();
   for (const r of weekRanking)
     if (r.team) {
