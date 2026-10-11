@@ -183,6 +183,17 @@ function Admin() {
         )}
         {canManageAll && (
           <Section
+            icon={ClipboardList}
+            title={t("Gutunazalen probabilitateak", "Probabilidades de sobres")}
+            description={t(
+              "Editatu arrunta, bitxia eta legendarioa agertzeko ehunekoak.",
+              "Edita el porcentaje de aparición de común, raro y legendario.",
+            )}
+            to="/admin/sobres"
+          />
+        )}
+        {canManageAll && (
+          <Section
             icon={FileText}
             title={t("Argazkien kudeaketa", "Gestión de fotografías")}
             description={t(

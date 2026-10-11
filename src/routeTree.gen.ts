@@ -26,6 +26,7 @@ import { Route as AdminMisionesRouteImport } from './routes/admin.misiones'
 import { Route as AdminPasswordRouteImport } from './routes/admin.password'
 import { Route as AdminPosicionesRouteImport } from './routes/admin.posiciones'
 import { Route as AdminReglasRouteImport } from './routes/admin.reglas'
+import { Route as AdminSobresRouteImport } from './routes/admin.sobres'
 import { Route as EquiposIndexRouteImport } from './routes/equipos.index'
 import { Route as EquiposTeamIdRouteImport } from './routes/equipos.$teamId'
 import { Route as JugadoresPlayerIdRouteImport } from './routes/jugadores.$playerId'
@@ -117,6 +118,11 @@ const AdminReglasRoute = AdminReglasRouteImport.update({
   path: '/admin/reglas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSobresRoute = AdminSobresRouteImport.update({
+  id: '/admin/sobres',
+  path: '/admin/sobres',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EquiposIndexRoute = EquiposIndexRouteImport.update({
   id: '/equipos/',
   path: '/equipos/',
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
+  '/admin/sobres': typeof AdminSobresRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
+  '/admin/sobres': typeof AdminSobresRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
   '/admin': typeof AdminIndexRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/admin/password': typeof AdminPasswordRoute
   '/admin/posiciones': typeof AdminPosicionesRoute
   '/admin/reglas': typeof AdminReglasRoute
+  '/admin/sobres': typeof AdminSobresRoute
   '/equipos/$teamId': typeof EquiposTeamIdRoute
   '/jugadores/$playerId': typeof JugadoresPlayerIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -236,6 +245,7 @@ export interface FileRouteTypes {
     | '/admin/password'
     | '/admin/posiciones'
     | '/admin/reglas'
+    | '/admin/sobres'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
     | '/admin/'
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/admin/password'
     | '/admin/posiciones'
     | '/admin/reglas'
+    | '/admin/sobres'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
     | '/admin'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/admin/password'
     | '/admin/posiciones'
     | '/admin/reglas'
+    | '/admin/sobres'
     | '/equipos/$teamId'
     | '/jugadores/$playerId'
     | '/admin/'
@@ -309,6 +321,7 @@ export interface RootRouteChildren {
   AdminPasswordRoute: typeof AdminPasswordRoute
   AdminPosicionesRoute: typeof AdminPosicionesRoute
   AdminReglasRoute: typeof AdminReglasRoute
+  AdminSobresRoute: typeof AdminSobresRoute
   EquiposTeamIdRoute: typeof EquiposTeamIdRoute
   JugadoresPlayerIdRoute: typeof JugadoresPlayerIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -438,6 +451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReglasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/sobres': {
+      id: '/admin/sobres'
+      path: '/admin/sobres'
+      fullPath: '/admin/sobres'
+      preLoaderRoute: typeof AdminSobresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/equipos/': {
       id: '/equipos/'
       path: '/equipos'
@@ -493,6 +513,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminPasswordRoute: AdminPasswordRoute,
   AdminPosicionesRoute: AdminPosicionesRoute,
   AdminReglasRoute: AdminReglasRoute,
+  AdminSobresRoute: AdminSobresRoute,
   EquiposTeamIdRoute: EquiposTeamIdRoute,
   JugadoresPlayerIdRoute: JugadoresPlayerIdRoute,
   AdminIndexRoute: AdminIndexRoute,
