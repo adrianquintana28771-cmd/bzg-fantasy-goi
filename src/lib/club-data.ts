@@ -197,6 +197,7 @@ export async function fetchStatLeaders(): Promise<Record<StatLeaderKey, StatLead
       equipo: p.club_player_teams?.[0]?.club_teams?.nombre ?? null,
     });
   }
+  const poolIds = await poolIdsByClubPlayer(playerIds);
   const out = {} as Record<StatLeaderKey, StatLeader[]>;
   for (const key of Object.keys(STAT_LEADER_ACTIONS) as StatLeaderKey[]) {
     const acts = STAT_LEADER_ACTIONS[key] as readonly string[];
@@ -205,7 +206,7 @@ export async function fetchStatLeaders(): Promise<Record<StatLeaderKey, StatLead
       if (acts.includes(r.action_id)) sums.set(r.player_id, (sums.get(r.player_id) ?? 0) + (r.cantidad ?? 0));
     out[key] = [...sums]
       .filter(([id, t]) => t > 0 && info.has(id))
-      .map(([id, total]) => ({ id, total, ...info.get(id)! }))
+      .map(([id, total]) => ({ id, total, poolId: poolIds.get(id) ?? null, ...info.get(id)! }))
       .sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre))
       .slice(0, 5);
   }
@@ -213,7 +214,13 @@ export async function fetchStatLeaders(): Promise<Record<StatLeaderKey, StatLead
 }
 
 // Top 5 por medias (no acumulados): % medio de paradas por jornada y media de puntos por jornada.
-export type AvgLeader = { id: string; nombre: string; equipo: string | null; valor: number };
+export type AvgLeader = {
+  id: string;
+  nombre: string;
+  equipo: string | null;
+  valor: number;
+  poolId: string | null;
+};
 
 /** Media de los % de parada por jornada (solo jornadas con lanzamientos). */
 export async function fetchSavePctLeaders(): Promise<AvgLeader[]> {
@@ -243,6 +250,7 @@ export async function fetchSavePctLeaders(): Promise<AvgLeader[]> {
       equipo: p.club_player_teams?.[0]?.club_teams?.nombre ?? null,
     });
   }
+  const poolIds = await poolIdsByClubPlayer(playerIds);
   // Sumas por jugador y jornada; el % se calcula por jornada y luego se promedia.
   const per = new Map<string, Map<number, { par: number; fue: number; gol: number }>>();
   for (const r of rows) {
@@ -261,7 +269,9 @@ export async function fetchSavePctLeaders(): Promise<AvgLeader[]> {
         .map((j) => pctParadas(j.par, j.fue, j.gol))
         .filter((p): p is number => p != null);
       const valor = pcts.length ? round2(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
-      return valor != null && info.has(id) ? { id, valor, ...info.get(id)! } : null;
+      return valor != null && info.has(id)
+        ? { id, valor, poolId: poolIds.get(id) ?? null, ...info.get(id)! }
+        : null;
     })
     .filter((x): x is AvgLeader => x != null)
     .sort((a, b) => b.valor - a.valor || a.nombre.localeCompare(b.nombre))
@@ -278,6 +288,7 @@ export async function fetchAvgPtsLeaders(): Promise<AvgLeader[]> {
       nombre: r.nombre,
       equipo: r.team?.nombre ?? null,
       valor: round2(r.puntos / r.jornadas),
+      poolId: r.id,
     }))
     .sort((a, b) => b.valor - a.valor || a.nombre.localeCompare(b.nombre))
     .slice(0, 5);
