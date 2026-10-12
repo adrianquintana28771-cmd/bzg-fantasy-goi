@@ -280,10 +280,18 @@ function Inner({ userId }: { userId: string }) {
     queryKey: ["jornada-pts", jornada.data?.numero],
     enabled: !!jornada.data,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("player_jornada_stats")
-        .select("player_id, puntos, jornada_numero");
-      if (error) throw error;
+      const data: { player_id: string; puntos: number; jornada_numero: number }[] = [];
+      for (let from = 0; ; from += 1000) {
+        const { data: page, error } = await supabase
+          .from("player_jornada_stats")
+          .select("player_id, puntos, jornada_numero")
+          .order("player_id")
+          .order("jornada_numero")
+          .range(from, from + 999);
+        if (error) throw error;
+        data.push(...(page ?? []));
+        if (!page || page.length < 1000) break;
+      }
       const map = new Map<string, number>();
       const totals = new Map<string, { puntos: number; jornadas: number }>();
       (data ?? []).forEach((s) => {
