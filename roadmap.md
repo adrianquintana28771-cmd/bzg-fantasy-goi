@@ -35,3 +35,4 @@
 - [x] Listado de jugadores/entrenadores por equipo con datos que faltan
 - [x] Inicio: las 6 clasificaciones tienen todo el rectángulo clicable (igual que los partidos), no solo el nombre.
 - [x] Inicio «Jugador/a de la jornada»: solo la ficha completa (nombre, equipo, rareza y puntos ya van dentro); quitados los textos duplicados de fuera.
+- [x] Fondo de foto (degradado + escudo) detrás de TODAS las fotos: fotos JPEG opacas ahora se mezclan (mix-blend-multiply) sobre el fondo en CardPhoto y ficha de jugador; sin foto → logo (igual que antes). Verificado en vista previa (cards y perfil). build OK.
