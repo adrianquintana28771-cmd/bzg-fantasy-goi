@@ -100,8 +100,3 @@ export function photoFor(ci: CardImages | undefined, clubPlayerId: string | null
   const p = ci.photos[clubPlayerId];
   return p?.[rz] ?? p?.normal ?? null;
 }
-
-/** Opaque (JPEG) photos hide the gradient background behind them; they blend over it instead. */
-export function isOpaquePhotoSrc(src: string | null | undefined) {
-  return /\.(jpe?g)$/i.test((src ?? "").split("?")[0]);
-}
