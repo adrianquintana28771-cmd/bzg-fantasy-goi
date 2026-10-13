@@ -7,6 +7,7 @@ import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tramo } from "@/lib/club-data";
 
 export const Route = createFileRoute("/admin/reglas")({
   head: () => ({
@@ -61,6 +62,7 @@ interface Criterio {
   es_resultado: string | null;
   activo: boolean;
   orden: number;
+  tramos: Tramo[] | null;
 }
 
 const GRUPOS = ["ataque", "defensa", "portero", "entrenador", "negativo", "bonus"];
@@ -80,7 +82,7 @@ function Reglas() {
     queryFn: async (): Promise<Criterio[]> => {
       const { data, error } = await supabase
         .from("club_action_types")
-        .select("id,nombre,puntos,grupo,solo_portero,solo_entrenador,es_resultado,activo,orden")
+        .select("id,nombre,puntos,grupo,solo_portero,solo_entrenador,es_resultado,activo,orden,tramos")
         .order("orden");
       if (error) throw error;
       return (data ?? []).map((r) => ({ ...r, puntos: Number(r.puntos) })) as Criterio[];
