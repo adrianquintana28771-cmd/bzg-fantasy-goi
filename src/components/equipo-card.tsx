@@ -3,7 +3,6 @@ import { displayPts } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { usePhotoSource, photoBlendClass, type CardImages } from "@/lib/card-images";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
-import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 import type { Database } from "@/integrations/supabase/types";
 
 export type Posicion = Database["public"]["Enums"]["plantilla_posicion"];
@@ -84,21 +83,18 @@ export function CardPhoto({
   name?: string;
 }) {
   const { src, onError } = usePhotoSource(images, pool?.club_player_id, pool?.rareza ?? "normal");
-  if (src) {
-    return (
-      <div className={cn("relative overflow-hidden", className)}>
+  return (
+      <div className={cn("relative isolate overflow-hidden", className)}>
         <PlayerPhotoBackground />
+        {src && (
         <img
           src={src}
           onError={onError}
           alt={name ?? ""}
           className={cn("relative h-full w-full object-cover object-top", photoBlendClass(src))}
         />
+        )}
       </div>
-    );
-  }
-  return (
-    <img src={escudoAsset.url} alt="" aria-hidden="true" className={cn("h-full w-full object-contain", className)} />
   );
 }
 

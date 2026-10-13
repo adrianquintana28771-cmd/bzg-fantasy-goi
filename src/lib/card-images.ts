@@ -101,7 +101,7 @@ export function photoFor(ci: CardImages | undefined, clubPlayerId: string | null
   return p?.[rz] ?? p?.normal ?? null;
 }
 
-/** Las fotos siempre se pintan encima del fondo, sin mezcla. */
+/** Leave a visible frame of the shared background without blending or tinting the photo. */
 export function photoBlendClass(_src?: string | null) {
-  return "";
+  return "z-10 scale-[0.88]";
 }
