@@ -92,7 +92,7 @@ export function CardPhoto({
           src={src}
           onError={onError}
           alt={name ?? ""}
-          className={cn("relative h-full w-full object-cover object-top")}
+          className={cn("relative h-full w-full object-cover object-top", photoBlendClass(src))}
         />
       </div>
     );
