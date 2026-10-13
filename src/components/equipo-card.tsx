@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { displayPts } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
-import { usePhotoSource, type CardImages } from "@/lib/card-images";
+import { usePhotoSource, isOpaquePhotoSrc, type CardImages } from "@/lib/card-images";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
 import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 import type { Database } from "@/integrations/supabase/types";
@@ -88,7 +88,12 @@ export function CardPhoto({
     return (
       <div className={cn("relative overflow-hidden", className)}>
         <PlayerPhotoBackground />
-        <img src={src} onError={onError} alt={name ?? ""} className="relative h-full w-full object-cover object-top" />
+        <img
+          src={src}
+          onError={onError}
+          alt={name ?? ""}
+          className={cn("relative h-full w-full object-cover object-top", isOpaquePhotoSrc(src) && "mix-blend-multiply")}
+        />
       </div>
     );
   }

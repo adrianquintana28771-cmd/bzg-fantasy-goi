@@ -18,7 +18,7 @@ import {
 import { useT, useTd, useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { fetchPoolPlayer, fetchTeams, round2, tramoPts, tramoPctPts, pctParadas, type Tramo } from "@/lib/club-data";
-import { useCardImages, usePhotoSource } from "@/lib/card-images";
+import { useCardImages, usePhotoSource, isOpaquePhotoSrc } from "@/lib/card-images";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
 
 const ESTADO_COLOR: Record<PlayerEstado, string> = {
@@ -234,7 +234,7 @@ function Jugador() {
                 src={photo}
                 onError={photoError}
                 alt={`${player.club?.nombre ?? player.nombre} ${player.club?.apellido1 ?? ""}`.trim()}
-                className="relative h-full w-full object-cover object-top"
+                className={`relative h-full w-full object-cover object-top${isOpaquePhotoSrc(photo) ? " mix-blend-multiply" : ""}`}
                 loading="eager"
               />
             </>
