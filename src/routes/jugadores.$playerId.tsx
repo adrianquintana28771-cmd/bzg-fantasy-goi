@@ -18,7 +18,7 @@ import {
 import { useT, useTd, useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { fetchPoolPlayer, fetchTeams, round2, tramoPts, tramoPctPts, pctParadas, type Tramo } from "@/lib/club-data";
-import { useCardImages, usePhotoSource, photoBlendClass } from "@/lib/card-images";
+import { useCardImages, usePhotoSource } from "@/lib/card-images";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
 
 const ESTADO_COLOR: Record<PlayerEstado, string> = {
@@ -226,22 +226,26 @@ function Jugador() {
         className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6"
         style={{ background: "var(--gradient-card)" }}
       >
-        <div className="relative isolate mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-elevated">
-          <PlayerPhotoBackground />
+        <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-elevated">
           {photo ? (
             <>
+              <PlayerPhotoBackground />
               <img
                 src={photo}
                 onError={photoError}
                 alt={`${player.club?.nombre ?? player.nombre} ${player.club?.apellido1 ?? ""}`.trim()}
-                className={`relative h-full w-full object-cover object-top ${photoBlendClass(photo)}`}
+                className="relative h-full w-full object-cover object-top"
                 loading="eager"
               />
             </>
           ) : (
-            null
+            <div className="grid h-full w-full place-items-center">
+              <span className="font-display text-[8rem] leading-none text-primary-foreground/90">
+                {dorsal ?? player.nombre.charAt(0)}
+              </span>
+            </div>
           )}
-          <div className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent p-3">
+          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent p-3">
             <EstadoBadge estado={estado} />
             {dorsal != null && (
               <span className="rounded bg-black/40 px-2 py-0.5 text-[11px] font-semibold text-white">#{dorsal}</span>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const CARD_BUCKET = "player-card-images";
@@ -86,94 +86,8 @@ export function usePhotoSource(ci: CardImages | undefined, id: string | null | u
     ...(ci?.alternatives?.[id]?.[rz] ?? [ci?.photos[id]?.[rz]]),
     ...(ci?.alternatives?.[id]?.normal ?? [ci?.photos[id]?.normal]),
   ].filter((u): u is string => Boolean(u)))] : [];
-  const original = sources.find((u) => !failed.includes(u));
-  const src = useWhiteKeyed(original);
-  return { src, onError: () => { if (original) setFailed((previous) => [...previous, original]); } };
-}
-
-/* ---------- Display-only removal of a flat white/grey photo background (stored files untouched) ---------- */
-const keyedCache = new Map<string, Promise<string>>();
-const isOpaqueFormat = (u: string) => /\.(jpe?g)(\?|$)/i.test(u.split("?")[0] + "?");
-
-function keyWhite(url: string): Promise<string> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onerror = () => resolve(url);
-    img.onload = () => {
-      try {
-        const scale = Math.min(1, 900 / Math.max(img.naturalWidth, img.naturalHeight));
-        const w = Math.max(1, Math.round(img.naturalWidth * scale));
-        const h = Math.max(1, Math.round(img.naturalHeight * scale));
-        const canvas = document.createElement("canvas");
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return resolve(url);
-        ctx.drawImage(img, 0, 0, w, h);
-        const data = ctx.getImageData(0, 0, w, h);
-        const px = data.data;
-        // Background colour = median-ish of the four corners.
-        const corners = [0, w - 1, (h - 1) * w, h * w - 1].map((i) => [px[i * 4], px[i * 4 + 1], px[i * 4 + 2]]);
-        const bg = [0, 1, 2].map((c) => corners.map((k) => k[c]).sort((a, b) => a - b)[1]);
-        if (Math.min(...bg) < 170) return resolve(url); // not a light flat background
-        const dist = (i: number) => {
-          const r = px[i * 4], g = px[i * 4 + 1], b = px[i * 4 + 2];
-          const sat = Math.max(r, g, b) - Math.min(r, g, b);
-          return sat > 30 ? 999 : Math.max(Math.abs(r - bg[0]), Math.abs(g - bg[1]), Math.abs(b - bg[2]));
-        };
-        const TOL = 38;
-        const mark = new Uint8Array(w * h);
-        const stack: number[] = [];
-        const push = (i: number) => { if (!mark[i] && dist(i) <= TOL) { mark[i] = 1; stack.push(i); } };
-        for (let x = 0; x < w; x++) { push(x); push((h - 1) * w + x); }
-        for (let y = 0; y < h; y++) { push(y * w); push(y * w + w - 1); }
-        while (stack.length) {
-          const i = stack.pop()!;
-          const x = i % w, y = (i / w) | 0;
-          if (x > 0) push(i - 1);
-          if (x < w - 1) push(i + 1);
-          if (y > 0) push(i - w);
-          if (y < h - 1) push(i + w);
-        }
-        for (let i = 0; i < w * h; i++) {
-          if (mark[i]) { px[i * 4 + 3] = 0; continue; }
-          // Soften the silhouette edge next to removed background.
-          const x = i % w, y = (i / w) | 0;
-          const nearBg = (x > 0 && mark[i - 1]) || (x < w - 1 && mark[i + 1]) || (y > 0 && mark[i - w]) || (y < h - 1 && mark[i + w]);
-          if (nearBg) {
-            const d = dist(i);
-            if (d < 90) px[i * 4 + 3] = Math.round(255 * Math.min(1, (d - TOL) / (90 - TOL) + 0.35));
-          }
-        }
-        ctx.putImageData(data, 0, 0);
-        canvas.toBlob((blob) => resolve(blob ? URL.createObjectURL(blob) : url), "image/png");
-      } catch {
-        resolve(url); // e.g. CORS-tainted canvas: keep the original photo
-      }
-    };
-    img.src = url;
-  });
-}
-
-function cacheKey(u: string) {
-  return u.split("?")[0];
-}
-
-/** Returns a background-free version of opaque (JPEG) photos; transparent formats pass through. */
-export function useWhiteKeyed(url: string | undefined) {
-  const [done, setDone] = useState<Record<string, string>>({});
-  useEffect(() => {
-    if (!url || !isOpaqueFormat(url) || done[url]) return;
-    const key = cacheKey(url);
-    let p = keyedCache.get(key);
-    if (!p) { p = keyWhite(url); keyedCache.set(key, p); }
-    let alive = true;
-    p.then((out) => { if (alive) setDone((prev) => ({ ...prev, [url]: out })); });
-    return () => { alive = false; };
-  }, [url, done]);
-  if (!url) return undefined;
-  if (!isOpaqueFormat(url)) return url;
-  return done[url]; // undefined while processing: the decorative background shows meanwhile
+  const src = sources.find((u) => !failed.includes(u));
+  return { src, onError: () => { if (src) setFailed((previous) => [...previous, src]); } };
 }
 
 export function useCardImages() {
@@ -185,9 +99,4 @@ export function photoFor(ci: CardImages | undefined, clubPlayerId: string | null
   if (!ci || !clubPlayerId) return null;
   const p = ci.photos[clubPlayerId];
   return p?.[rz] ?? p?.normal ?? null;
-}
-
-/** Leave a visible frame of the shared background without blending or tinting the photo. */
-export function photoBlendClass(_src?: string | null) {
-  return "z-10 scale-[0.88]";
 }

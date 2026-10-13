@@ -3,7 +3,7 @@ import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 /** Decorative layers only: the player image is rendered above them. */
 export function PlayerPhotoBackground() {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 player-photo-background">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 player-photo-background">
       <img
         src={escudoAsset.url}
         alt=""
