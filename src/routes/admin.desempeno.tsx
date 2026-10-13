@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Minus, Plus, Save, Trash2 } from "lucide-react";
+import { Minus, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
 import { AdminGuard } from "@/components/admin-guard";
@@ -66,7 +66,7 @@ interface PlayerRow {
 }
 
 function Desempeno() {
-  const { canEditStats, canManageAll } = useAuth();
+  const { canEditStats } = useAuth();
   const { t, td, lang } = useLang();
   const qc = useQueryClient();
   const [matchId, setMatchId] = useState<string>("");
@@ -358,8 +358,6 @@ function Desempeno() {
           "Elige un partido y un jugador/a, y anota cada acción. Los puntos se calculan solos.",
         )}
       </p>
-
-      {canManageAll && <TramosPortero actions={actions.data ?? []} />}
 
       <div className="mt-6 grid gap-3">
         <label className="text-sm font-semibold">
