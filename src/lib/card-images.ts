@@ -101,7 +101,7 @@ export function photoFor(ci: CardImages | undefined, clubPlayerId: string | null
   return p?.[rz] ?? p?.normal ?? null;
 }
 
-/** Fotos opacas (JPEG) se mezclan para que su fondo blanco deje ver el degradado; PNG transparentes no se tocan. */
-export function photoBlendClass(src: string | null | undefined) {
-  return src && /\.(png|webp)(?:\?|$)/i.test(src) ? "" : "mix-blend-multiply";
+/** Las fotos siempre se pintan encima del fondo, sin mezcla. */
+export function photoBlendClass(_src?: string | null) {
+  return "";
 }
