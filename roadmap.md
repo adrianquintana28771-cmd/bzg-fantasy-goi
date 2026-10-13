@@ -34,3 +34,4 @@
 - [ ] Resto de equipos y entrenadores reales
 - [x] Listado de jugadores/entrenadores por equipo con datos que faltan
 - [x] Inicio: las 6 clasificaciones tienen todo el rectángulo clicable (igual que los partidos), no solo el nombre.
+- [x] Inicio «Jugador/a de la jornada»: solo la ficha completa (nombre, equipo, rareza y puntos ya van dentro); quitados los textos duplicados de fuera.
