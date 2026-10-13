@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ShieldAlert, Plus, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -7,6 +7,7 @@ import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tramo } from "@/lib/club-data";
 
 export const Route = createFileRoute("/admin/reglas")({
   head: () => ({
@@ -61,6 +62,7 @@ interface Criterio {
   es_resultado: string | null;
   activo: boolean;
   orden: number;
+  tramos: Tramo[] | null;
 }
 
 const GRUPOS = ["ataque", "defensa", "portero", "entrenador", "negativo", "bonus"];
@@ -80,7 +82,7 @@ function Reglas() {
     queryFn: async (): Promise<Criterio[]> => {
       const { data, error } = await supabase
         .from("club_action_types")
-        .select("id,nombre,puntos,grupo,solo_portero,solo_entrenador,es_resultado,activo,orden")
+        .select("id,nombre,puntos,grupo,solo_portero,solo_entrenador,es_resultado,activo,orden,tramos")
         .order("orden");
       if (error) throw error;
       return (data ?? []).map((r) => ({ ...r, puntos: Number(r.puntos) })) as Criterio[];
@@ -219,6 +221,8 @@ function Reglas() {
         </label>
       </div>
 
+      <TramosPortero actions={criterios.data ?? []} />
+
       <Bloque
         titulo={t("Entrenatzaileak (emaitzaren arabera)", "Entrenadores/as (según el resultado)")}
         items={entrenador}
@@ -257,6 +261,100 @@ function Bloque({
         {items.length === 0 && <p className="p-4 text-sm text-muted-foreground">{t("Irizpiderik ez.", "Sin criterios.")}</p>}
       </div>
     </div>
+  );
+}
+
+const PCT_ID = "porcentaje_paradas";
+const TRAMO_IDS = ["parada", "gol_encajado", PCT_ID];
+
+/** Editor super_admin de tramos de portero: se guarda en club_action_types.tramos y la BD recalcula sola. */
+function TramosPortero({ actions }: { actions: Criterio[] }) {
+  const { t, td } = useLang();
+  const qc = useQueryClient();
+  const [draft, setDraft] = useState<Record<string, Tramo[]>>({});
+  useEffect(() => {
+    const d: Record<string, Tramo[]> = {};
+    for (const a of actions) if (TRAMO_IDS.includes(a.id)) d[a.id] = a.tramos ?? [];
+    setDraft(d);
+  }, [actions]);
+  const [saving, setSaving] = useState("");
+
+  async function guardar(id: string) {
+    const tramos = (draft[id] ?? [])
+      .filter((r) => Number.isFinite(r.desde) && Number.isFinite(r.puntos))
+      .sort((a, b) => a.desde - b.desde);
+    setSaving(id);
+    const { error } = await supabase.from("club_action_types").update({ tramos } as never).eq("id", id);
+    setSaving("");
+    if (error) return toast.error(t("Ezin izan da gorde", "No se pudo guardar"));
+    toast.success(t("Tarteak gordeta · puntuazioak berriro kalkulatuta", "Tramos guardados · puntuaciones recalculadas"));
+    qc.invalidateQueries({ queryKey: ["criterios"] });
+    qc.invalidateQueries({ queryKey: ["club_action_types"] });
+  }
+
+  const set = (id: string, i: number, k: keyof Tramo, v: string) =>
+    setDraft((d) => ({
+      ...d,
+      [id]: d[id].map((r, j) => (j === i ? { ...r, [k]: v === "" && k === "hasta" ? null : Number(v) } : r)),
+    }));
+
+  return (
+    <details className="mt-6 rounded-2xl border border-border bg-card p-4 shadow-card">
+      <summary className="cursor-pointer font-display text-lg">
+        {t("Atezainen tarteak", "Tramos de porteros")}
+      </summary>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {t(
+          "Geldiketak eta golak: puntuak unitateko, tarteka metatuta (hutsik = lineala). Golak: atezain bakarra badago bakarrik; 2+ badaude, gol bakoitza irizpidearen puntuak. Ehunekoa: tarteko puntu finkoak, % = geldiketak / (geldiketak + kanpora + golak) × 100.",
+          "Paradas y goles: puntos por unidad, acumulativos por tramos (vacío = lineal). Goles: solo si juega un único portero; con 2+ cada gol vale los puntos del criterio. Porcentaje: puntos fijos del tramo, % = paradas / (paradas + fuera + goles) × 100.",
+        )}
+      </p>
+      {TRAMO_IDS.map((id) => {
+        const a = actions.find((x) => x.id === id);
+        if (!a) return null;
+        const pctMode = id === PCT_ID;
+        return (
+          <div key={id} className="mt-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold">{td(a.nombre)}</h3>
+              <span className="text-xs text-muted-foreground">
+                {pctMode ? "%" : t("puntuak unitateko", "puntos por unidad")}
+              </span>
+            </div>
+            <div className="mt-2 grid gap-2">
+              {(draft[id] ?? []).map((r, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <span>{t("Nondik", "Desde")}</span>
+                  <input type="number" step={pctMode ? "0.01" : "1"} value={r.desde} onChange={(e) => set(id, i, "desde", e.target.value)} className="w-20 rounded-md border border-input bg-background px-2 py-1" />
+                  <span>{t("Nora", "Hasta")}</span>
+                  <input type="number" step={pctMode ? "0.01" : "1"} value={r.hasta ?? ""} placeholder="∞" onChange={(e) => set(id, i, "hasta", e.target.value)} className="w-20 rounded-md border border-input bg-background px-2 py-1" />
+                  <span>{t("Puntuak", "Puntos")}</span>
+                  <input type="number" step="0.01" value={r.puntos} onChange={(e) => set(id, i, "puntos", e.target.value)} className="w-20 rounded-md border border-input bg-background px-2 py-1" />
+                  <button type="button" aria-label={t("Ezabatu", "Eliminar")} onClick={() => setDraft((d) => ({ ...d, [id]: d[id].filter((_, j) => j !== i) }))} className="grid h-7 w-7 place-items-center rounded-md border border-destructive/40 text-destructive">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+              {(draft[id] ?? []).length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {pctMode
+                    ? t("Tarterik ez: ez du punturik ematen.", "Sin tramos: no suma puntos.")
+                    : t(`Tarterik ez: lineala (${a.puntos} pt unitateko).`, `Sin tramos: lineal (${a.puntos} pts por unidad).`)}
+                </p>
+              )}
+            </div>
+            <div className="mt-2 flex gap-2">
+              <button type="button" onClick={() => setDraft((d) => { const l = d[id] ?? []; const last = l[l.length - 1]; return { ...d, [id]: [...l, { desde: last ? (last.hasta ?? last.desde) + (pctMode ? 0.01 : 1) : pctMode ? 0 : 1, hasta: null, puntos: 0 }] }; })} className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs">
+                <Plus className="h-3.5 w-3.5" /> {t("Tartea", "Tramo")}
+              </button>
+              <button type="button" disabled={saving === id} onClick={() => guardar(id)} className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground disabled:opacity-50">
+                <Save className="h-3.5 w-3.5" /> {t("Gorde", "Guardar")}
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </details>
   );
 }
 
