@@ -245,9 +245,9 @@ function Home() {
                 </span>
                 <Trophy className="h-5 w-5 text-gold" style={{ color: "var(--gold)" }} />
               </div>
-              <div className="mt-3 flex items-center gap-4">
-                {powPool ? (
-                  <div className="w-28 shrink-0 sm:w-32">
+              <div className="mt-3 flex justify-center">
+                {powPool && (
+                  <div className="w-44 shrink-0 sm:w-52">
                     <EquipoCard
                       pool={powPool}
                       images={cardImages.data}
@@ -255,22 +255,7 @@ function Home() {
                       puntos={playerOfWeek.puntos}
                     />
                   </div>
-                ) : null}
-                <div className="flex-1">
-                  <div translate="no" className="font-display text-2xl">{playerOfWeek.nombre}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {playerOfWeek.team?.nombre}
-                    {playerOfWeek.team
-                      ? ` · ${CAT_LABEL[playerOfWeek.team.categoria as keyof typeof CAT_LABEL]}`
-                      : ""}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-display text-4xl text-primary">{playerOfWeek.puntos}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                    {t("puntuak jardunaldian", "pts en la jornada")}
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           )}
