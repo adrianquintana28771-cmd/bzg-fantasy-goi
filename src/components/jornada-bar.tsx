@@ -41,6 +41,12 @@ export function JornadaBar({
     }`;
   return (
     <div className="flex gap-2 overflow-x-auto pb-2">
+      {showMedia && (
+        <button type="button" className={cls(value === "media")} onClick={() => onChange("media")}>
+          {t("Batez bestekoa", "Media")}
+          {extra?.("media")}
+        </button>
+      )}
       <button type="button" className={cls(value === "total")} onClick={() => onChange("total")}>
         {t("Guztira", "Total")}
         {extra?.("total")}
