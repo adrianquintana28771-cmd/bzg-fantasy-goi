@@ -1,5 +1,5 @@
 # Pendiente
-- [ ] Bajar algo más las fotos y quitar fondo blanco únicamente a Aimar Temiño en sus tres rarezas; comprobar antes de extender a otros jugadores.
+- [x] Fotos algo más bajas; limpieza de fondo de Aimar Temiño aplicada a común/raro/legendario, sin cambiar otras fotos; comprobar resultado visual antes de extender a otros jugadores.
 - [x] Unificar fondo de Uxue detrás de todas las fotos y sin foto, centrar fotos con ajuste a todo el hueco; comprobadas Uxue y Peio en inventario real sin cambiar archivos originales.
 
 - [x] Inicio: los nombres de las 6 clasificaciones (goles, paradas, asistencias, robos, % paradas y media de puntos) son enlaces a la ficha de cada jugador/a, con su identificador real; cálculos, orden y diseño intactos.
