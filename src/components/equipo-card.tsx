@@ -86,7 +86,7 @@ export function CardPhoto({
   return (
     <div className={cn("relative overflow-hidden", className)}>
       <PlayerPhotoBackground />
-      {src && <img src={src} onError={onError} alt={name ?? ""} className="relative h-full w-full translate-y-[3%] object-cover object-[50%_35%]" />}
+      {src && <img src={src} onError={onError} alt={name ?? ""} className="relative h-full w-full translate-y-[6%] object-cover object-[50%_25%]" />}
     </div>
   );
 }
