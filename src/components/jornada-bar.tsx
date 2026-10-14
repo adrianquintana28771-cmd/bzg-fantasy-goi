@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/lib/i18n";
 
-export type JornadaSel = number | "total";
+export type JornadaSel = number | "total" | "media";
 
 /** Jornadas del calendario real (club_matches). */
 export function useCalendarJornadas() {
@@ -24,11 +24,13 @@ export function JornadaBar({
   value,
   onChange,
   extra,
+  showMedia,
 }: {
   jornadas: number[];
   value: JornadaSel;
   onChange: (v: JornadaSel) => void;
   extra?: (j: JornadaSel) => ReactNode;
+  showMedia?: boolean;
 }) {
   const t = useT();
   const cls = (active: boolean) =>
