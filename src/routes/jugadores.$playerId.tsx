@@ -303,7 +303,7 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
   const ptsFor = (j: number) => stats.find((s) => s.jornada === j)?.puntos ?? 0;
   const estadoFor = (j: number) => stats.find((s) => s.jornada === j)?.estado ?? "disponible";
 
-  const filtered = current === "total" ? actions : actions.filter((a) => a.jornada === current);
+  const filtered = current === "total" || current === "media" ? actions : actions.filter((a) => a.jornada === current);
   const grouped = new Map<
     string,
     {
@@ -332,9 +332,9 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
     grouped.set(a.action_id, g);
   }
   const rows = [...grouped.values()].filter((r) => r.cantidad > 0).sort((a, b) => a.orden - b.orden);
-  const totalPts = current === "total" ? round2(stats.reduce((a, s) => a + s.puntos, 0)) : round2(ptsFor(current));
+  const totalPts = current === "total" || current === "media" ? round2(stats.reduce((a, s) => a + s.puntos, 0)) : round2(ptsFor(current));
   const rowPts = (r: { pts: number }) => r.pts;
-  const noDisp = current !== "total" && estadoFor(current) === "no_disponible";
+  const noDisp = current !== "total" && current !== "media" && estadoFor(current) === "no_disponible";
 
   return (
     <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
@@ -351,7 +351,7 @@ function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] })
               value={current}
               onChange={setSel}
               extra={(j) =>
-                j !== "total" && stats.some((s) => s.jornada === j) ? (
+                j !== "total" && j !== "media" && stats.some((s) => s.jornada === j) ? (
                   <div
                     className="mx-auto mt-1 h-1 w-6 rounded-full"
                     style={{ background: ESTADO_COLOR[estadoFor(j)] }}
