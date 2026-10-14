@@ -84,16 +84,11 @@ export function CardPhoto({
   name?: string;
 }) {
   const { src, onError } = usePhotoSource(images, pool?.club_player_id, pool?.rareza ?? "normal");
-  if (src) {
-    return (
-      <div className={cn("relative overflow-hidden", className)}>
-        <PlayerPhotoBackground />
-        <img src={src} onError={onError} alt={name ?? ""} className="relative h-full w-full object-cover object-top" />
-      </div>
-    );
-  }
   return (
-    <img src={escudoAsset.url} alt="" aria-hidden="true" className={cn("h-full w-full object-contain", className)} />
+    <div className={cn("relative overflow-hidden", className)}>
+      <PlayerPhotoBackground />
+      {src && <img src={src} onError={onError} alt={name ?? ""} className="relative h-full w-full object-cover object-center" />}
+    </div>
   );
 }
 

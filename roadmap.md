@@ -1,4 +1,5 @@
 # Pendiente
+- [ ] Unificar fondo de Uxue detrás de todas las fotos, centrar fotos y comprobar fichas reales sin cambiar archivos originales.
 
 - [x] Inicio: los nombres de las 6 clasificaciones (goles, paradas, asistencias, robos, % paradas y media de puntos) son enlaces a la ficha de cada jugador/a, con su identificador real; cálculos, orden y diseño intactos.
 
