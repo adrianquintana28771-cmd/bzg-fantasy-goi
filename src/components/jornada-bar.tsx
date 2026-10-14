@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/lib/i18n";
 
-export type JornadaSel = number | "total";
+export type JornadaSel = number | "total" | "media";
 
 /** Jornadas del calendario real (club_matches). */
 export function useCalendarJornadas() {
@@ -24,11 +24,13 @@ export function JornadaBar({
   value,
   onChange,
   extra,
+  showMedia,
 }: {
   jornadas: number[];
   value: JornadaSel;
   onChange: (v: JornadaSel) => void;
   extra?: (j: JornadaSel) => ReactNode;
+  showMedia?: boolean;
 }) {
   const t = useT();
   const cls = (active: boolean) =>
@@ -39,6 +41,12 @@ export function JornadaBar({
     }`;
   return (
     <div className="flex gap-2 overflow-x-auto pb-2">
+      {showMedia && (
+        <button type="button" className={cls(value === "media")} onClick={() => onChange("media")}>
+          {t("Batez bestekoa", "Media")}
+          {extra?.("media")}
+        </button>
+      )}
       <button type="button" className={cls(value === "total")} onClick={() => onChange("total")}>
         {t("Guztira", "Total")}
         {extra?.("total")}

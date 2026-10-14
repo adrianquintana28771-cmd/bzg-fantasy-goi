@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchPlayerRanking } from "@/lib/club-data";
+import { fetchPlayerRanking, round2 } from "@/lib/club-data";
 import { RankedPlayerRow } from "@/components/ranked-player-row";
 import { BackButton } from "@/components/back-button";
 import { supabase } from "@/integrations/supabase/client";
@@ -68,7 +68,13 @@ function Rankings() {
         (!gender || r.team?.sexo === gender) &&
         (!teamId || r.team?.id === teamId),
     )
-    .map((r) => (jor === "total" ? r : { ...r, puntos: r.porJornada[jor] ?? 0, jornadas: r.porJornada[jor] ? 1 : 0 }))
+    .map((r) =>
+      jor === "total"
+        ? r
+        : jor === "media"
+          ? { ...r, puntos: r.jornadas > 0 ? round2(r.puntos / r.jornadas) : 0 }
+          : { ...r, puntos: r.porJornada[jor] ?? 0, jornadas: r.porJornada[jor] ? 1 : 0 },
+    )
     .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre));
 
   return (
@@ -102,7 +108,7 @@ function Rankings() {
       </div>
 
       <div className="mt-4">
-        <JornadaBar jornadas={jornadas} value={jor} onChange={setJor} />
+        <JornadaBar jornadas={jornadas} value={jor} onChange={setJor} showMedia />
       </div>
 
       {tab === "usuarios" ? (
@@ -221,11 +227,13 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
     .map((u) =>
       jor === "total"
         ? u
-        : {
-            ...u,
-            puntos: Math.round((u.porJornada[jor] ?? 0) * 100) / 100,
-            jornadas: jor in u.porJornada ? 1 : 0,
-          },
+        : jor === "media"
+          ? { ...u, puntos: u.jornadas > 0 ? Math.round((u.puntos / u.jornadas) * 100) / 100 : 0 }
+          : {
+              ...u,
+              puntos: Math.round((u.porJornada[jor] ?? 0) * 100) / 100,
+              jornadas: jor in u.porJornada ? 1 : 0,
+            },
     )
     .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre));
 
