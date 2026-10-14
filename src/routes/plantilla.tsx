@@ -786,7 +786,7 @@ function Inner({ userId }: { userId: string }) {
                 {(sobreResult ?? []).map((p, i) => (
                   <div key={`${p.id}-${i}`} className={`rounded-lg border-2 p-3 text-center ${RAREZA_STYLE[p.rareza]}`}>
                     <div className="relative mb-1">
-                      <CardPhoto className="mx-auto h-16 w-full" />
+                      <CardPhoto className="mx-auto h-16 w-full" images={cardImages.data} pool={cardById(p.id)?.pool} name={p.nombre} />
                       {cardById(p.id)?.pool.club_teams?.nombre && (
                         <div className="absolute inset-x-0 top-0 truncate rounded bg-black/60 px-1 text-[9px] font-semibold text-white">
                           {cardById(p.id)!.pool.club_teams!.nombre}
