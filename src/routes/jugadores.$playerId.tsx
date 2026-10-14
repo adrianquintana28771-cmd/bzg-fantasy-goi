@@ -234,7 +234,7 @@ function Jugador() {
                 src={photo}
                 onError={photoError}
                 alt={`${player.club?.nombre ?? player.nombre} ${player.club?.apellido1 ?? ""}`.trim()}
-                className="relative h-full w-full translate-y-[6%] object-cover object-[50%_25%]"
+                className="relative h-full w-full translate-y-[6%] object-cover object-top"
                 loading="eager"
               />
             </>
