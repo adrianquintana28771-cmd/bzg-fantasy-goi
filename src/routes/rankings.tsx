@@ -227,11 +227,13 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
     .map((u) =>
       jor === "total"
         ? u
-        : {
-            ...u,
-            puntos: Math.round((u.porJornada[jor] ?? 0) * 100) / 100,
-            jornadas: jor in u.porJornada ? 1 : 0,
-          },
+        : jor === "media"
+          ? { ...u, puntos: u.jornadas > 0 ? Math.round((u.puntos / u.jornadas) * 100) / 100 : 0 }
+          : {
+              ...u,
+              puntos: Math.round((u.porJornada[jor] ?? 0) * 100) / 100,
+              jornadas: jor in u.porJornada ? 1 : 0,
+            },
     )
     .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre));
 
