@@ -3,7 +3,6 @@ import { displayPts } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { usePhotoSource, type CardImages } from "@/lib/card-images";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
-import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
 import type { Database } from "@/integrations/supabase/types";
 
 export type Posicion = Database["public"]["Enums"]["plantilla_posicion"];
