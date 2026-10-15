@@ -4,8 +4,8 @@ import { ShieldAlert } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
 
-export function AdminGuard({ children }: { children: ReactNode }) {
-  const { loading, user, isStaff } = useAuth();
+export function AdminGuard({ children, allowMisiones = false }: { children: ReactNode; allowMisiones?: boolean }) {
+  const { loading, user, isStaff, isAdminMisiones } = useAuth();
   const navigate = useNavigate();
   const t = useT();
 
@@ -19,7 +19,7 @@ export function AdminGuard({ children }: { children: ReactNode }) {
     );
   }
   if (!user) return null;
-  if (!isStaff) {
+  if (!isStaff && !(allowMisiones && isAdminMisiones)) {
     return (
       <div className="mx-auto max-w-md p-10 text-center">
         <ShieldAlert className="mx-auto h-12 w-12 text-warning" />

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 
-export type AppRole = "user" | "admin" | "manager" | "super_admin";
+export type AppRole = "user" | "admin" | "manager" | "super_admin" | "admin_misiones";
 
 interface AuthState {
   loading: boolean;
@@ -22,6 +22,10 @@ interface AuthState {
   canManagePlayers: boolean;
   /** Can do everything (super_admin) */
   canManageAll: boolean;
+  /** Rol limitado: solo códigos de misión y disponibilidad */
+  isAdminMisiones: boolean;
+  /** Puede entrar al panel de administración */
+  canAccessAdmin: boolean;
   displayName: string | null;
   refreshRole: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -105,6 +109,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       canEditMatches: isSuperAdmin || isManager,
       canManagePlayers: isSuperAdmin || isManager,
       canManageAll: isSuperAdmin,
+      isAdminMisiones: roles.includes("admin_misiones"),
+      canAccessAdmin: isStaff || roles.includes("admin_misiones"),
       displayName,
       refreshRole: async () => loadRole(session?.user.id),
       signOut: async () => {

@@ -1132,6 +1132,13 @@ export type Database = {
         Args: { _activo: boolean; _player_id: string }
         Returns: undefined
       }
+      set_player_estado: {
+        Args: {
+          _club_player_id: string
+          _estado: Database["public"]["Enums"]["player_estado"]
+        }
+        Returns: undefined
+      }
       tramo_pct_pts: { Args: { _pct: number; _tramos: Json }; Returns: number }
       tramo_pts: { Args: { _n: number; _tramos: Json }; Returns: number }
       user_ranking: {
@@ -1157,7 +1164,7 @@ export type Database = {
       username_exists: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "user" | "manager" | "super_admin"
+      app_role: "admin" | "user" | "manager" | "super_admin" | "admin_misiones"
       card_rareza: "normal" | "raro" | "legendario"
       club_categoria: "cadete" | "juvenil" | "senior"
       club_sexo: "masculino" | "femenino"
@@ -1298,7 +1305,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "manager", "super_admin"],
+      app_role: ["admin", "user", "manager", "super_admin", "admin_misiones"],
       card_rareza: ["normal", "raro", "legendario"],
       club_categoria: ["cadete", "juvenil", "senior"],
       club_sexo: ["masculino", "femenino"],
