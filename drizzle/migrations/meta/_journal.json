@@ -99,6 +99,13 @@
       "when": 1792084490925,
       "tag": "0013_add_admin_misiones_role",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792084507193,
+      "tag": "0014_admin_misiones_permissions",
+      "breakpoints": true
     }
   ]
 }

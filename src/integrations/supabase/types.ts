@@ -1132,6 +1132,13 @@ export type Database = {
         Args: { _activo: boolean; _player_id: string }
         Returns: undefined
       }
+      set_player_estado: {
+        Args: {
+          _club_player_id: string
+          _estado: Database["public"]["Enums"]["player_estado"]
+        }
+        Returns: undefined
+      }
       tramo_pct_pts: { Args: { _pct: number; _tramos: Json }; Returns: number }
       tramo_pts: { Args: { _n: number; _tramos: Json }; Returns: number }
       user_ranking: {
