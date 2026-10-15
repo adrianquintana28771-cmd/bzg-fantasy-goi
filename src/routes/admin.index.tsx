@@ -28,11 +28,37 @@ export const Route = createFileRoute("/admin/")({
     ],
   }),
   component: () => (
-    <AdminGuard>
-      <Admin />
+    <AdminGuard allowMisiones>
+      <AdminOrMisiones />
     </AdminGuard>
   ),
 });
+
+function AdminOrMisiones() {
+  const { isStaff } = useAuth();
+  return isStaff ? <Admin /> : <MisionesOnly />;
+}
+
+function MisionesOnly() {
+  const t = useT();
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      <BackButton />
+      <h1 className="mt-6 font-display text-4xl">{t("Administrazio panela", "Panel de administración")}</h1>
+      <div className="mt-8 grid gap-4 md:grid-cols-2">
+        <Section
+          icon={ClipboardList}
+          title={t("Misio-kodeak", "Códigos de misión")}
+          description={t(
+            "Sortu misio-kodeak (4 orduz aktibo) eta ikusi aktiboak.",
+            "Crea códigos de misión (activos 4 horas) y consulta los activos.",
+          )}
+          to="/admin/codigos"
+        />
+      </div>
+    </div>
+  );
+}
 
 function Admin() {
   const t = useT();

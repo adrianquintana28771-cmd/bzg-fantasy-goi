@@ -16,7 +16,7 @@ export const Route = createFileRoute("/admin/codigos")({
     ],
   }),
   component: () => (
-    <AdminGuard>
+    <AdminGuard allowMisiones>
       <Page />
     </AdminGuard>
   ),
@@ -24,7 +24,8 @@ export const Route = createFileRoute("/admin/codigos")({
 
 function Page() {
   const t = useT();
-  const { canManageAll } = useAuth();
+  const { canManageAll: isSA, isAdminMisiones } = useAuth();
+  const canManageAll = isSA || isAdminMisiones;
   const [codigo, setCodigo] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);

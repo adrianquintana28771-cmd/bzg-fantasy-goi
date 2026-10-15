@@ -507,10 +507,10 @@ function EstadoEditor({
   estado: PlayerEstado;
   onDone: () => void;
 }) {
-  const { canManageAll } = useAuth();
+  const { canManageAll, isAdminMisiones } = useAuth();
   const t = useT();
   const [saving, setSaving] = useState(false);
-  if (!canManageAll || !clubPlayerId) return null;
+  if (!(canManageAll || isAdminMisiones) || !clubPlayerId) return null;
   const opts: Array<[PlayerEstado, string]> = [
     ["disponible", t("Eskuragarri", "Disponible")],
     ["dudoso", t("Zalantzazkoa", "Dudoso")],
@@ -518,8 +518,7 @@ function EstadoEditor({
   ];
   const save = async (v: PlayerEstado) => {
     setSaving(true);
-    await supabase.from("club_players").update({ estado: v }).eq("id", clubPlayerId);
-    await supabase.from("player_pool").update({ estado: v }).eq("club_player_id", clubPlayerId);
+    await supabase.rpc("set_player_estado", { _club_player_id: clubPlayerId, _estado: v });
     setSaving(false);
     onDone();
   };

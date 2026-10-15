@@ -74,7 +74,7 @@ const BASE_NAV: NavItem[] = [
 ];
 
 export function SiteHeader() {
-  const { user, displayName, signOut, isStaff, isSuperAdmin, isManager, isAdmin } = useAuth();
+  const { user, displayName, signOut, isStaff, isSuperAdmin, isManager, isAdmin, isAdminMisiones } = useAuth();
   const t = useT();
   const roleLabel = isSuperAdmin
     ? "Super admin"
@@ -82,7 +82,9 @@ export function SiteHeader() {
       ? "Manager"
       : isAdmin
         ? "Admin"
-        : t("Erabiltzailea", "Usuario");
+        : isAdminMisiones
+          ? "Admin misiones"
+          : t("Erabiltzailea", "Usuario");
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -179,11 +181,11 @@ export function SiteHeader() {
 }
 
 export function BottomNav() {
-  const { isStaff, user } = useAuth();
+  const { isStaff, canAccessAdmin, user } = useAuth();
   const t = useT();
   const canPlay = !isStaff;
   const nav = BASE_NAV.filter(
-    (n) => (!n.adminOnly || isStaff) && (!n.authOnly || !!user) && (!n.gameOnly || canPlay),
+    (n) => (!n.adminOnly || canAccessAdmin) && (!n.authOnly || !!user) && (!n.gameOnly || canPlay),
   );
   const cols = nav.length;
 
