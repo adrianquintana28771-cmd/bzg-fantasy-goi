@@ -1157,7 +1157,7 @@ export type Database = {
       username_exists: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "user" | "manager" | "super_admin"
+      app_role: "admin" | "user" | "manager" | "super_admin" | "admin_misiones"
       card_rareza: "normal" | "raro" | "legendario"
       club_categoria: "cadete" | "juvenil" | "senior"
       club_sexo: "masculino" | "femenino"
@@ -1298,7 +1298,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "manager", "super_admin"],
+      app_role: ["admin", "user", "manager", "super_admin", "admin_misiones"],
       card_rareza: ["normal", "raro", "legendario"],
       club_categoria: ["cadete", "juvenil", "senior"],
       club_sexo: ["masculino", "femenino"],
