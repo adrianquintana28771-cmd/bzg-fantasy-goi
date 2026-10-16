@@ -1,4 +1,5 @@
 # Pendiente
+- [ ] Códigos por partido: programar activación a una hora concreta desde Super Admin y comprobar caducidad y canje seguro.
 - [x] Fotos algo más bajas; limpieza de fondo de Aimar Temiño aplicada a común/raro/legendario, sin cambiar otras fotos; comprobar resultado visual antes de extender a otros jugadores.
 - [x] Unificar fondo de Uxue detrás de todas las fotos y sin foto, centrar fotos con ajuste a todo el hueco; comprobadas Uxue y Peio en inventario real sin cambiar archivos originales.
 
