@@ -190,8 +190,8 @@ function Admin() {
             icon={ClipboardList}
             title={t("Misio-kodeak", "Códigos de misión")}
             description={t(
-              "Sortu misio-kodeak (4 orduz aktibo) eta ikusi aktiboak.",
-              "Crea códigos de misión (activos 4 horas) y consulta los activos.",
+              "Sortu edo programatu partidetako kodeak. Aktibaziotik 4 orduz balio dute.",
+              "Crea o programa códigos para cada partido, válidos 4 horas desde su activación.",
             )}
             to="/admin/codigos"
           />

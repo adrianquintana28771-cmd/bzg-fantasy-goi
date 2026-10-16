@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION private.mission_code_available(timestamptz,timestamptz,timestamptz) TO authenticated, service_role;

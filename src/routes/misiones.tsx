@@ -20,6 +20,10 @@ export const Route = createFileRoute("/misiones")({
           "Completa misiones para ganar sobres y escanea el QR del pabellón para conseguir un sobre premium.",
       },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Misiones · BZG Fantasy" },
+      { property: "og:description", content: "Misiones del club y canje de códigos para conseguir sobres en BZG Fantasy." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   validateSearch: (s: Record<string, unknown>) => ({
@@ -267,6 +271,8 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
           ? t("Kode hau trukatu duzu jada", "Ya has canjeado este código")
           : e.message.includes("caducado")
             ? t("Kode hau iraungita dago", "Este código ha caducado")
+            : e.message.includes("aún no activo")
+              ? t("Kode hau ez dago aktibo oraindik", "Este código todavía no está activo")
             : t("Kodea ez da baliozkoa", "Código no válido"),
       ),
   });

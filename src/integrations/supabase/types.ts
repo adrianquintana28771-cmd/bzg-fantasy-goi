@@ -647,6 +647,7 @@ export type Database = {
       }
       misiones: {
         Row: {
+          activa_desde: string | null
           caduca_at: string | null
           codigo_qr: string | null
           creada_admin: boolean
@@ -656,6 +657,7 @@ export type Database = {
           espera_segundos: number
           id: string
           is_active: boolean
+          match_id: string | null
           nombre: string
           recompensa_sobres: number
           requiere_qr: boolean | null
@@ -663,6 +665,7 @@ export type Database = {
           tipo_sobre: string
         }
         Insert: {
+          activa_desde?: string | null
           caduca_at?: string | null
           codigo_qr?: string | null
           creada_admin?: boolean
@@ -672,6 +675,7 @@ export type Database = {
           espera_segundos?: number
           id?: string
           is_active?: boolean
+          match_id?: string | null
           nombre: string
           recompensa_sobres?: number
           requiere_qr?: boolean | null
@@ -679,6 +683,7 @@ export type Database = {
           tipo_sobre?: string
         }
         Update: {
+          activa_desde?: string | null
           caduca_at?: string | null
           codigo_qr?: string | null
           creada_admin?: boolean
@@ -688,13 +693,22 @@ export type Database = {
           espera_segundos?: number
           id?: string
           is_active?: boolean
+          match_id?: string | null
           nombre?: string
           recompensa_sobres?: number
           requiere_qr?: boolean | null
           semanal?: boolean
           tipo_sobre?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "misiones_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "club_matches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       player_card_images: {
         Row: {
@@ -1055,6 +1069,16 @@ export type Database = {
           id: string
         }[]
       }
+      admin_list_scheduled_mission_codes: {
+        Args: never
+        Returns: {
+          activa_desde: string
+          caduca_at: string
+          codigo_qr: string
+          id: string
+          match_id: string
+        }[]
+      }
       admin_save_mision: {
         Args: {
           _activa: boolean
@@ -1089,6 +1113,10 @@ export type Database = {
       admin_save_sobre_config: {
         Args: { _legendario: number; _normal: number; _raro: number }
         Returns: undefined
+      }
+      admin_schedule_mission_code: {
+        Args: { _codigo: string; _inicio_local: string; _match_id: string }
+        Returns: string
       }
       check_cron_token: {
         Args: { _nombre: string; _token: string }
