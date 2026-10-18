@@ -134,6 +134,13 @@
       "when": 1792312450116,
       "tag": "0018_goalkeeper_new_formula",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792312510073,
+      "tag": "0019_goalkeeper_new_formula_fix_merge",
+      "breakpoints": true
     }
   ]
 }
