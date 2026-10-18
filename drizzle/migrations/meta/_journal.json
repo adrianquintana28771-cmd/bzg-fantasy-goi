@@ -127,6 +127,13 @@
       "when": 1792190730370,
       "tag": "0017_allow_pure_code_window_checks",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792312450116,
+      "tag": "0018_goalkeeper_new_formula",
+      "breakpoints": true
     }
   ]
 }
