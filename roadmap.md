@@ -1,5 +1,6 @@
 # Pendiente
-- [ ] Actualizar puntos de jornadas cerradas al guardar Desempeño y alinear su cálculo visible con la auditoría, sin cambiar fórmulas ni alineaciones congeladas.
+- [x] Recalcular puntos de jornadas cerradas con fórmula vigente; Desempeño reutiliza cálculo de auditoría y refresca lecturas al guardar. 14 pruebas correctas y 93 puntuaciones históricas de entrenadores sin diferencias.
+- [ ] Verificar guardado de Desempeño y lectura posterior en auditoría con sesión Super Admin: no hay sesión autorizada disponible.
 - [x] Auditoría de porteros alineada con última fórmula: 12 pruebas correctas y 105 puntuaciones de cartas J1–J4 sin diferencias, sin modificar puntos ni estadísticas.
 - [x] Corregir regresión de resultados automáticos de entrenadores: 15 puntuaciones corregidas, 4 pruebas SQL y 6 pruebas de auditoría correctas; 897 filas de jugadores/porteros idénticas, ficha real comprobada.
 - [x] Códigos por partido: programación desde Super Admin, activación en hora de Madrid y caducidad 4 horas después; siete pruebas de horarios correctas y acceso sin sesión bloqueado.
