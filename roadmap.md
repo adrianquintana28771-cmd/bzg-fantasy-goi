@@ -1,4 +1,5 @@
 # Pendiente
+- [ ] Corregir actualización del total tras guardar criterios de puntuación, sin cambiar la fórmula vigente.
 - [x] Recalcular puntos de jornadas cerradas con fórmula vigente; Desempeño reutiliza cálculo de auditoría y refresca lecturas al guardar. 14 pruebas correctas y 93 puntuaciones históricas de entrenadores sin diferencias.
 - [ ] Verificar guardado de Desempeño y lectura posterior en auditoría con sesión Super Admin: no hay sesión autorizada disponible.
 - [x] Auditoría de porteros alineada con última fórmula: 12 pruebas correctas y 105 puntuaciones de cartas J1–J4 sin diferencias, sin modificar puntos ni estadísticas.
