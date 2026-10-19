@@ -1155,6 +1155,17 @@ export type Database = {
           p_rating: number
         }[]
       }
+      ranking_user_lineup: {
+        Args: { _jornada?: number; _user_id: string }
+        Returns: {
+          jornada: number
+          nombre: string
+          player_id: string
+          posicion: Database["public"]["Enums"]["plantilla_posicion"]
+          puntos: number
+          rareza: Database["public"]["Enums"]["card_rareza"]
+        }[]
+      }
       recalc_player_stats: { Args: never; Returns: undefined }
       set_player_activo: {
         Args: { _activo: boolean; _player_id: string }
