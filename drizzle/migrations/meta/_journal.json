@@ -141,6 +141,13 @@
       "when": 1792312510073,
       "tag": "0019_goalkeeper_new_formula_fix_merge",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792412928779,
+      "tag": "0020_restore_coach_recorded_actions_only",
+      "breakpoints": true
     }
   ]
 }

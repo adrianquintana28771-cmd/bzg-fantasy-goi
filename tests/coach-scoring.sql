@@ -9,10 +9,11 @@ WITH recorded AS (
   JOIN public.club_action_types t ON t.id = a.action_id AND t.activo
   GROUP BY pp.id, m.jornada
 )
-SELECT 'Eneko coach J3 has no automatic 5 points' AS test,
-       count(*) = 3 AND bool_and(s.puntos = 0) AS passed
+SELECT 'Eneko J3 equals currently recorded performance' AS test,
+       count(*) = 3 AND bool_and(s.puntos = coalesce(r.puntos, 0)) AS passed
 FROM public.player_jornada_stats s
 JOIN public.player_pool pp ON pp.id = s.player_id
+LEFT JOIN recorded r ON r.player_id = s.player_id AND r.jornada = s.jornada_numero
 WHERE pp.club_player_id = '94e2ef8b-fc33-48b9-b679-84364caa2b1d' AND s.jornada_numero = 3
 UNION ALL
 SELECT 'Eneko recorded J1 defeat remains -2', count(*) = 3 AND bool_and(s.puntos = -2)
