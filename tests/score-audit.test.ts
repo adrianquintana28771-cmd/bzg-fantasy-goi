@@ -9,6 +9,15 @@ const types: AuditType[] = [
 ];
 const action = (match_id: string, action_id: string, cantidad: number, player_id = 'p') => ({ match_id, action_id, cantidad, player_id });
 describe('read-only score audit', () => {
+  test('performance corrections replace previous points for a closed jornada match', () => {
+    expect(auditPlayer('p', [action('closed-j1', 'parada', 16), action('closed-j1', 'gol_encajado', 19)], types).expected).toBe(53.77);
+    expect(auditPlayer('p', [action('closed-j1', 'parada', 0), action('closed-j1', 'gol_encajado', 0)], types).expected).toBe(0);
+  });
+  test('audit uses edited recorded-action points without automatic coach results', () => {
+    const changed = types.map(t => t.id === 'coach_victoria' ? { ...t, puntos: 7 } : t);
+    expect(auditPlayer('p', [action('closed-j1', 'coach_victoria', 1)], changed).expected).toBe(7);
+    expect(auditPlayer('p', [], changed).expected).toBe(0);
+  });
   test('coach without recorded performance has 0, not automatic 5', () => expect(auditPlayer('p', [], types).expected).toBe(0));
   test('recorded coach victory keeps 5', () => expect(auditPlayer('p', [action('m','coach_victoria',1)], types).expected).toBe(5));
   test('single goalkeeper tiers are applied per match', () => expect(auditPlayer('p',[action('m1','gol_encajado',10),action('m2','gol_encajado',10)],types).expected).toBe(-2));

@@ -9,7 +9,8 @@ import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/i18n";
 import { ESTADO_LABEL, ESTADO_LABEL_EU, type PlayerEstado } from "@/lib/fantasy/types";
 import { supabase } from "@/integrations/supabase/client";
-import { pctParadas, tramoPctPts, tramoPts, type Tramo } from "@/lib/club-data";
+import { pctParadas, type Tramo } from "@/lib/club-data";
+import { auditPlayer } from "@/lib/score-audit";
 
 export const Route = createFileRoute("/admin/desempeno")({
   head: () => ({
@@ -20,6 +21,10 @@ export const Route = createFileRoute("/admin/desempeno")({
         content: "Formulario para registrar el desempeño de cada jugador/a en cada partido.",
       },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Desempeño de jugadores/as · BZG Fantasy" },
+      { property: "og:description", content: "Registro de acciones y puntuaciones Fantasy por partido y jornada." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: () => (
@@ -50,6 +55,7 @@ interface ActionRow {
   es_resultado: string | null;
   orden: number;
   tramos: Tramo[] | null;
+  activo: boolean;
 }
 interface PlayerRow {
   dorsal: number | null;
@@ -94,8 +100,7 @@ function Desempeno() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("club_action_types")
-        .select("id,nombre,puntos,grupo,solo_portero,solo_entrenador,es_resultado,orden,tramos")
-        .eq("activo", true)
+        .select("id,nombre,puntos,grupo,solo_portero,solo_entrenador,es_resultado,orden,tramos,activo")
         .order("orden");
       if (error) throw error;
       return (data ?? []) as unknown as ActionRow[];
@@ -228,7 +233,7 @@ function Desempeno() {
   const visibleActions = useMemo(
     () =>
       (actions.data ?? []).filter((a) =>
-        a.id === PCT_ID
+        !a.activo || a.id === PCT_ID
           ? false
           : esEntrenador
           ? a.solo_entrenador
@@ -246,44 +251,40 @@ function Desempeno() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("club_match_actions")
-        .select("player_id, club_players(nombre,apellido1,apellido2)")
+        .select("match_id,player_id,action_id,cantidad,club_action_types!inner(solo_portero),club_players(nombre,apellido1,apellido2)")
         .eq("match_id", matchId)
         .neq("player_id", playerId)
-        .in("action_id", ["parada", "gol_encajado", "lanzamiento_fuera", "asistencia_portero", "gk_victoria", "gk_empate", "gk_derrota"])
+        .eq("club_action_types.solo_portero", true)
         .gt("cantidad", 0);
       if (error) throw error;
       const names = new Map<string, string>();
       for (const r of (data ?? []) as unknown as { player_id: string; club_players: { nombre: string; apellido1: string | null; apellido2: string | null } | null }[])
         names.set(r.player_id, r.club_players ? [r.club_players.nombre, r.club_players.apellido1].filter(Boolean).join(" ") : "?");
-      return [...names.values()];
+      return { names: [...names.values()], actions: data ?? [] };
     },
   });
-  const otrosNombres = otrosPorteros.data ?? [];
+  const otrosNombres = otrosPorteros.data?.names ?? [];
   const variosPorteros = otrosNombres.length > 0;
   // Cuenta este portero si tiene alguna acción de portería anotada
-  const yoActivo = ["parada", "gol_encajado", "lanzamiento_fuera", "asistencia_portero", "gk_victoria", "gk_empate", "gk_derrota"].some((id) => (counts[id] ?? 0) > 0);
+  const yoActivo = (actions.data ?? []).some((a) => a.solo_portero && (counts[a.id] ?? 0) > 0);
   const nPorteros = otrosNombres.length + (yoActivo ? 1 : 0);
-  const golAction = (actions.data ?? []).find((a) => a.id === "gol_encajado");
   const golesN = counts.gol_encajado ?? 0;
-  const golDesglose = (golAction?.tramos ?? []).map((tr) => {
+  const golDesglose = ([{ desde: 1, hasta: 10, puntos: -0.1 }, { desde: 11, hasta: 20, puntos: -0.2 }, { desde: 21, hasta: 30, puntos: -0.3 }, { desde: 31, hasta: null, puntos: -0.4 }] as Tramo[]).map((tr) => {
     const n = Math.max(0, Math.min(golesN, tr.hasta ?? golesN) - (tr.desde - 1));
     return { ...tr, n, pts: Math.round(n * tr.puntos * 100) / 100 };
   });
 
-  const accionPts = (a: ActionRow) => {
-    const n = counts[a.id] ?? 0;
-    if (a.id === "parada" && a.tramos?.length) return tramoPts(n, a.tramos);
-    if (a.id === "gol_encajado" && a.tramos?.length && !variosPorteros) return tramoPts(n, a.tramos);
-    return n * Number(a.puntos);
-  };
-  const pctAction = (actions.data ?? []).find((a) => a.id === PCT_ID);
+  const calculated = auditPlayer(playerId, [
+    ...(otrosPorteros.data?.actions ?? []),
+    ...Object.entries(counts).map(([action_id, cantidad]) => ({ match_id: matchId, player_id: playerId, action_id, cantidad })),
+  ], actions.data ?? []);
   // Sin paradas, lanzamientos fuera ni goles en contra, el % cuenta como 0 y se calcula igual.
   const pct = esPortero
     ? (pctParadas(counts.parada ?? 0, counts.lanzamiento_fuera ?? 0, counts.gol_encajado ?? 0) ?? 0)
     : null;
-  const pctPts = pct != null && pctAction?.tramos?.length ? tramoPctPts(pct, pctAction.tramos) : 0;
+  const pctPts = calculated.lines.find(l => l.rule === "percentage")?.points ?? 0;
 
-  const total = Math.round((visibleActions.reduce((acc, a) => acc + accionPts(a), 0) + pctPts) * 100) / 100;
+  const total = calculated.expected;
 
   function bump(id: string, delta: number) {
     const act = visibleActions.find((a) => a.id === id);
@@ -315,14 +316,14 @@ function Desempeno() {
         .from("club_match_actions")
         .upsert(rows as never, { onConflict: "match_id,player_id,action_id" });
       if (error) throw error;
-      await supabase
+      const { error: participationError } = await supabase
         .from("club_match_players")
         .upsert({ match_id: matchId, player_id: playerId, jugado: true } as never, {
           onConflict: "match_id,player_id",
         });
+      if (participationError) throw participationError;
+      await qc.invalidateQueries();
       toast.success(`${t("Errendimendua gordeta", "Desempeño guardado")} · ${total} ${t("puntu", "puntos")}`);
-      qc.invalidateQueries({ queryKey: ["club_match_actions"] });
-      qc.invalidateQueries({ queryKey: ["club_match_players", matchId] });
     } catch (e) {
       console.error(e);
       toast.error(t("Ezin izan da errendimendua gorde", "No se ha podido guardar el desempeño"));
@@ -530,8 +531,8 @@ function Desempeno() {
               <div className="mt-3 font-semibold">{t("Jasotako golak", "Goles en contra")}: {golesN}</div>
               {variosPorteros ? (
                 <div className="text-xs text-muted-foreground">
-                  {t("2+ atezain → −1 gol bakoitzeko (tarterik gabe)", "2+ porteros/as → −1 por gol (sin tramos)")}:{" "}
-                  {golesN} × −1 = <span className="font-semibold text-destructive">{-golesN}</span>
+                  {t("2+ atezain → −0,3 gol bakoitzeko (tarterik gabe)", "2+ porteros/as → −0,3 por gol (sin tramos)")}:{" "}
+                  {golesN} × −0,3 = <span className="font-semibold text-destructive">{Math.round(-0.3 * golesN * 100) / 100}</span>
                 </div>
               ) : golDesglose.length ? (
                 <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground">
@@ -541,7 +542,7 @@ function Desempeno() {
                     </li>
                   ))}
                   <li className="font-semibold text-foreground">
-                    {t("Guztira", "Total")}: {String(golAction ? tramoPts(golesN, golAction.tramos ?? []) : 0).replace(".", ",")}
+                    {t("Guztira", "Total")}: {String(Math.round(golDesglose.reduce((sum, d) => sum + d.pts, 0) * 100) / 100).replace(".", ",")}
                   </li>
                 </ul>
               ) : null}
@@ -570,7 +571,7 @@ function Desempeno() {
                         <div
                           className={`text-xs ${Number(a.puntos) >= 0 ? "text-primary" : "text-destructive"}`}
                         >
-                          {Number(a.puntos) > 0 ? `+${a.puntos}` : a.puntos} pts
+                          {a.id === "parada" ? "+2,5" : a.id === "lanzamiento_fuera" ? "+0,5" : a.id === "gol_encajado" ? (variosPorteros ? "−0,3" : "−0,1 / −0,2 / −0,3 / −0,4") : Number(a.puntos) > 0 ? `+${a.puntos}` : a.puntos} pts
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
