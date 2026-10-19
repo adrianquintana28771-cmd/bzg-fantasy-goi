@@ -5,8 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Si el valor es negativo o nulo, devuelve 0; si es positivo, mantiene hasta 2 decimales con coma
-export const displayPts = (pts: number | null | undefined): string => {
-  const visual = Math.max(0, Number(pts) || 0);
+export function canSeeNegativePoints(roles: readonly string[]): boolean {
+  return roles.includes("admin") || roles.includes("super_admin");
+}
+
+// Only the visual representation changes; calculations always retain the original value.
+export const displayPts = (pts: number | null | undefined, showNegative = false): string => {
+  const value = Number(pts) || 0;
+  const visual = showNegative ? value : Math.max(0, value);
   return String(Math.round(visual * 100) / 100).replace(".", ",");
 };
