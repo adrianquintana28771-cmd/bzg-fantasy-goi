@@ -1,5 +1,5 @@
 # Pendiente
-- [ ] Corregir regresión de resultados automáticos de entrenadores y verificar que jugadores/porteros permanecen intactos.
+- [x] Corregir regresión de resultados automáticos de entrenadores: 15 puntuaciones corregidas, 4 pruebas SQL y 6 pruebas de auditoría correctas; 897 filas de jugadores/porteros idénticas, ficha real comprobada.
 - [x] Códigos por partido: programación desde Super Admin, activación en hora de Madrid y caducidad 4 horas después; siete pruebas de horarios correctas y acceso sin sesión bloqueado.
 - [ ] Comprobar programación y canje completos con sesión Super Admin y usuario: no hay sesión disponible; pendiente de iniciar sesión en vista previa.
 - [x] Fotos algo más bajas; limpieza de fondo de Aimar Temiño aplicada a común/raro/legendario, sin cambiar otras fotos; comprobar resultado visual antes de extender a otros jugadores.
