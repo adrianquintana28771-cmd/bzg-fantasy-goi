@@ -148,6 +148,13 @@
       "when": 1792412928779,
       "tag": "0020_restore_coach_recorded_actions_only",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792414990548,
+      "tag": "0021_goalkeeper_editable_criteria_totals",
+      "breakpoints": true
     }
   ]
 }
