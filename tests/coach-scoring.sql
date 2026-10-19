@@ -25,4 +25,15 @@ SELECT 'Every coach jornada equals recorded actions only',
 FROM public.player_jornada_stats s
 JOIN public.player_pool pp ON pp.id = s.player_id
 JOIN public.club_players cp ON cp.id = pp.club_player_id AND cp.es_entrenador
-LEFT JOIN recorded r ON r.player_id = s.player_id AND r.jornada = s.jornada_numero;
+LEFT JOIN recorded r ON r.player_id = s.player_id AND r.jornada = s.jornada_numero
+UNION ALL
+SELECT 'Coaches without recorded actions score exactly 0',
+       count(*) > 0 AND bool_and(s.puntos = 0)
+FROM public.player_jornada_stats s
+JOIN public.player_pool pp ON pp.id = s.player_id
+JOIN public.club_players cp ON cp.id = pp.club_player_id AND cp.es_entrenador
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.club_match_actions a
+  JOIN public.club_matches m ON m.id = a.match_id
+  WHERE a.player_id = cp.id AND m.jornada = s.jornada_numero
+);
