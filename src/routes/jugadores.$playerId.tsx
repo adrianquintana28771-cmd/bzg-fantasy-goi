@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { displayPts } from "@/lib/utils";
+import { useDisplayPoints } from "@/hooks/use-display-points";
 import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { CategoryBadge } from "@/components/fantasy-ui";
@@ -66,6 +66,7 @@ type ActionRow = {
 type JStat = { jornada: number; puntos: number; estado: PlayerEstado };
 
 function Jugador() {
+  const displayPts = useDisplayPoints();
   const t = useT();
   const { lang } = useLang();
   const cardImages = useCardImages();
@@ -250,6 +251,7 @@ function Jugador() {
 }
 
 function Desempeno({ stats, actions }: { stats: JStat[]; actions: ActionRow[] }) {
+  const displayPts = useDisplayPoints();
   const t = useT();
   const td = useTd();
   const { data: calendar = [] } = useCalendarJornadas();

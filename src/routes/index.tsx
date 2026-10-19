@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchPlayerRanking, fetchStatLeaders, fetchSavePctLeaders, fetchAvgPtsLeaders, round2, type RankedPlayer } from "@/lib/club-data";
-import { displayPts } from "@/lib/utils";
+import { useDisplayPoints } from "@/hooks/use-display-points";
 import { RankedPlayerRow } from "@/components/ranked-player-row";
 import { CategoryBadge } from "@/components/fantasy-ui";
 import { EquipoCard, type PoolRow, type Posicion } from "@/components/equipo-card";
@@ -93,6 +93,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const displayPts = useDisplayPoints();
   const t = useT();
   const { lang } = useLang();
   const CAT_LABEL = lang === "eu" ? CATEGORY_LABEL_EU : CATEGORY_LABEL;

@@ -1,4 +1,6 @@
 # Pendiente
+- [x] Mostrar puntos negativos a Admin y Super Admin sin cambiar cálculos; 17 pruebas correctas. Clasificaciones abre alineación real de la jornada (Total/Media muestra historial), comprobado en escritorio y móvil sin errores.
+- [ ] Comprobar visualmente puntos negativos con sesión Admin/Super Admin: no hay sesión autorizada disponible; las reglas de ambos roles están verificadas por pruebas.
 - [x] Criterios editables de porteros sustituyen fórmula fija por confirmación del usuario; recálculo histórico, ficha y auditoría alineados, 105 puntuaciones sin diferencias, 14 pruebas correctas y puntos no porteros intactos. Ficha real muestra total 31; guardado mediante pantalla Super Admin sigue pendiente de sesión autorizada.
 - [x] Recalcular puntos de jornadas cerradas con fórmula vigente; Desempeño reutiliza cálculo de auditoría y refresca lecturas al guardar. 14 pruebas correctas y 93 puntuaciones históricas de entrenadores sin diferencias.
 - [ ] Verificar guardado de Desempeño y lectura posterior en auditoría con sesión Super Admin: no hay sesión autorizada disponible.
