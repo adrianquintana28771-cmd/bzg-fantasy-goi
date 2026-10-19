@@ -10,7 +10,7 @@ const types: AuditType[] = [
 const action = (match_id: string, action_id: string, cantidad: number, player_id = 'p') => ({ match_id, action_id, cantidad, player_id });
 describe('read-only score audit', () => {
   test('performance corrections replace previous points for a closed jornada match', () => {
-    expect(auditPlayer('p', [action('closed-j1', 'parada', 16), action('closed-j1', 'gol_encajado', 19)], types).expected).toBe(53.77);
+    expect(auditPlayer('p', [action('closed-j1', 'parada', 16), action('closed-j1', 'gol_encajado', 19)], types).expected).toBe(37.7);
     expect(auditPlayer('p', [action('closed-j1', 'parada', 0), action('closed-j1', 'gol_encajado', 0)], types).expected).toBe(0);
   });
   test('audit uses edited recorded-action points without automatic coach results', () => {
@@ -21,17 +21,21 @@ describe('read-only score audit', () => {
   test('coach without recorded performance has 0, not automatic 5', () => expect(auditPlayer('p', [], types).expected).toBe(0));
   test('recorded coach victory keeps 5', () => expect(auditPlayer('p', [action('m','coach_victoria',1)], types).expected).toBe(5));
   test('single goalkeeper tiers are applied per match', () => expect(auditPlayer('p',[action('m1','gol_encajado',10),action('m2','gol_encajado',10)],types).expected).toBe(-2));
-  test('multiple goalkeepers use -0.3 per goal, not legacy criteria', () => expect(auditPlayer('p',[action('m','gol_encajado',10),action('m','parada',1,'other')],types).expected).toBe(-3));
-  test('10 saves, 5 outside, 20 conceded uses continuous bonus', () => {
+  test('multiple goalkeepers use configured conceded unit points', () => expect(auditPlayer('p',[action('m','gol_encajado',10),action('m','parada',1,'other')],types).expected).toBe(-10));
+  test('10 saves, 5 outside, 20 conceded applies configured percentage tier', () => {
     const result = auditPlayer('p',[action('m','parada',10),action('m','lanzamiento_fuera',5),action('m','gol_encajado',20)],types);
     expect(result.lines.find(l => l.rule === 'percentage')?.quantity).toBe('28.57 %');
-    expect(result.expected).toBe(27.36);
+    expect(result.expected).toBe(27.5);
   });
-  test('zero denominator has no percentage bonus', () => expect(auditPlayer('p',[action('m','parada',0)],types).lines).toHaveLength(0));
-  test('16 saves and 19 conceded with one goalkeeper gives 53.77', () => expect(auditPlayer('p',[action('m','parada',16),action('m','gol_encajado',19)],types).expected).toBe(53.77));
-  test('8 saves and 6 conceded with two goalkeepers gives 35.70', () => expect(auditPlayer('p',[action('m','parada',8),action('m','gol_encajado',6),action('m','parada',1,'other')],types).expected).toBe(35.7));
-  test('bonus is zero below 10 shots', () => expect(auditPlayer('p',[action('m','parada',9)],types).expected).toBe(22.5));
-  test('bonus is capped at 25', () => expect(auditPlayer('p',[action('m','parada',20)],types).expected).toBe(75));
-  test('absent inputs are zero', () => expect(auditPlayer('p',[action('m','parada',10)],types).expected).toBe(37.5));
-  test('round each match before adding the jornada', () => expect(auditPlayer('p',[action('m1','parada',16),action('m1','gol_encajado',19),action('m2','parada',16),action('m2','gol_encajado',19)],types).expected).toBe(107.54));
+  test('zero denominator has no percentage bonus', () => expect(auditPlayer('p',[action('m','parada',0)],types).expected).toBe(0));
+  test('edited save points update closed jornada total', () => {
+    const actions = [action('closed-j1','parada',10)];
+    expect(auditPlayer('p',actions,types).expected).toBe(33);
+    expect(auditPlayer('p',actions,types.map(t => t.id === 'parada' ? {...t,puntos:1.5} : t)).expected).toBe(23);
+  });
+  test('save tiers replace linear save points', () => expect(auditPlayer('p',[action('m','parada',10)],types.map(t => t.id === 'parada' ? {...t,tramos:[{desde:1,hasta:5,puntos:1},{desde:6,hasta:null,puntos:2}]} : t)).expected).toBe(23));
+  test('disabled goalkeeper criteria do not score', () => expect(auditPlayer('p',[action('m','parada',10)],types.map(t => ({...t,activo:false}))).expected).toBe(0));
+  test('missing inputs count as zero', () => expect(auditPlayer('p',[action('m','parada',10)],types).expected).toBe(33));
+  test('percentage uses raw value before selecting tier', () => expect(auditPlayer('p',[action('m','parada',1),action('m','gol_encajado',2)],types.map(t => t.id === 'porcentaje_paradas' ? {...t,tramos:[{desde:33.334,hasta:null,puntos:8}]} : t)).expected).toBe(2.3));
+  test('round each match before adding jornada', () => expect(auditPlayer('p',[action('m1','parada',1),action('m2','parada',1)],types.map(t => t.id === 'parada' ? {...t,puntos:1.235} : t.id === 'porcentaje_paradas' ? {...t,tramos:[]} : t)).expected).toBe(2.48));
 });
