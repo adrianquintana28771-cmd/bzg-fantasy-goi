@@ -8,6 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
 import { JornadaBar, useCalendarJornadas, type JornadaSel } from "@/components/jornada-bar";
+import { Button } from "@/components/ui/button";
+import { RankingLineupDialog } from "@/components/ranking-lineup-dialog";
+import { useDisplayPoints } from "@/hooks/use-display-points";
 
 export const Route = createFileRoute("/rankings")({
   head: () => {
@@ -187,6 +190,8 @@ function Select({
 
 function UsuariosRanking({ jor }: { jor: JornadaSel }) {
   const t = useT();
+  const displayPts = useDisplayPoints();
+  const [selectedUser, setSelectedUser] = useState<{ userId: string; nombre: string } | null>(null);
   const queryClient = useQueryClient();
   const q = useQuery({
     queryKey: ["user-ranking"],
@@ -258,8 +263,8 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
         {rows.map((u, i) => (
           <li
             key={u.userId}
-            className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-card"
           >
+            <Button variant="ghost" onClick={() => setSelectedUser(u)} className="h-auto w-full justify-between gap-3 whitespace-normal rounded-xl border border-border bg-card px-4 py-3 text-left shadow-card" aria-label={`${t("Lerrokadura ikusi", "Ver alineación")} · ${u.nombre}`}>
             <div className="flex items-center gap-3">
               <span
                 className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-display text-lg"
@@ -278,19 +283,21 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
                 {i + 1}
               </span>
               <div className="min-w-0">
-                <div className="truncate font-semibold">{u.nombre}</div>
+                <div translate="no" className="break-words font-semibold">{u.nombre}</div>
                 <div className="text-xs text-muted-foreground">
                   {u.jornadas} {t("jardunaldi", "jornada(s)")}
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="font-display text-2xl text-primary">{String(u.puntos).replace(".", ",")}</div>
+              <div className="font-display text-2xl text-primary">{displayPts(u.puntos)}</div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</div>
             </div>
+            </Button>
           </li>
         ))}
       </ol>
+      <RankingLineupDialog user={selectedUser} jornada={jor} onClose={() => setSelectedUser(null)} />
     </div>
   );
 }
