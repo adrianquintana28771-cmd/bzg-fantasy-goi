@@ -18,6 +18,10 @@ export const Route = createFileRoute("/admin/reglas")({
         content: "Crea y edita los criterios de puntuación del Fantasy del club.",
       },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Criterios de puntuación · Admin BZG" },
+      { property: "og:description", content: "Gestión de criterios de puntuación de BZG Fantasy." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: () => (
@@ -90,12 +94,7 @@ function Reglas() {
   });
 
   const refrescar = () => {
-    qc.invalidateQueries({ queryKey: ["criterios"] });
-    qc.invalidateQueries({ queryKey: ["club_action_types"] });
-    qc.invalidateQueries({ queryKey: ["historial-jornadas"] });
-    qc.invalidateQueries({ queryKey: ["ranking-usuarios"] });
-    qc.invalidateQueries({ queryKey: ["ranking-jugadores"] });
-    qc.invalidateQueries({ queryKey: ["player-stats"] });
+    return qc.invalidateQueries();
   };
 
   const guardar = useMutation({
@@ -288,8 +287,7 @@ function TramosPortero({ actions }: { actions: Criterio[] }) {
     setSaving("");
     if (error) return toast.error(t("Ezin izan da gorde", "No se pudo guardar"));
     toast.success(t("Tarteak gordeta · puntuazioak berriro kalkulatuta", "Tramos guardados · puntuaciones recalculadas"));
-    qc.invalidateQueries({ queryKey: ["criterios"] });
-    qc.invalidateQueries({ queryKey: ["club_action_types"] });
+    await qc.invalidateQueries();
   }
 
   const set = (id: string, i: number, k: keyof Tramo, v: string) =>
