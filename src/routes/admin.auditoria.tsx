@@ -30,7 +30,7 @@ function AuditPage() {
     return data ?? [];
   } });
   const selected = jornada ?? calendar.data?.find(j => j.is_active)?.numero ?? calendar.data?.[0]?.numero;
-  const audit = useQuery({ queryKey: ['score-audit', selected], enabled: isSuperAdmin && selected != null, queryFn: () => fetchScoreAudit(selected ?? 0) });
+  const audit = useQuery({ queryKey: ['score-audit', selected], enabled: isSuperAdmin && selected != null, refetchInterval: 15000, queryFn: () => fetchScoreAudit(selected ?? 0) });
   if (!isSuperAdmin) return <p className="p-8">{t('super_admin bakarrik.', 'Solo super_admin.')}</p>;
   const rows = (audit.data ?? []).filter(p => {
     const kind = p.club?.es_entrenador ? 'coach' : p.posicion === 'portero' ? 'goalkeeper' : 'player';
