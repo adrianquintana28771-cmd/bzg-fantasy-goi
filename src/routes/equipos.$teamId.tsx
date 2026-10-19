@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { displayPts } from "@/lib/utils";
+import { useDisplayPoints } from "@/hooks/use-display-points";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CategoryBadge } from "@/components/fantasy-ui";
@@ -33,6 +33,7 @@ export const Route = createFileRoute("/equipos/$teamId")({
 });
 
 function EquipoDetalle() {
+  const displayPts = useDisplayPoints();
   const t = useT();
   const { lang } = useLang();
   const POS_LABEL = lang === "eu" ? POSITION_LABEL_EU : POSITION_LABEL;

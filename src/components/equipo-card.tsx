@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { displayPts } from "@/lib/utils";
+import { useDisplayPoints } from "@/hooks/use-display-points";
 import { useT } from "@/lib/i18n";
 import { usePhotoSource, type CardImages } from "@/lib/card-images";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
@@ -19,7 +19,6 @@ export const RAREZA_LABEL_EU: Record<Rareza, string> = {
 };
 
 export const fmtMult = (m: number) => `×${String(m).replace(".", ",")}`;
-const fmtPts = (n: number) => displayPts(n);
 
 /** Muestra base de la jornada · multiplicador de rareza → total final (solo visual) */
 export function PuntosRareza({
@@ -35,14 +34,15 @@ export function PuntosRareza({
   baseClass?: string;
   finalClass?: string;
 }) {
+  const displayPts = useDisplayPoints();
   const mult = RAREZA_MULT[rareza];
   return (
     <span className={`inline-flex flex-wrap items-center gap-x-1 tabular-nums ${className}`}>
-      <span className={baseClass}>{fmtPts(base)}</span>
+      <span className={baseClass}>{displayPts(base)}</span>
       <span className={`${baseClass} opacity-60`}>·</span>
       <span className={baseClass}>{fmtMult(mult)}</span>
       <span className={`${baseClass} opacity-60`}>→</span>
-      <span className={finalClass}>{fmtPts(base * mult)} pts</span>
+      <span className={finalClass}>{displayPts(base * mult)} pts</span>
     </span>
   );
 }
@@ -103,6 +103,7 @@ export function EquipoCard({
   puntos: number;
   media?: number;
 }) {
+  const displayPts = useDisplayPoints();
   const t = useT();
   const template = images?.templates[pool.rareza];
   const nombre = pool.nombre.trim().split(/\s+/).slice(0, 2).join(" ");

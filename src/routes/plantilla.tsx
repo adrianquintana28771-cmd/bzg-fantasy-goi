@@ -10,7 +10,7 @@ import sobreAperturaAsset from "@/assets/sobre-apertura.webp.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { displayPts } from "@/lib/utils";
+import { useDisplayPoints } from "@/hooks/use-display-points";
 import { useT, useTd } from "@/lib/i18n";
 import { useCardImages } from "@/lib/card-images";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,6 @@ function cartaPuntos(rating: number, rareza: Rareza) {
   return Math.min(99, Math.round(rating * RAREZA_MULT[rareza]));
 }
 
-const fmtPts = (n: number) => displayPts(n);
 
 const POS_LABEL: Record<Posicion, string> = {
   portero: "Atezaina",
@@ -185,6 +184,7 @@ function PlantillaPage() {
 }
 
 function Inner({ userId }: { userId: string }) {
+  const displayPts = useDisplayPoints();
   const t = useT();
   const td = useTd();
   const qc = useQueryClient();

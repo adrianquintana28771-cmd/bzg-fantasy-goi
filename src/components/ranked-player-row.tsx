@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import type { RankedPlayer } from "@/lib/club-data";
 import { useT } from "@/lib/i18n";
-import { displayPts } from "@/lib/utils";
+import { useDisplayPoints } from "@/hooks/use-display-points";
 
 export function RankedPlayerRow({ p, rank }: { p: RankedPlayer; rank: number }) {
+  const displayPts = useDisplayPoints();
   const t = useT();
   return (
     <Link
