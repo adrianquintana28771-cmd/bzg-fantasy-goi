@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Package, Sparkles, X, Lock, Save } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
 import campoAsset from "@/assets/campo-bzg.png.asset.json";
-import sobreAperturaAsset from "@/assets/sobre-apertura.webp.asset.json";
+import sobreAperturaAsset from "@/assets/animacion_sobre.mp4.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -414,6 +414,9 @@ function Inner({ userId }: { userId: string }) {
     rareza: Rareza;
   }> | null>(null);
   const [sobreRevelado, setSobreRevelado] = useState(false);
+  const [sobreAbriendo, setSobreAbriendo] = useState(false);
+  const sobreBusy = useRef(false);
+  const sobreVideo = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (lineup.data) {
@@ -432,7 +435,7 @@ function Inner({ userId }: { userId: string }) {
   }, [lineup.data]);
 
   useEffect(() => {
-    if (!sobreResult) return;
+    if (!sobreAbriendo || sobreRevelado) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reducedMotion) {
@@ -440,10 +443,22 @@ function Inner({ userId }: { userId: string }) {
       return;
     }
 
-    setSobreRevelado(false);
-    const revealTimer = window.setTimeout(() => setSobreRevelado(true), 2100);
-    return () => window.clearTimeout(revealTimer);
-  }, [sobreResult]);
+    const video = sobreVideo.current;
+    if (!video) return;
+    let disposed = false;
+    // Never hide a successfully opened pack if loading or playback fails.
+    const revealTimer = window.setTimeout(() => setSobreRevelado(true), 15000);
+    void video.play().catch(() => {
+      if (!disposed) setSobreRevelado(true);
+    });
+    return () => {
+      disposed = true;
+      window.clearTimeout(revealTimer);
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    };
+  }, [sobreAbriendo, sobreRevelado]);
 
   const openSobreMut = useMutation({
     mutationFn: async (tipo: "normal" | "premium") => {
@@ -483,13 +498,26 @@ function Inner({ userId }: { userId: string }) {
       qc.invalidateQueries({ queryKey: ["wallet", userId] });
       void qc.refetchQueries({ queryKey: ["inventory", userId] });
     },
-    onError: (e: Error) =>
+    onError: (e: Error) => {
+      sobreBusy.current = false;
+      setSobreAbriendo(false);
+      setSobreRevelado(false);
       toast.error(
         e.message.includes("premium")
           ? t("Ez duzu gutunazal premiumik", "No tienes sobres premium")
           : t("Ez duzu gutunazalik eskuragarri", "No tienes sobres disponibles"),
-      ),
+      );
+    },
   });
+
+  function abrirSobre(tipo: "normal" | "premium") {
+    // A synchronous guard also blocks clicks before React updates the buttons.
+    if (sobreBusy.current) return;
+    sobreBusy.current = true;
+    setSobreRevelado(false);
+    setSobreAbriendo(true);
+    openSobreMut.mutate(tipo);
+  }
 
   const saveLineupMut = useMutation({
     mutationFn: async () => {
@@ -558,22 +586,22 @@ function Inner({ userId }: { userId: string }) {
 
       {/* Sobres */}
       <section className="grid grid-cols-2 gap-3">
-        <button
-          onClick={() => openSobreMut.mutate("normal")}
-          disabled={openSobreMut.isPending || (wallet.data?.sobres ?? 0) <= 0}
+        <Button
+          onClick={() => abrirSobre("normal")}
+          disabled={sobreAbriendo || openSobreMut.isPending || (wallet.data?.sobres ?? 0) <= 0}
           className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card p-3 text-sm font-semibold disabled:opacity-40"
         >
           <Package className="h-5 w-5 text-primary" /> {t("Gutunazal normala", "Sobre normal")} (
           {wallet.data?.sobres ?? 0})
-        </button>
-        <button
-          onClick={() => openSobreMut.mutate("premium")}
-          disabled={openSobreMut.isPending || (wallet.data?.premium ?? 0) <= 0}
+        </Button>
+        <Button
+          onClick={() => abrirSobre("premium")}
+          disabled={sobreAbriendo || openSobreMut.isPending || (wallet.data?.premium ?? 0) <= 0}
           className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[color:var(--gold,#d4a017)] bg-card p-3 text-sm font-bold disabled:opacity-40"
         >
           <Sparkles className="h-5 w-5 text-[color:var(--gold,#d4a017)]" /> {t("Premiuma", "Premium")} (
           {wallet.data?.premium ?? 0})
-        </button>
+        </Button>
       </section>
 
       {/* Medio campo */}
@@ -762,9 +790,12 @@ function Inner({ userId }: { userId: string }) {
 
       {/* Resultado del sobre */}
       <Dialog
-        open={!!sobreResult}
+        open={sobreAbriendo}
         onOpenChange={(open) => {
           if (!open) {
+            if (openSobreMut.isPending) return;
+            sobreBusy.current = false;
+            setSobreAbriendo(false);
             setSobreResult(null);
             setSobreRevelado(false);
           }
@@ -772,12 +803,12 @@ function Inner({ userId }: { userId: string }) {
       >
         <DialogContent
           className={
-            sobreRevelado
+            sobreRevelado && sobreResult
               ? "max-w-lg"
               : "w-[min(94vw,52rem)] max-w-none border-0 bg-transparent p-0 shadow-none [&>button]:text-primary-foreground"
           }
         >
-          {sobreRevelado ? (
+          {sobreRevelado && sobreResult ? (
             <div className="animate-in fade-in zoom-in-95 duration-300">
               <DialogHeader>
                 <DialogTitle className="font-display text-2xl">{t("Gutunazal berria!", "¡Nuevo sobre!")}</DialogTitle>
@@ -807,12 +838,24 @@ function Inner({ userId }: { userId: string }) {
           ) : (
             <>
               <DialogTitle className="sr-only">{t("Gutunazala irekitzen", "Abriendo sobre")}</DialogTitle>
-              <img
-                src={sobreAperturaAsset.url}
-                alt=""
-                aria-hidden="true"
-                className="mx-auto aspect-[26/19] w-full max-w-[52rem] object-contain"
-              />
+              {!sobreRevelado ? (
+                <video
+                  ref={sobreVideo}
+                  src={sobreAperturaAsset.url}
+                  autoPlay
+                  muted
+                  playsInline
+                  preload="none"
+                  aria-hidden="true"
+                  onEnded={() => setSobreRevelado(true)}
+                  onError={() => setSobreRevelado(true)}
+                  className="mx-auto aspect-video max-h-[75dvh] w-full max-w-[52rem] object-contain"
+                />
+              ) : (
+                <div role="status" className="p-8 text-center text-primary-foreground">
+                  {t("Kargatzen…", "Cargando…")}
+                </div>
+              )}
             </>
           )}
         </DialogContent>
