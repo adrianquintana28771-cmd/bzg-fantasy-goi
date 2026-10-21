@@ -417,6 +417,36 @@ export type Database = {
           },
         ]
       }
+      inventory_usage_backup: {
+        Row: {
+          created_at: string
+          frozen_lineups: Json
+          inventory: Json
+          lineups: Json
+          player_usage: Json
+          snapshot_key: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          frozen_lineups?: Json
+          inventory?: Json
+          lineups?: Json
+          player_usage?: Json
+          snapshot_key: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          frozen_lineups?: Json
+          inventory?: Json
+          lineups?: Json
+          player_usage?: Json
+          snapshot_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       jornada_alineaciones_congeladas: {
         Row: {
           created_at: string
