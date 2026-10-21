@@ -587,20 +587,22 @@ function Inner({ userId }: { userId: string }) {
       {/* Sobres */}
       <section className="grid grid-cols-2 gap-3">
         <Button
+          variant="outline"
           onClick={() => abrirSobre("normal")}
           disabled={sobreAbriendo || openSobreMut.isPending || (wallet.data?.sobres ?? 0) <= 0}
-          className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card p-3 text-sm font-semibold disabled:opacity-40"
+          className="h-auto min-h-14 min-w-0 gap-2 whitespace-normal rounded-lg border-border bg-card p-3 text-sm font-semibold text-card-foreground disabled:opacity-70"
         >
-          <Package className="h-5 w-5 text-primary" /> {t("Gutunazal normala", "Sobre normal")} (
-          {wallet.data?.sobres ?? 0})
+          <Package className="text-primary" />
+          <span className="min-w-0 break-words text-center leading-snug">{t("Gutunazal normala", "Sobre normal")} ({wallet.data?.sobres ?? 0})</span>
         </Button>
         <Button
+          variant="outline"
           onClick={() => abrirSobre("premium")}
           disabled={sobreAbriendo || openSobreMut.isPending || (wallet.data?.premium ?? 0) <= 0}
-          className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[color:var(--gold,#d4a017)] bg-card p-3 text-sm font-bold disabled:opacity-40"
+          className="h-auto min-h-14 min-w-0 gap-2 whitespace-normal rounded-lg border-2 border-gold bg-card p-3 text-sm font-bold text-card-foreground disabled:opacity-70"
         >
-          <Sparkles className="h-5 w-5 text-[color:var(--gold,#d4a017)]" /> {t("Premiuma", "Premium")} (
-          {wallet.data?.premium ?? 0})
+          <Sparkles className="text-gold" />
+          <span className="min-w-0 break-words text-center leading-snug">{t("Premiuma", "Premium")} ({wallet.data?.premium ?? 0})</span>
         </Button>
       </section>
 
