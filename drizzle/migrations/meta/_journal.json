@@ -169,6 +169,13 @@
       "when": 1792602765396,
       "tag": "0023_single_use_inventory_backup",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792602843456,
+      "tag": "0024_pack_single_remaining_use",
+      "breakpoints": true
     }
   ]
 }
