@@ -137,7 +137,7 @@ export function EquipoCard({
         )}
         {usos !== undefined && (
           <div className={cn("text-[10px] font-semibold", usos <= 1 ? "text-destructive" : "text-muted-foreground")}>
-            {t("Geratzen diren erabilerak", "Usos restantes")}: {usos}/{MAX_USOS}
+            {t("Geratzen diren erabilerak", "Usos restantes")}: {usos}/1
           </div>
         )}
         <div className="text-[10px] font-semibold">
