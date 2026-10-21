@@ -34,6 +34,22 @@ describe('read-only score audit', () => {
     expect(auditPlayer('p',actions,types.map(t => t.id === 'parada' ? {...t,puntos:1.5} : t)).expected).toBe(23);
   });
   test('save tiers replace linear save points', () => expect(auditPlayer('p',[action('m','parada',10)],types.map(t => t.id === 'parada' ? {...t,tramos:[{desde:1,hasta:5,puntos:1},{desde:6,hasta:null,puntos:2}]} : t)).expected).toBe(23));
+  test('edited 3-point saves and outside unit values agree with breakdown', () => {
+    const edited = types.map(t => t.id === 'parada' ? {...t,puntos:3} : t.id === 'lanzamiento_fuera' ? {...t,puntos:0.75} : t);
+    const result = auditPlayer('p',[action('m','parada',10),action('m','lanzamiento_fuera',5)],edited);
+    expect(result.lines.find(l => l.actionId === 'parada')?.points).toBe(30);
+    expect(result.lines.find(l => l.actionId === 'lanzamiento_fuera')?.points).toBe(3.75);
+    expect(result.expected).toBe(41.75);
+  });
+  test('edited conceded tiers and shared unit value agree with breakdown', () => {
+    const edited = types.map(t => t.id === 'gol_encajado' ? {...t,puntos:-0.5,tramos:[{desde:1,hasta:10,puntos:-0.25},{desde:11,hasta:null,puntos:-0.75}]} : t);
+    const single = auditPlayer('p',[action('m','gol_encajado',12)],edited);
+    expect(single.lines.find(l => l.actionId === 'gol_encajado')?.points).toBe(-4);
+    expect(single.expected).toBe(-4);
+    const shared = auditPlayer('p',[action('m','gol_encajado',12),action('m','parada',1,'other')],edited);
+    expect(shared.lines.find(l => l.actionId === 'gol_encajado')?.points).toBe(-6);
+    expect(shared.expected).toBe(-6);
+  });
   test('disabled goalkeeper criteria do not score', () => expect(auditPlayer('p',[action('m','parada',10)],types.map(t => ({...t,activo:false}))).expected).toBe(0));
   test('missing inputs count as zero', () => expect(auditPlayer('p',[action('m','parada',10)],types).expected).toBe(33));
   test('percentage uses raw value before selecting tier', () => expect(auditPlayer('p',[action('m','parada',1),action('m','gol_encajado',2)],types.map(t => t.id === 'porcentaje_paradas' ? {...t,tramos:[{desde:33.334,hasta:null,puntos:8}]} : t)).expected).toBe(2.3));

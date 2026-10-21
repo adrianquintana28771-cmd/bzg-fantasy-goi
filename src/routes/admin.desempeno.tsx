@@ -269,7 +269,8 @@ function Desempeno() {
   const yoActivo = (actions.data ?? []).some((a) => a.solo_portero && (counts[a.id] ?? 0) > 0);
   const nPorteros = otrosNombres.length + (yoActivo ? 1 : 0);
   const golesN = counts.gol_encajado ?? 0;
-  const golDesglose = ([{ desde: 1, hasta: 10, puntos: -0.1 }, { desde: 11, hasta: 20, puntos: -0.2 }, { desde: 21, hasta: 30, puntos: -0.3 }, { desde: 31, hasta: null, puntos: -0.4 }] as Tramo[]).map((tr) => {
+  const golAction = actions.data?.find((a) => a.id === "gol_encajado" && a.activo);
+  const golDesglose = (golAction?.tramos ?? []).map((tr) => {
     const n = Math.max(0, Math.min(golesN, tr.hasta ?? golesN) - (tr.desde - 1));
     return { ...tr, n, pts: Math.round(n * tr.puntos * 100) / 100 };
   });
@@ -283,6 +284,8 @@ function Desempeno() {
     ? (pctParadas(counts.parada ?? 0, counts.lanzamiento_fuera ?? 0, counts.gol_encajado ?? 0) ?? 0)
     : null;
   const pctPts = calculated.lines.find(l => l.rule === "percentage")?.points ?? 0;
+  const golesPts = calculated.lines.find(l => l.actionId === "gol_encajado")?.points ?? 0;
+  const signedPoints = (points: number) => `${points > 0 ? "+" : ""}${String(points).replace(".", ",")}`;
 
   const total = calculated.expected;
 
@@ -529,10 +532,12 @@ function Desempeno() {
                 {[yoActivo ? fullName(player) : null, ...otrosNombres].filter(Boolean).join(" · ") || "—"}
               </div>
               <div className="mt-3 font-semibold">{t("Jasotako golak", "Goles en contra")}: {golesN}</div>
-              {variosPorteros ? (
+              {variosPorteros || !golDesglose.length ? (
                 <div className="text-xs text-muted-foreground">
-                  {t("2+ atezain → −0,3 gol bakoitzeko (tarterik gabe)", "2+ porteros/as → −0,3 por gol (sin tramos)")}:{" "}
-                  {golesN} × −0,3 = <span className="font-semibold text-destructive">{Math.round(-0.3 * golesN * 100) / 100}</span>
+                  {variosPorteros
+                    ? t("2+ atezain → gol bakoitzeko (tarterik gabe)", "2+ porteros/as → por gol (sin tramos)")
+                    : t("Gol bakoitzeko (tarterik gabe)", "Por gol (sin tramos)")}:{" "}
+                  {golesN} × {signedPoints(Number(golAction?.puntos ?? 0))} = <span className={`font-semibold ${golesPts < 0 ? "text-destructive" : "text-primary"}`}>{signedPoints(golesPts)}</span>
                 </div>
               ) : golDesglose.length ? (
                 <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground">
@@ -542,7 +547,7 @@ function Desempeno() {
                     </li>
                   ))}
                   <li className="font-semibold text-foreground">
-                    {t("Guztira", "Total")}: {String(Math.round(golDesglose.reduce((sum, d) => sum + d.pts, 0) * 100) / 100).replace(".", ",")}
+                    {t("Guztira", "Total")}: {signedPoints(golesPts)}
                   </li>
                 </ul>
               ) : null}
@@ -550,7 +555,7 @@ function Desempeno() {
                 % {t("geldiketak", "paradas")}: {pct == null ? "—" : `${String(pct).replace(".", ",")} %`}
               </div>
               <div className="text-xs text-muted-foreground">
-                {counts.parada ?? 0} / ({counts.parada ?? 0} + {counts.lanzamiento_fuera ?? 0} + {golesN}) × 100 → +{String(pctPts).replace(".", ",")} pts
+                {counts.parada ?? 0} / ({counts.parada ?? 0} + {counts.lanzamiento_fuera ?? 0} + {golesN}) × 100 → {signedPoints(pctPts)} pts
               </div>
             </div>
           )}
@@ -571,7 +576,9 @@ function Desempeno() {
                         <div
                           className={`text-xs ${Number(a.puntos) >= 0 ? "text-primary" : "text-destructive"}`}
                         >
-                          {a.id === "parada" ? "+2,5" : a.id === "lanzamiento_fuera" ? "+0,5" : a.id === "gol_encajado" ? (variosPorteros ? "−0,3" : "−0,1 / −0,2 / −0,3 / −0,4") : Number(a.puntos) > 0 ? `+${a.puntos}` : a.puntos} pts
+                          {((a.id === "parada" || (a.id === "gol_encajado" && !variosPorteros)) && a.tramos?.length)
+                            ? a.tramos.map((tr) => `${tr.desde}–${tr.hasta ?? "∞"}: ${signedPoints(tr.puntos)}`).join(" / ")
+                            : signedPoints(Number(a.puntos))} pts
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
