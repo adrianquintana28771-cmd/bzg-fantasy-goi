@@ -1,5 +1,5 @@
 # Pendiente
-- [ ] Guardar y verificar copia inmutable de usuarios, colección y alineaciones; dejar todas las cartas actuales y nuevas con un uso y comprobar el descuento sin abrir sobres reales.
+- [x] Copia inmutable verificada: 157 usuarios, 6253 cartas, 618 alineaciones y 3888 posiciones congeladas. Las 6253 cartas de 147 propietarios quedan con un uso; sobres e inserciones nuevas inicializan un uso. Nueve comprobaciones SQL correctas y 78 fichas reales muestran 1/1 sin errores. Consumo existente comprobado sin cerrar jornadas ni abrir sobres reales.
 - [x] Desempeño: etiquetas y desglose de porteros usan criterios editables y total de auditoría, sin cambiar datos ni cálculo; 16 pruebas correctas y compilación sin errores. Comprobación con sesión administradora pendiente del acceso autorizado ya indicado abajo.
 - [x] Mostrar puntos negativos a Admin y Super Admin sin cambiar cálculos; 17 pruebas correctas. Clasificaciones abre alineación real de la jornada (Total/Media muestra historial), comprobado en escritorio y móvil sin errores.
 - [ ] Comprobar visualmente puntos negativos con sesión Admin/Super Admin: no hay sesión autorizada disponible; las reglas de ambos roles están verificadas por pruebas.
