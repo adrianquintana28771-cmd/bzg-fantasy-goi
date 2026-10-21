@@ -162,6 +162,13 @@
       "when": 1792416106715,
       "tag": "0022_ranking_user_lineup_read",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792602765396,
+      "tag": "0023_single_use_inventory_backup",
+      "breakpoints": true
     }
   ]
 }
