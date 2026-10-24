@@ -1003,3 +1003,28 @@ function Court({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+function Select({
+  value,
+  onChange,
+  label,
+  children,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
+      {label}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-md border border-input bg-background px-2.5 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+      >
+        {children}
+      </select>
+    </label>
+  );
+}
