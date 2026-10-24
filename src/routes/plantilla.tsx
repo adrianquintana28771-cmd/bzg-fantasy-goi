@@ -455,10 +455,6 @@ function Inner({ userId }: { userId: string }) {
   const [dirty, setDirty] = useState(false);
   const [pickSlot, setPickSlot] = useState<Posicion | null>(null);
   const [histJor, setHistJor] = useState<number | null>(null);
-  /** Filtros de «Mis jugadores»: sexo, categoría y equipo dependientes entre sí */
-  const [filtroCat, setFiltroCat] = useState("");
-  const [filtroSexo, setFiltroSexo] = useState("");
-  const [filtroEquipo, setFiltroEquipo] = useState("");
   /** Jornada visible en el historial: siempre una sola, la más reciente por defecto. */
   const histActiva = histJor ?? historial.data?.[0]?.numero ?? null;
   const [sobreResult, setSobreResult] = useState<Array<{
