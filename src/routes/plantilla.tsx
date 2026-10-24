@@ -11,7 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useDisplayPoints } from "@/hooks/use-display-points";
-import { useT, useTd } from "@/lib/i18n";
+import { useT, useTd, useLang } from "@/lib/i18n";
+import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useCardImages } from "@/lib/card-images";
 import { Button } from "@/components/ui/button";
 import { fetchAllRows, round2 } from "@/lib/club-data";
@@ -187,6 +188,8 @@ function Inner({ userId }: { userId: string }) {
   const displayPts = useDisplayPoints();
   const t = useT();
   const td = useTd();
+  const { lang } = useLang();
+  const CAT_LABEL = lang === "eu" ? CATEGORY_LABEL_EU : CATEGORY_LABEL;
   const qc = useQueryClient();
   const cardImages = useCardImages();
 
@@ -215,15 +218,15 @@ function Inner({ userId }: { userId: string }) {
         )
         .eq("user_id", userId);
       if (error) throw error;
-      const { data: teams } = await supabase.from("club_teams").select("id, nombre");
-      const tmap = new Map((teams ?? []).map((t) => [t.id, t.nombre]));
+      const { data: teams } = await supabase.from("club_teams").select("id, nombre, categoria, sexo");
+      const tmap = new Map((teams ?? []).map((t) => [t.id, t]));
       return ((data ?? []) as unknown as CopyRow[]).map((c) =>
         c.player_pool
           ? {
               ...c,
               player_pool: {
                 ...c.player_pool,
-                club_teams: c.player_pool.team_id ? { nombre: tmap.get(c.player_pool.team_id) ?? "" } : null,
+                club_teams: c.player_pool.team_id ? (tmap.get(c.player_pool.team_id) ?? null) : null,
               },
             }
           : c,
@@ -404,6 +407,48 @@ function Inner({ userId }: { userId: string }) {
       })
       .sort((a, b) => cartaPuntos(b.pool.rating, b.pool.rareza) - cartaPuntos(a.pool.rating, a.pool.rareza));
   }, [inventory.data]);
+
+  /** Filtros de «Mis jugadores»: sexo, categoría y equipo dependientes entre sí */
+  const [filtroCat, setFiltroCat] = useState("");
+  const [filtroSexo, setFiltroSexo] = useState("");
+  const [filtroEquipo, setFiltroEquipo] = useState("");
+
+  /** Equipes presentes no inventário do usuário */
+  const inventarioEquipos = useMemo(() => {
+    const map = new Map<string, { id: string; nombre: string; categoria: string; sexo: string }>();
+    (inventory.data ?? []).forEach((c) => {
+      const tm = c.player_pool?.club_teams;
+      if (tm?.id) map.set(tm.id, { id: tm.id, nombre: tm.nombre, categoria: tm.categoria ?? "", sexo: tm.sexo ?? "" });
+    });
+    return [...map.values()].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }, [inventory.data]);
+
+  /** Opções dependentes: categorias visíveis dado o sexo, sexos visíveis dada a categoria */
+  const catOptions = (["cadete", "juvenil", "senior"] as const).filter(
+    (k) => inventarioEquipos.some((tm) => tm.categoria === k) && (!filtroSexo || inventarioEquipos.some((tm) => tm.categoria === k && tm.sexo === filtroSexo)),
+  );
+  const sexoOptions = (["masculino", "femenino"] as const).filter(
+    (g) => inventarioEquipos.some((tm) => tm.sexo === g) && (!filtroCat || inventarioEquipos.some((tm) => tm.sexo === g && tm.categoria === filtroCat)),
+  );
+  const equiposFiltrados = inventarioEquipos.filter(
+    (tm) => (!filtroCat || tm.categoria === filtroCat) && (!filtroSexo || tm.sexo === filtroSexo),
+  );
+  useEffect(() => {
+    if (filtroEquipo && !equiposFiltrados.some((tm) => tm.id === filtroEquipo)) setFiltroEquipo("");
+  }, [filtroCat, filtroSexo, filtroEquipo, equiposFiltrados]);
+
+  const visibleCards = useMemo(
+    () =>
+      cards.filter((c) => {
+        const tm = c.pool.club_teams;
+        return (
+          (!filtroCat || tm?.categoria === filtroCat) &&
+          (!filtroSexo || tm?.sexo === filtroSexo) &&
+          (!filtroEquipo || c.pool.team_id === filtroEquipo)
+        );
+      }),
+    [cards, filtroCat, filtroSexo, filtroEquipo],
+  );
 
   const [slotDraft, setSlotDraft] = useState<Record<Posicion, string | null>>({
     portero: null,
@@ -765,8 +810,33 @@ function Inner({ userId }: { userId: string }) {
       {/* Mis jugadores */}
       <section className="rounded-2xl border border-border bg-card p-4">
         <h2 className="mb-3 font-display text-lg">
-          {t("Nire jokalariak", "Mis jugadores")} ({cards.length})
+          {t("Nire jokalariak", "Mis jugadores")} ({visibleCards.length})
         </h2>
+        {cards.length > 0 && (
+          <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <Select value={filtroCat} onChange={setFiltroCat} label={t("Kategoria", "Categoría")}>
+              <option value="">{t("Guztiak", "Todas")}</option>
+              {catOptions.map((k) => (
+                <option key={k} value={k}>
+                  {CAT_LABEL[k]}
+                </option>
+              ))}
+            </Select>
+            <Select value={filtroSexo} onChange={setFiltroSexo} label={t("Sexua", "Sexo")}>
+              <option value="">{t("Guztiak", "Todos")}</option>
+              {sexoOptions.includes("masculino") && <option value="masculino">{t("Gizonezkoa", "Masculino")}</option>}
+              {sexoOptions.includes("femenino") && <option value="femenino">{t("Emakumezkoa", "Femenino")}</option>}
+            </Select>
+            <Select value={filtroEquipo} onChange={setFiltroEquipo} label={t("Taldea", "Equipo")}>
+              <option value="">{t("Guztiak", "Todos")}</option>
+              {equiposFiltrados.map((tm) => (
+                <option key={tm.id} value={tm.id}>
+                  {tm.nombre}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
         {cards.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {t("Oraindik ez duzu jokalaririk. Osatu", "Todavía no tienes jugadores. Completa")}{" "}
@@ -775,10 +845,14 @@ function Inner({ userId }: { userId: string }) {
             </Link>{" "}
             {t("gutunazalak lortzeko.", "para conseguir sobres.")}
           </p>
+        ) : visibleCards.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            {t("Iragazkirekin ez dago jokalaririk. Saiatu beste iragazki batekin.", "Nenhum jogador com esses filtros. Tente outro filtro.")}
+          </p>
         ) : (
           <div className="overflow-x-auto">
           <ul className="grid grid-cols-2 gap-3 sm:min-w-[540px] sm:grid-cols-3">
-            {cards.map((c) => {
+            {visibleCards.map((c) => {
               const enPista = alignedIds.has(c.pool.id);
               return (
                 <li
@@ -929,5 +1003,30 @@ function Court({ children }: { children: React.ReactNode }) {
       <div className="absolute inset-0 bg-black/10" />
       <div className="absolute inset-0">{children}</div>
     </div>
+  );
+}
+
+function Select({
+  value,
+  onChange,
+  label,
+  children,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
+      {label}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-md border border-input bg-background px-2.5 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+      >
+        {children}
+      </select>
+    </label>
   );
 }

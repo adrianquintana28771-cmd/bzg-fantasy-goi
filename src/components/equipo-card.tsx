@@ -67,7 +67,7 @@ export interface PoolRow {
   club_player_id?: string | null;
   team_id?: string | null;
   estado?: "disponible" | "dudoso" | "no_disponible";
-  club_teams?: { nombre: string } | null;
+  club_teams?: { id?: string; nombre: string; categoria?: string; sexo?: string } | null;
 }
 
 /** Foto de la carta: mismo origen para sobres, selector y campo */
