@@ -14,7 +14,7 @@ import { useDisplayPoints } from "@/hooks/use-display-points";
 import { useT, useTd } from "@/lib/i18n";
 import { useCardImages } from "@/lib/card-images";
 import { Button } from "@/components/ui/button";
-import { round2 } from "@/lib/club-data";
+import { fetchAllRows, round2 } from "@/lib/club-data";
 
 import {
   CardPhoto,
@@ -235,8 +235,9 @@ function Inner({ userId }: { userId: string }) {
   const positions = useQuery({
     queryKey: ["pool-positions"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("player_pool_positions").select("player_id, posicion");
-      if (error) throw error;
+      const data = await fetchAllRows((from, to) =>
+        supabase.from("player_pool_positions").select("player_id, posicion").range(from, to),
+      );
       const map = new Map<string, Posicion[]>();
       (data ?? []).forEach((r) => {
         const arr = map.get(r.player_id) ?? [];
@@ -322,7 +323,9 @@ function Inner({ userId }: { userId: string }) {
       }
       const [{ data: lineups }, { data: pool }, { data: frozen }] = await Promise.all([
         supabase.from("lineups").select("*, jornadas(numero, nombre)").eq("user_id", userId),
-        supabase.from("player_pool").select("id, nombre, rareza"),
+        fetchAllRows((from, to) =>
+          supabase.from("player_pool").select("id, nombre, rareza").range(from, to),
+        ).then((poolRows) => ({ data: poolRows })),
         supabase
           .from("jornada_alineaciones_congeladas")
           .select("jornada_id, posicion, player_id")

@@ -8,6 +8,7 @@ import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
 import { useT, useLang } from "@/lib/i18n";
 import { POSITION_LABEL, POSITION_LABEL_EU } from "@/lib/fantasy/types";
+import { fetchAllRows } from "@/lib/club-data";
 
 export const Route = createFileRoute("/admin/posiciones")({
   head: () => ({
@@ -50,15 +51,22 @@ function AdminPosiciones() {
     queryKey: ["admin-posiciones"],
     queryFn: async () => {
       const [playersRes, teamsRes, linksRes, posRes, ppRes] = await Promise.all([
-        supabase
-          .from("club_players")
-          .select("id,nombre,apellido1,es_entrenador")
-          .eq("activo", true)
-          .order("nombre"),
+        fetchAllRows((from, to) =>
+          supabase
+            .from("club_players")
+            .select("id,nombre,apellido1,es_entrenador")
+            .eq("activo", true)
+            .order("nombre")
+            .range(from, to),
+        ).then((data) => ({ data, error: null })),
         supabase.from("club_teams").select("id,nombre,club_seasons!inner(is_active)").eq("club_seasons.is_active", true),
-        supabase.from("club_player_teams").select("player_id,team_id"),
+        fetchAllRows((from, to) =>
+          supabase.from("club_player_teams").select("player_id,team_id").range(from, to),
+        ).then((data) => ({ data, error: null })),
         supabase.from("club_positions").select("id,nombre,orden").order("orden"),
-        supabase.from("club_player_positions").select("player_id,position_id,es_principal"),
+        fetchAllRows((from, to) =>
+          supabase.from("club_player_positions").select("player_id,position_id,es_principal").range(from, to),
+        ).then((data) => ({ data, error: null })),
       ]);
       for (const r of [playersRes, teamsRes, linksRes, posRes, ppRes]) if (r.error) throw r.error;
       const teamName = new Map((teamsRes.data ?? []).map((tm) => [tm.id, tm.nombre]));

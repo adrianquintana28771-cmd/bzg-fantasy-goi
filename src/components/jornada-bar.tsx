@@ -5,14 +5,14 @@ import { useT } from "@/lib/i18n";
 
 export type JornadaSel = number | "total" | "media";
 
-/** Jornadas del calendario real (club_matches). */
+/** Jornadas del calendario real (tabla jornadas: una fila por jornada, sin límite de lectura). */
 export function useCalendarJornadas() {
   return useQuery({
     queryKey: ["calendar-jornadas"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("club_matches").select("jornada");
+      const { data, error } = await supabase.from("jornadas").select("numero").order("numero");
       if (error) throw error;
-      return [...new Set((data ?? []).map((m) => m.jornada))].sort((a, b) => a - b);
+      return (data ?? []).map((j) => j.numero);
     },
     staleTime: 60_000,
   });

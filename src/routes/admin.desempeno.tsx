@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/i18n";
 import { ESTADO_LABEL, ESTADO_LABEL_EU, type PlayerEstado } from "@/lib/fantasy/types";
 import { supabase } from "@/integrations/supabase/client";
-import { pctParadas, type Tramo } from "@/lib/club-data";
+import { fetchAllRows, pctParadas, type Tramo } from "@/lib/club-data";
 import { auditPlayer } from "@/lib/score-audit";
 
 export const Route = createFileRoute("/admin/desempeno")({
@@ -84,14 +84,16 @@ function Desempeno() {
   const matches = useQuery({
     queryKey: ["club_matches"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("club_matches")
-        .select(
-          "id,rival,fecha,jornada,es_local,goles_favor,goles_contra,team_id,club_teams(nombre,categoria,sexo)",
-        )
-        .order("fecha", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as unknown as MatchRow[];
+      const data = await fetchAllRows((from, to) =>
+        supabase
+          .from("club_matches")
+          .select(
+            "id,rival,fecha,jornada,es_local,goles_favor,goles_contra,team_id,club_teams(nombre,categoria,sexo)",
+          )
+          .order("fecha", { ascending: false })
+          .range(from, to),
+      );
+      return data as unknown as MatchRow[];
     },
   });
 
@@ -132,13 +134,15 @@ function Desempeno() {
     queryKey: ["club_all_players"],
     enabled: !!match,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("club_player_teams")
-        .select(
-          "team_id,dorsal,club_teams(nombre),club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,estado,club_player_positions(position_id,es_principal))",
-        );
-      if (error) throw error;
-      return (data ?? []) as unknown as (PlayerRow & {
+      const data = await fetchAllRows((from, to) =>
+        supabase
+          .from("club_player_teams")
+          .select(
+            "team_id,dorsal,club_teams(nombre),club_players(id,nombre,alias,apellido1,apellido2,es_entrenador,estado,club_player_positions(position_id,es_principal))",
+          )
+          .range(from, to),
+      );
+      return data as unknown as (PlayerRow & {
         team_id: string;
         club_teams: { nombre: string } | null;
       })[];

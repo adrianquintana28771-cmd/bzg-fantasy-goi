@@ -8,6 +8,7 @@ import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
 import { adminSetPassword } from "@/lib/admin-password.functions";
+import { fetchAllRows } from "@/lib/club-data";
 import { passwordSchema } from "@/components/auth-panel";
 
 export const Route = createFileRoute("/admin/password")({
@@ -40,8 +41,9 @@ function Page() {
     queryKey: ["admin-users-pw"],
     enabled: canManageAll,
     queryFn: async () =>
-      (await supabase.from("profiles").select("id, username, nombre, apellido, display_name").order("username"))
-        .data ?? [],
+      fetchAllRows((from, to) =>
+        supabase.from("profiles").select("id, username, nombre, apellido, display_name").order("username").range(from, to),
+      ),
   });
 
   const filtered = useMemo(() => {

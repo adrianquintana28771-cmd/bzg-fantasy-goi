@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BackButton } from "@/components/back-button";
 import { useT, useLang } from "@/lib/i18n";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU, type Category } from "@/lib/fantasy/types";
+import { fetchAllRows } from "@/lib/club-data";
 
 export const Route = createFileRoute("/partidos/")({
   head: () => {
@@ -51,14 +52,16 @@ function Partidos() {
   const { data = [], isLoading } = useQuery({
     queryKey: ["partidos-publicos"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("club_matches")
-        .select(
-          "id,jornada,rival,fecha,hora,es_local,goles_favor,goles_contra,club_teams(nombre,categoria,sexo)",
-        )
-        .order("jornada");
-      if (error) throw error;
-      return (data ?? []) as unknown as Match[];
+      const data = await fetchAllRows((from: number, to: number) =>
+        supabase
+          .from("club_matches")
+          .select(
+            "id,jornada,rival,fecha,hora,es_local,goles_favor,goles_contra,club_teams(nombre,categoria,sexo)",
+          )
+          .order("jornada")
+          .range(from, to),
+      );
+      return data as unknown as Match[];
     },
   });
 

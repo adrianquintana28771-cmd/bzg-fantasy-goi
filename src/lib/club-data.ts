@@ -23,6 +23,23 @@ export type PoolPlayer = {
 const POOL_SELECT =
   "id,nombre,posicion,rareza,estado,team_id,club_player_id,club:club_players(nombre,apellido1,apellido2,dorsal,estado,es_entrenador)";
 
+/**
+ * Lee TODAS las filas de una consulta en bloques de 1000 (límite de la API de datos).
+ * `build` recibe el rango y debe devolver la consulta con `.range(from, to)` aplicado.
+ */
+export async function fetchAllRows<T>(
+  build: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>,
+): Promise<T[]> {
+  const out: T[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await build(from, from + 999);
+    if (error) throw error;
+    out.push(...(data ?? []));
+    if (!data || data.length < 1000) break;
+  }
+  return out;
+}
+
 export async function fetchTeams(): Promise<ClubTeam[]> {
   const { data, error } = await supabase
     .from("club_teams")
@@ -33,13 +50,14 @@ export async function fetchTeams(): Promise<ClubTeam[]> {
 }
 
 export async function fetchPool(): Promise<PoolPlayer[]> {
-  const { data, error } = await supabase
-    .from("player_pool")
-    .select(POOL_SELECT.replace("club:club_players(", "club:club_players!inner(activo,"))
-    .eq("rareza", "normal")
-    .eq("club.activo", true);
-  if (error) throw error;
-  return (data ?? []) as unknown as PoolPlayer[];
+  return (await fetchAllRows((from, to) =>
+    supabase
+      .from("player_pool")
+      .select(POOL_SELECT.replace("club:club_players(", "club:club_players!inner(activo,"))
+      .eq("rareza", "normal")
+      .eq("club.activo", true)
+      .range(from, to),
+  )) as unknown as PoolPlayer[];
 }
 
 export async function fetchPoolPlayer(id: string): Promise<PoolPlayer | null> {
