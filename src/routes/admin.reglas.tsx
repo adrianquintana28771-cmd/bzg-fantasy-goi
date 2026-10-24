@@ -264,7 +264,8 @@ function Bloque({
 }
 
 const PCT_ID = "porcentaje_paradas";
-const TRAMO_IDS = ["parada", "gol_encajado", PCT_ID];
+const ACC_ID = "porcentaje_acierto";
+const TRAMO_IDS = ["parada", "gol_encajado", PCT_ID, ACC_ID];
 
 /** Editor super_admin de tramos de portero: se guarda en club_action_types.tramos y la BD recalcula sola. */
 function TramosPortero({ actions }: { actions: Criterio[] }) {
@@ -310,7 +311,7 @@ function TramosPortero({ actions }: { actions: Criterio[] }) {
       {TRAMO_IDS.map((id) => {
         const a = actions.find((x) => x.id === id);
         if (!a) return null;
-        const pctMode = id === PCT_ID;
+        const pctMode = id === PCT_ID || id === ACC_ID;
         return (
           <div key={id} className="mt-4">
             <div className="flex items-center justify-between">
