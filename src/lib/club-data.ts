@@ -53,10 +53,16 @@ export async function fetchPoolPlayer(id: string): Promise<PoolPlayer | null> {
 }
 
 export async function fetchPointsByPlayer(): Promise<Record<string, number>> {
-  const { data, error } = await supabase.from("player_jornada_stats").select("player_id,puntos");
-  if (error) throw error;
   const out: Record<string, number> = {};
-  for (const r of data ?? []) out[r.player_id] = (out[r.player_id] ?? 0) + Number(r.puntos);
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from("player_jornada_stats")
+      .select("player_id,puntos")
+      .range(from, from + 999);
+    if (error) throw error;
+    for (const r of data ?? []) out[r.player_id] = (out[r.player_id] ?? 0) + Number(r.puntos);
+    if (!data || data.length < 1000) break;
+  }
   return out;
 }
 
