@@ -807,8 +807,33 @@ function Inner({ userId }: { userId: string }) {
       {/* Mis jugadores */}
       <section className="rounded-2xl border border-border bg-card p-4">
         <h2 className="mb-3 font-display text-lg">
-          {t("Nire jokalariak", "Mis jugadores")} ({cards.length})
+          {t("Nire jokalariak", "Mis jugadores")} ({visibleCards.length})
         </h2>
+        {cards.length > 0 && (
+          <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <Select value={filtroCat} onChange={setFiltroCat} label={t("Kategoria", "Categoría")}>
+              <option value="">{t("Guztiak", "Todas")}</option>
+              {catOptions.map((k) => (
+                <option key={k} value={k}>
+                  {CAT_LABEL[k]}
+                </option>
+              ))}
+            </Select>
+            <Select value={filtroSexo} onChange={setFiltroSexo} label={t("Sexua", "Sexo")}>
+              <option value="">{t("Guztiak", "Todos")}</option>
+              {sexoOptions.includes("masculino") && <option value="masculino">{t("Gizonezkoa", "Masculino")}</option>}
+              {sexoOptions.includes("femenino") && <option value="femenino">{t("Emakumezkoa", "Femenino")}</option>}
+            </Select>
+            <Select value={filtroEquipo} onChange={setFiltroEquipo} label={t("Taldea", "Equipo")}>
+              <option value="">{t("Guztiak", "Todos")}</option>
+              {equiposFiltrados.map((tm) => (
+                <option key={tm.id} value={tm.id}>
+                  {tm.nombre}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
         {cards.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {t("Oraindik ez duzu jokalaririk. Osatu", "Todavía no tienes jugadores. Completa")}{" "}
