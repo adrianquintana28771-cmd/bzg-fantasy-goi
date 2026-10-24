@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/club-data";
 
 export const CARD_BUCKET = "player-card-images";
 export type Rareza = "normal" | "raro" | "legendario";
@@ -33,9 +34,9 @@ export function preferredImageFile(current: File | undefined, incoming: File) {
 }
 
 export async function fetchCardImages(): Promise<CardImages> {
-  const { data, error } = await supabase.from("player_card_images").select("player_id,rareza,path,updated_at");
-  if (error) throw error;
-  const rows = data ?? [];
+  const rows = await fetchAllRows((from, to) =>
+    supabase.from("player_card_images").select("player_id,rareza,path,updated_at").range(from, to),
+  );
   const bucket = supabase.storage.from(CARD_BUCKET);
   const ids = [...new Set(rows.map((r) => r.player_id))];
   // Inspect existing objects, not guessed signed URLs (missing objects can still be signed).
