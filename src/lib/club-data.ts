@@ -50,13 +50,14 @@ export async function fetchTeams(): Promise<ClubTeam[]> {
 }
 
 export async function fetchPool(): Promise<PoolPlayer[]> {
-  const { data, error } = await supabase
-    .from("player_pool")
-    .select(POOL_SELECT.replace("club:club_players(", "club:club_players!inner(activo,"))
-    .eq("rareza", "normal")
-    .eq("club.activo", true);
-  if (error) throw error;
-  return (data ?? []) as unknown as PoolPlayer[];
+  return (await fetchAllRows((from, to) =>
+    supabase
+      .from("player_pool")
+      .select(POOL_SELECT.replace("club:club_players(", "club:club_players!inner(activo,"))
+      .eq("rareza", "normal")
+      .eq("club.activo", true)
+      .range(from, to),
+  )) as unknown as PoolPlayer[];
 }
 
 export async function fetchPoolPlayer(id: string): Promise<PoolPlayer | null> {
