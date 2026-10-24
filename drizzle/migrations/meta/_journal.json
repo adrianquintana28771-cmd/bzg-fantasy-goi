@@ -183,6 +183,13 @@
       "when": 1792602924373,
       "tag": "0025_restrict_inventory_backup_access",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792869887255,
+      "tag": "0026_field_shooting_percentage",
+      "breakpoints": true
     }
   ]
 }
