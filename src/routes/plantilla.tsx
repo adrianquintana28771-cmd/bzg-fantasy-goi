@@ -418,6 +418,8 @@ function Inner({ userId }: { userId: string }) {
   const [dirty, setDirty] = useState(false);
   const [pickSlot, setPickSlot] = useState<Posicion | null>(null);
   const [histJor, setHistJor] = useState<number | null>(null);
+  /** Jornada visible en el historial: siempre una sola, la más reciente por defecto. */
+  const histActiva = histJor ?? historial.data?.[0]?.numero ?? null;
   const [sobreResult, setSobreResult] = useState<Array<{
     id: string;
     nombre: string;
@@ -703,22 +705,12 @@ function Inner({ userId }: { userId: string }) {
         <h2 className="mb-3 font-display text-lg">{t("Aurreko jardunaldiak", "Jornadas anteriores")}</h2>
         {(historial.data ?? []).length > 0 && (
           <div className="mb-3 flex gap-2 overflow-x-auto pb-2">
-            <button
-              onClick={() => setHistJor(null)}
-              className={`shrink-0 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-                histJor === null
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-card hover:bg-muted"
-              }`}
-            >
-              {t("Dena", "Todos")}
-            </button>
             {(historial.data ?? []).map((h) => (
               <button
                 key={h.jornadaId}
                 onClick={() => setHistJor(h.numero)}
                 className={`shrink-0 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-                  histJor === h.numero
+                  histActiva === h.numero
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-card hover:bg-muted"
                 }`}
@@ -736,7 +728,7 @@ function Inner({ userId }: { userId: string }) {
         ) : (
           <div className="space-y-3">
             {(historial.data ?? [])
-              .filter((h) => histJor === null || h.numero === histJor)
+              .filter((h) => h.numero === histActiva)
               .map((h) => (
                 <div key={h.jornadaId} className="rounded-xl border border-border p-3">
                   <div className="flex items-center justify-between">
