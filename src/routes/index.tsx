@@ -3,7 +3,7 @@ import { Trophy, Users, Shield, ArrowRight, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchPlayerRanking, fetchStatLeaders, fetchSavePctLeaders, fetchAvgPtsLeaders, round2, type RankedPlayer } from "@/lib/club-data";
+import { fetchPlayerRanking, fetchStatLeaders, fetchSavePctLeaders, fetchShootingPctLeaders, fetchAvgPtsLeaders, round2, type RankedPlayer } from "@/lib/club-data";
 import { useDisplayPoints } from "@/hooks/use-display-points";
 import { RankedPlayerRow } from "@/components/ranked-player-row";
 import { CategoryBadge } from "@/components/fantasy-ui";
@@ -108,6 +108,10 @@ function Home() {
   const { data: savePctLeaders = [] } = useQuery({
     queryKey: ["home-save-pct-leaders"],
     queryFn: fetchSavePctLeaders,
+  });
+  const { data: shootPctLeaders = [] } = useQuery({
+    queryKey: ["home-shoot-pct-leaders"],
+    queryFn: fetchShootingPctLeaders,
   });
   const { data: avgPtsLeaders = [] } = useQuery({
     queryKey: ["home-avg-pts-leaders"],
@@ -364,6 +368,14 @@ function Home() {
                   rank={i + 1}
                   value={`${String(p.valor).replace(".", ",")} %`}
                 />
+              ))}
+            </div>
+          </div>
+          <div>
+            <h2 className="mb-3 font-display text-xl">🎯 {t("% asmatzea (batez bestekoa)", "% acierto (media)")}</h2>
+            <div className="space-y-2">
+              {shootPctLeaders.map((p, i) => (
+                <LeaderRow key={p.id} p={p} rank={i + 1} value={`${String(p.valor).replace(".", ",")} %`} />
               ))}
             </div>
           </div>
