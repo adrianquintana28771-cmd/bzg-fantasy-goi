@@ -125,7 +125,7 @@ export function EquipoCard({
         {pool.club_teams?.nombre && <div translate="no" className="break-words text-[10px]">{pool.club_teams.nombre}</div>}
         <div className="break-words text-[10px] uppercase">{posiciones.map((p) => POS_SHORT[p]).join(" · ")}</div>
       </div>
-      <div className="absolute inset-x-[7%] top-[49%] flex min-w-0 flex-col gap-1 rounded bg-card/95 p-2 text-xs text-card-foreground">
+      <div className="absolute inset-x-[7%] top-[49%] flex min-w-0 flex-col gap-0.5 rounded bg-card/95 p-1.5 text-xs leading-tight text-card-foreground sm:gap-1 sm:p-2 sm:leading-normal">
         <div className="text-[10px] font-bold uppercase">
           {t(RAREZA_LABEL_EU[pool.rareza], RAREZA_LABEL_ES[pool.rareza])} {fmtMult(RAREZA_MULT[pool.rareza])}
           {(total ?? 0) > 1 && <span className="ml-1">x{total}</span>}
