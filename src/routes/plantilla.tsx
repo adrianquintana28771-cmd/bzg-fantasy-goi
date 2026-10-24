@@ -405,6 +405,43 @@ function Inner({ userId }: { userId: string }) {
       .sort((a, b) => cartaPuntos(b.pool.rating, b.pool.rareza) - cartaPuntos(a.pool.rating, a.pool.rareza));
   }, [inventory.data]);
 
+  /** Equipes presentes no inventário do usuário */
+  const inventarioEquipos = useMemo(() => {
+    const map = new Map<string, { id: string; nombre: string; categoria: string; sexo: string }>();
+    (inventory.data ?? []).forEach((c) => {
+      const tm = c.player_pool?.club_teams;
+      if (tm?.id) map.set(tm.id, { id: tm.id, nombre: tm.nombre, categoria: tm.categoria ?? "", sexo: tm.sexo ?? "" });
+    });
+    return [...map.values()].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }, [inventory.data]);
+
+  /** Opções dependentes: categorias visíveis dado o sexo, sexos visíveis dada a categoria */
+  const catOptions = (["cadete", "juvenil", "senior"] as const).filter(
+    (k) => inventarioEquipos.some((tm) => tm.categoria === k) && (!filtroSexo || inventarioEquipos.some((tm) => tm.categoria === k && tm.sexo === filtroSexo)),
+  );
+  const sexoOptions = (["masculino", "femenino"] as const).filter(
+    (g) => inventarioEquipos.some((tm) => tm.sexo === g) && (!filtroCat || inventarioEquipos.some((tm) => tm.sexo === g && tm.categoria === filtroCat)),
+  );
+  const equiposFiltrados = inventarioEquipos.filter(
+    (tm) => (!filtroCat || tm.categoria === filtroCat) && (!filtroSexo || tm.sexo === filtroSexo),
+  );
+  useEffect(() => {
+    if (filtroEquipo && !equiposFiltrados.some((tm) => tm.id === filtroEquipo)) setFiltroEquipo("");
+  }, [filtroCat, filtroSexo, filtroEquipo, equiposFiltrados]);
+
+  const visibleCards = useMemo(
+    () =>
+      cards.filter((c) => {
+        const tm = c.pool.club_teams;
+        return (
+          (!filtroCat || tm?.categoria === filtroCat) &&
+          (!filtroSexo || tm?.sexo === filtroSexo) &&
+          (!filtroEquipo || c.pool.team_id === filtroEquipo)
+        );
+      }),
+    [cards, filtroCat, filtroSexo, filtroEquipo],
+  );
+
   const [slotDraft, setSlotDraft] = useState<Record<Posicion, string | null>>({
     portero: null,
     extremo_izq: null,
