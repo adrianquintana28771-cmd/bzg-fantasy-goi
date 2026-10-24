@@ -215,15 +215,15 @@ function Inner({ userId }: { userId: string }) {
         )
         .eq("user_id", userId);
       if (error) throw error;
-      const { data: teams } = await supabase.from("club_teams").select("id, nombre");
-      const tmap = new Map((teams ?? []).map((t) => [t.id, t.nombre]));
+      const { data: teams } = await supabase.from("club_teams").select("id, nombre, categoria, sexo");
+      const tmap = new Map((teams ?? []).map((t) => [t.id, t]));
       return ((data ?? []) as unknown as CopyRow[]).map((c) =>
         c.player_pool
           ? {
               ...c,
               player_pool: {
                 ...c.player_pool,
-                club_teams: c.player_pool.team_id ? { nombre: tmap.get(c.player_pool.team_id) ?? "" } : null,
+                club_teams: c.player_pool.team_id ? (tmap.get(c.player_pool.team_id) ?? null) : null,
               },
             }
           : c,
