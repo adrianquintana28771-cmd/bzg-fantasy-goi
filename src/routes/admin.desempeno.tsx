@@ -222,6 +222,13 @@ function Desempeno() {
     setCounts(next);
   }, [existing.data, playerId, matchId]);
 
+  /** Por partido: se deduce de las acciones de portería guardadas; no cambia la ficha del jugador. */
+  const [tambienPortero, setTambienPortero] = useState(false);
+  useEffect(() => {
+    const gkIds = new Set((actions.data ?? []).filter((a) => a.solo_portero).map((a) => a.id));
+    setTambienPortero((existing.data ?? []).some((r) => gkIds.has(r.action_id) && r.cantidad > 0));
+  }, [existing.data, actions.data, playerId, matchId]);
+
   const player =
     [...(roster.data ?? []), ...invitados].find((r) => r.club_players?.id === playerId)
       ?.club_players ?? null;
@@ -239,9 +246,11 @@ function Desempeno() {
           ? a.solo_entrenador
           : esPortero
             ? a.solo_portero
-            : !a.solo_portero && !a.solo_entrenador,
+            : tambienPortero
+              ? !a.solo_entrenador
+              : !a.solo_portero && !a.solo_entrenador,
       ),
-    [actions.data, esPortero, esEntrenador],
+    [actions.data, esPortero, esEntrenador, tambienPortero],
   );
 
   /** Otros porteros/as con acciones de portería en este partido (regla de 2+ porteros) */
@@ -280,7 +289,8 @@ function Desempeno() {
     ...Object.entries(counts).map(([action_id, cantidad]) => ({ match_id: matchId, player_id: playerId, action_id, cantidad })),
   ], actions.data ?? []);
   // Sin paradas, lanzamientos fuera ni goles en contra, el % cuenta como 0 y se calcula igual.
-  const pct = esPortero
+  const verPortero = esPortero || (!esEntrenador && tambienPortero);
+  const pct = verPortero
     ? (pctParadas(counts.parada ?? 0, counts.lanzamiento_fuera ?? 0, counts.gol_encajado ?? 0) ?? 0)
     : null;
   const pctPts = calculated.lines.find(l => l.rule === "percentage")?.points ?? 0;
@@ -309,7 +319,11 @@ function Desempeno() {
     if (!matchId || !playerId) return;
     setSaving(true);
     try {
-      const rows = visibleActions.map((a) => ({
+      // Al desmarcar «También juega de portero», sus acciones de portería de este partido quedan a 0.
+      const extra = !esEntrenador && !esPortero && !tambienPortero
+        ? (actions.data ?? []).filter((a) => a.solo_portero && a.activo && (counts[a.id] ?? 0) === 0 && (existing.data ?? []).some((r) => r.action_id === a.id))
+        : [];
+      const rows = [...visibleActions, ...extra].map((a) => ({
         match_id: matchId,
         player_id: playerId,
         action_id: a.id,
@@ -498,7 +512,7 @@ function Desempeno() {
                       ? t("Atezaina", "Portero/a")
                       : t("Zelaiko jokalaria", "Jugador/a de campo")}
                 </span>
-                {esPortero && (
+                {verPortero && (
                   <span>
                     · {t("Geldiketak", "Paradas")}: {pct == null ? "—" : `${String(pct).replace(".", ",")} %`}
                     {variosPorteros && ` · ${t("2+ atezain", "2+ porteros")}`}
@@ -523,7 +537,27 @@ function Desempeno() {
             </div>
           </div>
 
-          {esPortero && (
+          {!esEntrenador && !esPortero && (
+            <label className="mt-4 flex items-center gap-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm">
+              <input
+                type="checkbox"
+                checked={tambienPortero}
+                onChange={(e) => {
+                  const on = e.target.checked;
+                  setTambienPortero(on);
+                  if (!on)
+                    setCounts((c) => {
+                      const n = { ...c };
+                      for (const a of actions.data ?? []) if (a.solo_portero) n[a.id] = 0;
+                      return n;
+                    });
+                }}
+              />
+              {t("Atezain gisa ere jokatzen du", "También juega de portero")}
+            </label>
+          )}
+
+          {verPortero && (
             <div className="mt-4 rounded-2xl border border-border bg-card p-4 text-sm">
               <div className="font-semibold">
                 {t("Partidako atezainak", "Porteros/as en este partido")}: {nPorteros}
