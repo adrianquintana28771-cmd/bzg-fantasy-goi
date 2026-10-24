@@ -842,10 +842,14 @@ function Inner({ userId }: { userId: string }) {
             </Link>{" "}
             {t("gutunazalak lortzeko.", "para conseguir sobres.")}
           </p>
+        ) : visibleCards.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            {t("Iragazkirekin ez dago jokalaririk. Saiatu beste iragazki batekin.", "Nenhum jogador com esses filtros. Tente outro filtro.")}
+          </p>
         ) : (
           <div className="overflow-x-auto">
           <ul className="grid grid-cols-2 gap-3 sm:min-w-[540px] sm:grid-cols-3">
-            {cards.map((c) => {
+            {visibleCards.map((c) => {
               const enPista = alignedIds.has(c.pool.id);
               return (
                 <li
