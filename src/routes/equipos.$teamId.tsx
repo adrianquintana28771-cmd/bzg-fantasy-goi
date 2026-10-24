@@ -6,7 +6,7 @@ import { CategoryBadge } from "@/components/fantasy-ui";
 import { ArrowLeft } from "lucide-react";
 import { POSITION_LABEL, POSITION_LABEL_EU, type Category } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
-import { fetchPool, fetchPointsByPlayer, fetchTeams, round2 } from "@/lib/club-data";
+import { fetchAllRows, fetchPool, fetchPointsByPlayer, fetchTeams, round2 } from "@/lib/club-data";
 
 export const Route = createFileRoute("/equipos/$teamId")({
   head: ({ params }) => {
@@ -46,7 +46,9 @@ function EquipoDetalle() {
         fetchPool(),
         fetchPointsByPlayer(),
         supabase.from("club_positions").select("id,nombre,orden").order("orden"),
-        supabase.from("club_player_positions").select("player_id,position_id,es_principal"),
+        fetchAllRows((from, to) =>
+          supabase.from("club_player_positions").select("player_id,position_id,es_principal").range(from, to),
+        ).then((rows) => ({ data: rows, error: null })),
       ]);
       if (posTipos.error) throw posTipos.error;
       if (posJug.error) throw posJug.error;

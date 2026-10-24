@@ -14,7 +14,7 @@ import { useDisplayPoints } from "@/hooks/use-display-points";
 import { useT, useTd } from "@/lib/i18n";
 import { useCardImages } from "@/lib/card-images";
 import { Button } from "@/components/ui/button";
-import { round2 } from "@/lib/club-data";
+import { fetchAllRows, round2 } from "@/lib/club-data";
 
 import {
   CardPhoto,
