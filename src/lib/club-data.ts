@@ -291,7 +291,7 @@ export async function fetchSavePctLeaders(): Promise<AvgLeader[]> {
         .filter((p): p is number => p != null);
       const valor = pcts.length ? round2(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
       const v = valor != null && info.has(id) ? info.get(id)! : null;
-      return v && !v.esEntrenador
+      return v && !v.esEntrenador && gk.has(id)
         ? { id, valor, poolId: poolIds.get(id) ?? null, nombre: v.nombre, equipo: v.equipo }
         : null;
     })
