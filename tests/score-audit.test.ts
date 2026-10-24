@@ -55,3 +55,18 @@ describe('read-only score audit', () => {
   test('percentage uses raw value before selecting tier', () => expect(auditPlayer('p',[action('m','parada',1),action('m','gol_encajado',2)],types.map(t => t.id === 'porcentaje_paradas' ? {...t,tramos:[{desde:33.334,hasta:null,puntos:8}]} : t)).expected).toBe(2.3));
   test('round each match before adding jornada', () => expect(auditPlayer('p',[action('m1','parada',1),action('m2','parada',1)],types.map(t => t.id === 'parada' ? {...t,puntos:1.235} : t.id === 'porcentaje_paradas' ? {...t,tramos:[]} : t)).expected).toBe(2.48));
 });
+
+test("field shooting percentage: highest tier only, 7m counted once, no points without shots", async () => {
+  const { auditPlayer } = await import("../src/lib/score-audit");
+  const tramos = [50, 60, 70, 80, 90, 100].map((desde, i) => ({ desde, hasta: null, puntos: [0.5, 1, 1.5, 2, 3.5, 5][i] }));
+  const types = [
+    { id: "gol", nombre: "Gol", puntos: 0, activo: true, solo_portero: false, tramos: null },
+    { id: "gol_7m", nombre: "7m", puntos: 0, activo: true, solo_portero: false, tramos: null },
+    { id: "falta_ataque", nombre: "Fallo", puntos: 0, activo: true, solo_portero: false, tramos: null },
+    { id: "porcentaje_acierto", nombre: "Acierto", puntos: 0, activo: true, solo_portero: false, tramos },
+  ];
+  const a = (action_id: string, cantidad: number) => ({ match_id: "m", player_id: "p", action_id, cantidad });
+  expect(auditPlayer("p", [a("gol", 7), a("falta_ataque", 4)], types).expected).toBe(1); // 63,64 %
+  expect(auditPlayer("p", [a("gol", 2), a("gol_7m", 2)], types).expected).toBe(5); // 100 %
+  expect(auditPlayer("p", [a("gol", 0)], types).expected).toBe(0);
+});
