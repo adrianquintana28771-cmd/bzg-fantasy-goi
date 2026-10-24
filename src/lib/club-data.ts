@@ -240,18 +240,7 @@ export async function fetchSavePctLeaders(): Promise<AvgLeader[]> {
   const { data: players } = playerIds.length
     ? await supabase
         .from("club_players")
-        .select("id, nombre, apellido1, alias, club_player_teams(club_teams(nombre))")
-        .in("id", playerIds)
-    : { data: [] as any[] };
-  const info = new Map<string, { nombre: string; equipo: string | null }>();
-  for (const p of (players ?? []) as any[]) {
-    info.set(p.id, {
-      nombre: p.alias || [p.nombre, p.apellido1].filter(Boolean).join(" "),
-      equipo: p.club_player_teams?.[0]?.club_teams?.nombre ?? null,
-    });
-  }
-  const poolIds = await poolIdsByClubPlayer(playerIds);
-  // Sumas por jugador y jornada; el % se calcula por jornada y luego se promedia.
+        .select("id, nombre, apellido1, alias, es_entrenador, club_player_teams(club_teams(nombre))")
   const per = new Map<string, Map<number, { par: number; fue: number; gol: number }>>();
   for (const r of rows) {
     if (r.jornada == null) continue;
