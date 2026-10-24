@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BackButton } from "@/components/back-button";
 import { useT, useLang } from "@/lib/i18n";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU, type Category } from "@/lib/fantasy/types";
+import { fetchAllRows } from "@/lib/club-data";
 
 export const Route = createFileRoute("/partidos/")({
   head: () => {

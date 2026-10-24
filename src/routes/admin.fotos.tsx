@@ -17,6 +17,7 @@ import {
   preferredImageFile,
   type Rareza,
 } from "@/lib/card-images";
+import { fetchAllRows } from "@/lib/club-data";
 
 export const Route = createFileRoute("/admin/fotos")({
   head: () => ({
