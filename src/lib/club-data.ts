@@ -293,3 +293,52 @@ export async function fetchAvgPtsLeaders(): Promise<AvgLeader[]> {
     .sort((a, b) => b.valor - a.valor || a.nombre.localeCompare(b.nombre))
     .slice(0, 5);
 }
+
+/** Media de los % de acierto por jornada: (gol + gol_7m) / (gol + gol_7m + fallados); solo jornadas con más de 5 lanzamientos. */
+export async function fetchShootingPctLeaders(): Promise<AvgLeader[]> {
+  const rows: { player_id: string; action_id: string; cantidad: number; jornada: number | null }[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from("club_match_actions")
+      .select("player_id, action_id, cantidad, club_matches(jornada)")
+      .in("action_id", ["gol", "gol_7m", "falta_ataque"])
+      .range(from, from + 999);
+    if (error) throw error;
+    for (const r of (data ?? []) as any[])
+      rows.push({ player_id: r.player_id, action_id: r.action_id, cantidad: r.cantidad, jornada: r.club_matches?.jornada ?? null });
+    if (!data || data.length < 1000) break;
+  }
+  const per = new Map<string, Map<number, { gol: number; fal: number }>>();
+  for (const r of rows) {
+    if (r.jornada == null) continue;
+    const m = per.get(r.player_id) ?? new Map();
+    const j = m.get(r.jornada) ?? { gol: 0, fal: 0 };
+    if (r.action_id === "falta_ataque") j.fal += r.cantidad ?? 0;
+    else j.gol += r.cantidad ?? 0;
+    m.set(r.jornada, j);
+    per.set(r.player_id, m);
+  }
+  const playerIds = [...per.keys()];
+  const { data: players } = playerIds.length
+    ? await supabase
+        .from("club_players")
+        .select("id, nombre, apellido1, alias, club_player_teams(club_teams(nombre))")
+        .in("id", playerIds)
+    : { data: [] as any[] };
+  const info = new Map<string, { nombre: string; equipo: string | null }>();
+  for (const p of (players ?? []) as any[])
+    info.set(p.id, {
+      nombre: p.alias || [p.nombre, p.apellido1].filter(Boolean).join(" "),
+      equipo: p.club_player_teams?.[0]?.club_teams?.nombre ?? null,
+    });
+  const poolIds = await poolIdsByClubPlayer(playerIds);
+  return [...per]
+    .map(([id, m]) => {
+      const pcts = [...m.values()].filter((j) => j.gol + j.fal > 5).map((j) => (j.gol * 100) / (j.gol + j.fal));
+      const valor = pcts.length ? round2(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
+      return valor != null && info.has(id) ? { id, valor, poolId: poolIds.get(id) ?? null, ...info.get(id)! } : null;
+    })
+    .filter((x): x is AvgLeader => x != null)
+    .sort((a, b) => b.valor - a.valor || a.nombre.localeCompare(b.nombre))
+    .slice(0, 5);
+}
