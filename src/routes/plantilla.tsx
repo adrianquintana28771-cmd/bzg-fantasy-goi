@@ -188,6 +188,8 @@ function Inner({ userId }: { userId: string }) {
   const displayPts = useDisplayPoints();
   const t = useT();
   const td = useTd();
+  const { lang } = useLang();
+  const CAT_LABEL = lang === "eu" ? CATEGORY_LABEL_EU : CATEGORY_LABEL;
   const qc = useQueryClient();
   const cardImages = useCardImages();
 
