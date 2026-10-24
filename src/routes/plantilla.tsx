@@ -405,6 +405,11 @@ function Inner({ userId }: { userId: string }) {
       .sort((a, b) => cartaPuntos(b.pool.rating, b.pool.rareza) - cartaPuntos(a.pool.rating, a.pool.rareza));
   }, [inventory.data]);
 
+  /** Filtros de «Mis jugadores»: sexo, categoría y equipo dependientes entre sí */
+  const [filtroCat, setFiltroCat] = useState("");
+  const [filtroSexo, setFiltroSexo] = useState("");
+  const [filtroEquipo, setFiltroEquipo] = useState("");
+
   /** Equipes presentes no inventário do usuário */
   const inventarioEquipos = useMemo(() => {
     const map = new Map<string, { id: string; nombre: string; categoria: string; sexo: string }>();
