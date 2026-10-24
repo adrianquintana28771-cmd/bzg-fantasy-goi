@@ -310,9 +310,18 @@ function Inner({ userId }: { userId: string }) {
   const historial = useQuery({
     queryKey: ["historial-jornadas", userId],
     queryFn: async () => {
-      const [{ data: lineups }, { data: stats }, { data: pool }, { data: frozen }] = await Promise.all([
+      const stats: { player_id: string; jornada_numero: number; puntos: number }[] = [];
+      for (let from = 0; ; from += 1000) {
+        const { data, error } = await supabase
+          .from("player_jornada_stats")
+          .select("player_id, jornada_numero, puntos")
+          .range(from, from + 999);
+        if (error) throw error;
+        stats.push(...(data ?? []));
+        if (!data || data.length < 1000) break;
+      }
+      const [{ data: lineups }, { data: pool }, { data: frozen }] = await Promise.all([
         supabase.from("lineups").select("*, jornadas(numero, nombre)").eq("user_id", userId),
-        supabase.from("player_jornada_stats").select("player_id, jornada_numero, puntos"),
         supabase.from("player_pool").select("id, nombre, rareza"),
         supabase
           .from("jornada_alineaciones_congeladas")

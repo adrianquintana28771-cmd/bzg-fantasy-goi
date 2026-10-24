@@ -117,14 +117,19 @@ export type RankedPlayer = {
 
 /** Ranking público de jugadores/as con datos reales (una fila por persona). */
 export async function fetchPlayerRanking(): Promise<RankedPlayer[]> {
-  const [teams, pool, stats] = await Promise.all([
-    fetchTeams(),
-    fetchPool(),
-    supabase.from("player_jornada_stats").select("player_id,puntos,jornada_numero"),
-  ]);
-  if (stats.error) throw stats.error;
+  const statsRows: { player_id: string; puntos: number; jornada_numero: number }[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from("player_jornada_stats")
+      .select("player_id,puntos,jornada_numero")
+      .range(from, from + 999);
+    if (error) throw error;
+    statsRows.push(...(data ?? []));
+    if (!data || data.length < 1000) break;
+  }
+  const [teams, pool] = await Promise.all([fetchTeams(), fetchPool()]);
   const agg: Record<string, { puntos: number; jornadas: Set<number>; por: Record<number, number> }> = {};
-  for (const r of stats.data ?? []) {
+  for (const r of statsRows) {
     const a = (agg[r.player_id] ??= { puntos: 0, jornadas: new Set(), por: {} });
     a.puntos += Number(r.puntos);
     a.por[r.jornada_numero] = round2((a.por[r.jornada_numero] ?? 0) + Number(r.puntos));
