@@ -1,10 +1,10 @@
 import { supabase } from '@/integrations/supabase/client';
 import { auditPlayer, type AuditAction, type AuditType } from './score-audit';
-import type { Tramo } from './club-data';
+import { fetchAllRows, type Tramo } from './club-data';
 
 export async function fetchScoreAudit(jornada: number) {
-  const [pool, matches, types, stats] = await Promise.all([
-    supabase.from('player_pool').select('id,nombre,rareza,posicion,club_player_id,club:club_players(es_entrenador),team_id').order('id'),
+  const [poolRows, matches, types, stats] = await Promise.all([
+    fetchAllRows((from, to) => supabase.from('player_pool').select('id,nombre,rareza,posicion,club_player_id,club:club_players(es_entrenador),team_id').order('id').range(from, to)),
     supabase.from('club_matches').select('id,rival,team_id,club_teams(nombre)').eq('jornada', jornada),
     supabase.from('club_action_types').select('id,nombre,puntos,activo,solo_portero,tramos'),
     supabase.from('player_jornada_stats').select('player_id,puntos,estado').eq('jornada_numero', jornada),
