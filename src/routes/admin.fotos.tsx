@@ -61,8 +61,12 @@ function Fotos() {
     queryKey: ["fotos-personas"],
     queryFn: async () => {
       const [pl, lk, tm] = await Promise.all([
-        supabase.from("club_players").select("id,nombre,apellido1,apellido2,alias,es_entrenador,activo").order("nombre"),
-        supabase.from("club_player_teams").select("player_id,team_id"),
+        fetchAllRows((from, to) =>
+          supabase.from("club_players").select("id,nombre,apellido1,apellido2,alias,es_entrenador,activo").order("nombre").range(from, to),
+        ).then((data) => ({ data, error: null })),
+        fetchAllRows((from, to) =>
+          supabase.from("club_player_teams").select("player_id,team_id").range(from, to),
+        ).then((data) => ({ data, error: null })),
         supabase.from("club_teams").select("id,nombre"),
       ]);
       for (const r of [pl, lk, tm]) if (r.error) throw r.error;

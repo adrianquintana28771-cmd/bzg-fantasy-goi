@@ -51,14 +51,16 @@ function Partidos() {
   const { data = [], isLoading } = useQuery({
     queryKey: ["partidos-publicos"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("club_matches")
-        .select(
-          "id,jornada,rival,fecha,hora,es_local,goles_favor,goles_contra,club_teams(nombre,categoria,sexo)",
-        )
-        .order("jornada");
-      if (error) throw error;
-      return (data ?? []) as unknown as Match[];
+      const data = await fetchAllRows((from, to) =>
+        supabase
+          .from("club_matches")
+          .select(
+            "id,jornada,rival,fecha,hora,es_local,goles_favor,goles_contra,club_teams(nombre,categoria,sexo)",
+          )
+          .order("jornada")
+          .range(from, to),
+      );
+      return data as unknown as Match[];
     },
   });
 

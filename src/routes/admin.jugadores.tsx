@@ -8,6 +8,7 @@ import { AdminGuard } from "@/components/admin-guard";
 import { useAuth } from "@/lib/auth-context";
 import { useT, useLang } from "@/lib/i18n";
 import { POSITION_LABEL, POSITION_LABEL_EU } from "@/lib/fantasy/types";
+import { fetchAllRows } from "@/lib/club-data";
 
 export const Route = createFileRoute("/admin/jugadores")({
   head: () => ({
