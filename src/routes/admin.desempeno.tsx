@@ -319,7 +319,11 @@ function Desempeno() {
     if (!matchId || !playerId) return;
     setSaving(true);
     try {
-      const rows = visibleActions.map((a) => ({
+      // Al desmarcar «También juega de portero», sus acciones de portería de este partido quedan a 0.
+      const extra = !esEntrenador && !esPortero && !tambienPortero
+        ? (actions.data ?? []).filter((a) => a.solo_portero && a.activo && (counts[a.id] ?? 0) === 0 && (existing.data ?? []).some((r) => r.action_id === a.id))
+        : [];
+      const rows = [...visibleActions, ...extra].map((a) => ({
         match_id: matchId,
         player_id: playerId,
         action_id: a.id,
