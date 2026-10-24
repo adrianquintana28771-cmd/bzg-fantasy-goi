@@ -240,14 +240,15 @@ export async function fetchSavePctLeaders(): Promise<AvgLeader[]> {
   const { data: players } = playerIds.length
     ? await supabase
         .from("club_players")
-        .select("id, nombre, apellido1, alias, club_player_teams(club_teams(nombre))")
+        .select("id, nombre, apellido1, alias, es_entrenador, club_player_teams(club_teams(nombre))")
         .in("id", playerIds)
     : { data: [] as any[] };
-  const info = new Map<string, { nombre: string; equipo: string | null }>();
+  const info = new Map<string, { nombre: string; equipo: string | null; esEntrenador: boolean }>();
   for (const p of (players ?? []) as any[]) {
     info.set(p.id, {
       nombre: p.alias || [p.nombre, p.apellido1].filter(Boolean).join(" "),
       equipo: p.club_player_teams?.[0]?.club_teams?.nombre ?? null,
+      esEntrenador: !!p.es_entrenador,
     });
   }
   const poolIds = await poolIdsByClubPlayer(playerIds);
@@ -269,8 +270,9 @@ export async function fetchSavePctLeaders(): Promise<AvgLeader[]> {
         .map((j) => pctParadas(j.par, j.fue, j.gol))
         .filter((p): p is number => p != null);
       const valor = pcts.length ? round2(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
-      return valor != null && info.has(id)
-        ? { id, valor, poolId: poolIds.get(id) ?? null, ...info.get(id)! }
+      const v = valor != null && info.has(id) ? info.get(id)! : null;
+      return v && !v.esEntrenador
+        ? { id, valor, poolId: poolIds.get(id) ?? null, nombre: v.nombre, equipo: v.equipo }
         : null;
     })
     .filter((x): x is AvgLeader => x != null)
