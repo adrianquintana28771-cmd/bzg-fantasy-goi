@@ -240,7 +240,7 @@ function Desempeno() {
   const visibleActions = useMemo(
     () =>
       (actions.data ?? []).filter((a) =>
-        !a.activo || a.id === PCT_ID
+        !a.activo || a.id === PCT_ID || a.id === ACC_ID
           ? false
           : esEntrenador
           ? a.solo_entrenador
@@ -293,11 +293,17 @@ function Desempeno() {
   const pct = verPortero
     ? (pctParadas(counts.parada ?? 0, counts.lanzamiento_fuera ?? 0, counts.gol_encajado ?? 0) ?? 0)
     : null;
-  const pctPts = calculated.lines.find(l => l.rule === "percentage")?.points ?? 0;
+  const pctPts = calculated.lines.find(l => l.actionId === "porcentaje_paradas")?.points ?? 0;
   const golesPts = calculated.lines.find(l => l.actionId === "gol_encajado")?.points ?? 0;
   const signedPoints = (points: number) => `${points > 0 ? "+" : ""}${String(points).replace(".", ",")}`;
 
   const total = calculated.expected;
+  const accGoles = (counts.gol ?? 0) + (counts.gol_7m ?? 0);
+  const accFallados = counts.falta_ataque ?? 0;
+  const accDen = accGoles + accFallados;
+  const accPct = accDen > 0 ? Math.round((accGoles * 10000) / accDen) / 100 : null;
+  const accLine = calculated.lines.find((l) => l.actionId === ACC_ID);
+  const accActivo = !!actions.data?.find((a) => a.id === ACC_ID && a.activo);
 
   function bump(id: string, delta: number) {
     const act = visibleActions.find((a) => a.id === id);
@@ -594,6 +600,19 @@ function Desempeno() {
             </div>
           )}
 
+          {!esEntrenador && accActivo && (
+            <div className="mt-4 rounded-2xl border border-border bg-card p-4 text-sm">
+              <div className="font-semibold">
+                % {t("asmatzea", "acierto")}: {accPct == null ? "—" : `${String(accPct).replace(".", ",")} %`}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {accDen > 0
+                  ? <>({counts.gol ?? 0} + {counts.gol_7m ?? 0}) / ({counts.gol ?? 0} + {counts.gol_7m ?? 0} + {accFallados}) × 100 → {signedPoints(accLine?.points ?? 0)} pts</>
+                  : t("Jaurtiketarik gabe: ez du punturik ematen", "Sin lanzamientos: no suma puntos")}
+              </div>
+            </div>
+          )}
+
           {grupos.map((g) => (
             <div key={g} className="mt-6">
               <h2 className="font-display text-lg capitalize">{td(g)}</h2>
@@ -656,6 +675,7 @@ function Desempeno() {
 }
 
 const PCT_ID = "porcentaje_paradas";
+const ACC_ID = "porcentaje_acierto";
 
 function fullName(p: { nombre: string; alias: string | null; apellido1: string | null; apellido2: string | null }) {
   return [p.nombre, p.apellido1, p.apellido2].filter(Boolean).join(" ") || p.alias || "";

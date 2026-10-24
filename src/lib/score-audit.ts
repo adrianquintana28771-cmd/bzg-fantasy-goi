@@ -53,9 +53,19 @@ export function auditPlayer(playerId: string, actions: AuditAction[], types: Aud
       }
       if (pctType?.activo) lines.push({ match, actionId: 'porcentaje_paradas', action: pctType.nombre, quantity: `${round(percentage)} %`, origin: 'automatic', points: bonus, rule: 'percentage' });
     }
+    // Field shooting percentage: (gol + gol_7m) / (gol + gol_7m + lanzamiento fallado), highest tier only.
+    const goals = (quantities.get('gol') ?? 0) + (quantities.get('gol_7m') ?? 0);
+    const missed = quantities.get('falta_ataque') ?? 0;
+    const accType = byType.get('porcentaje_acierto');
+    if (accType?.activo && goals + missed > 0) {
+      const acc = goals * 100 / (goals + missed);
+      const accPts = [...(accType.tramos ?? [])].sort((a,b) => b.desde - a.desde).find(t => acc >= t.desde && (t.hasta == null || acc <= t.hasta))?.puntos ?? 0;
+      expected += accPts;
+      lines.push({ match, actionId: 'porcentaje_acierto', action: accType.nombre, quantity: `${round(acc)} %`, origin: 'automatic', points: accPts, rule: 'percentage' });
+    }
     for (const [id, quantity] of quantities) {
       const type = byType.get(id);
-      if (!type?.activo || ['parada', 'lanzamiento_fuera', 'gol_encajado', 'porcentaje_paradas'].includes(id) || quantity === 0) continue;
+      if (!type?.activo || ['parada', 'lanzamiento_fuera', 'gol_encajado', 'porcentaje_paradas', 'porcentaje_acierto'].includes(id) || quantity === 0) continue;
       const points = quantity * Number(type.puntos);
       expected += points;
       lines.push({ match, actionId: id, action: type.nombre, quantity: String(quantity), origin: 'recorded', points, rule: 'linear' });
