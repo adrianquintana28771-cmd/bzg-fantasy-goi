@@ -356,9 +356,13 @@ export async function fetchShootingPctLeaders(): Promise<AvgLeader[]> {
   const poolIds = await poolIdsByClubPlayer(playerIds);
   return [...per]
     .map(([id, m]) => {
-      const pcts = [...m.values()].filter((j) => j.gol + j.fal > 5).map((j) => (j.gol * 100) / (j.gol + j.fal));
-      const valor = pcts.length ? round2(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
-      return valor != null && info.has(id) ? { id, valor, poolId: poolIds.get(id) ?? null, ...info.get(id)! } : null;
+      const jornadas = [...m.values()].filter((j) => j.gol + j.fal > 0);
+      const totalLanz = jornadas.reduce((a, j) => a + j.gol + j.fal, 0);
+      // Mínimo de lanzamientos en el TOTAL acumulado, no por jornada
+      if (totalLanz <= 5) return null;
+      const pcts = jornadas.map((j) => (j.gol * 100) / (j.gol + j.fal));
+      const valor = round2(pcts.reduce((a, b) => a + b, 0) / pcts.length);
+      return info.has(id) ? { id, valor, poolId: poolIds.get(id) ?? null, ...info.get(id)! } : null;
     })
     .filter((x): x is AvgLeader => x != null)
     .sort((a, b) => b.valor - a.valor || a.nombre.localeCompare(b.nombre))
