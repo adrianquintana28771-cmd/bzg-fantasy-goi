@@ -52,7 +52,7 @@ function Partidos() {
   const { data = [], isLoading } = useQuery({
     queryKey: ["partidos-publicos"],
     queryFn: async () => {
-      const data = await fetchAllRows((from, to) =>
+      const data = await fetchAllRows((from: number, to: number) =>
         supabase
           .from("club_matches")
           .select(
