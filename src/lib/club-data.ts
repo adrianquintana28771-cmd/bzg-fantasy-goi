@@ -263,6 +263,15 @@ export async function fetchSavePctLeaders(): Promise<AvgLeader[]> {
     });
   }
   const poolIds = await poolIdsByClubPlayer(playerIds);
+  // Solo porteros/as reales (posición de portero en su ficha de club)
+  const { data: gkRows } = playerIds.length
+    ? await supabase
+        .from("club_player_positions")
+        .select("player_id")
+        .eq("position_id", "portero")
+        .in("player_id", playerIds)
+    : { data: [] as { player_id: string }[] };
+  const gk = new Set((gkRows ?? []).map((r) => r.player_id));
   // Sumas por jugador y jornada; el % se calcula por jornada y luego se promedia.
   const per = new Map<string, Map<number, { par: number; fue: number; gol: number }>>();
   for (const r of rows) {
@@ -282,7 +291,7 @@ export async function fetchSavePctLeaders(): Promise<AvgLeader[]> {
         .filter((p): p is number => p != null);
       const valor = pcts.length ? round2(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
       const v = valor != null && info.has(id) ? info.get(id)! : null;
-      return v && !v.esEntrenador
+      return v && !v.esEntrenador && gk.has(id)
         ? { id, valor, poolId: poolIds.get(id) ?? null, nombre: v.nombre, equipo: v.equipo }
         : null;
     })
