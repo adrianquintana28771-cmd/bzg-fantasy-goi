@@ -785,7 +785,7 @@ function Inner({ userId }: { userId: string }) {
           </p>
         ) : (
           <div className="overflow-x-auto">
-          <ul className="grid min-w-[540px] grid-cols-3 gap-3">
+          <ul className="grid grid-cols-2 gap-3 sm:min-w-[540px] sm:grid-cols-3">
             {cards.map((c) => {
               const enPista = alignedIds.has(c.pool.id);
               return (
@@ -884,7 +884,7 @@ function Inner({ userId }: { userId: string }) {
             </DialogTitle>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-auto">
-          <div className="grid min-w-[540px] grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:min-w-[540px] sm:grid-cols-3">
             {pickSlot && slotDraft[pickSlot] && (
               <button
                 onClick={() => {
@@ -892,13 +892,13 @@ function Inner({ userId }: { userId: string }) {
                   setDirty(true);
                   setPickSlot(null);
                 }}
-                className="col-span-3 flex w-full items-center justify-center gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-2 text-xs font-semibold text-destructive"
+                className="col-span-2 flex w-full items-center justify-center gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-2 text-xs font-semibold text-destructive sm:col-span-3"
               >
                 <X className="h-3 w-3" /> {t("Kendu hutsunetik", "Quitar del hueco")}
               </button>
             )}
             {pickSlot && eligibleForSlot(pickSlot).length === 0 && (
-              <p className="col-span-3 py-6 text-center text-sm text-muted-foreground">
+              <p className="col-span-2 py-6 text-center text-sm text-muted-foreground sm:col-span-3">
                 {t(
                   "Ez duzu jokalaririk hutsune honetarako. Ireki gutunazal bat.",
                   "No tienes jugadores para este hueco. Abre un sobre.",
