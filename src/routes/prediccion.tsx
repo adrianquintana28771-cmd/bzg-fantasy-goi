@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Target } from "lucide-react";
+import { Target, Lock, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PredictionCourt } from "@/components/prediction-court";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
@@ -38,6 +39,7 @@ function PrediccionPage() {
   const { user, loading } = useAuth();
   const qc = useQueryClient();
   const [picks, setPicks] = useState<Picks>({});
+  const [pickSlot, setPickSlot] = useState<PredSlot | null>(null);
 
   const jornadas = useQuery({
     queryKey: ["pred-jornadas"],
@@ -87,6 +89,7 @@ function PrediccionPage() {
   if (loading) return null;
   const locked = !activa || activa.is_locked;
   const usados = new Set(Object.values(picks).filter(Boolean));
+  const names = new Map((cands.data ?? []).map((c) => [c.id, c.nombre]));
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 px-4 py-6">
@@ -109,39 +112,62 @@ function PrediccionPage() {
           {t("Hasi saioa iragartzeko.", "Inicia sesión para hacer tu predicción.")}
         </p>
       ) : (
-        <section className="space-y-2 rounded-2xl border border-border bg-card p-4">
-          {PRED_SLOTS.map((slot) => {
-            const opts = (cands.data ?? [])
-              .filter((c) => c.activo && c.estado !== "no_disponible")
-              .filter((c) => (slot === "entrenador" ? c.esEntrenador : !c.esEntrenador && c.posiciones.includes(slot)))
-              .sort((a, b) => a.nombre.localeCompare(b.nombre));
-            return (
-              <label key={slot} className="flex items-center gap-3">
-                <span className="w-28 shrink-0 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t(...SLOT_LABEL[slot])}
-                </span>
-                <select
-                  translate="no"
-                  disabled={locked}
-                  value={picks[slot] ?? ""}
-                  onChange={(e) => setPicks((p) => ({ ...p, [slot]: e.target.value || null }))}
-                  className="min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="">—</option>
-                  {opts.map((o) => (
-                    <option key={o.id} value={o.id} disabled={usados.has(o.id) && picks[slot] !== o.id}>
-                      {o.nombre}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            );
-          })}
-          <Button className="mt-3 w-full" disabled={locked || save.isPending} onClick={() => save.mutate()}>
-            {locked ? t("Lerrokatzeak itxita", "Alineaciones cerradas") : t("Gorde iragarpena", "Guardar predicción")}
-          </Button>
+        <section className="overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <h2 className="font-display text-lg">{t("Zure iragarpena", "Tu predicción")}</h2>
+            {locked ? (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                <Lock className="h-3.5 w-3.5" /> {t("Blokeatuta", "Bloqueada")}
+              </span>
+            ) : (
+              <button
+                onClick={() => save.mutate()}
+                disabled={save.isPending}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[color:var(--gold,#d4a017)] px-3 py-1.5 text-xs font-bold text-black disabled:opacity-40"
+              >
+                <Save className="h-3.5 w-3.5" /> {t("Gorde", "Guardar")}
+              </button>
+            )}
+          </div>
+          <PredictionCourt picks={picks} names={names} onPick={setPickSlot} disabled={locked} />
         </section>
       )}
+
+      <Dialog open={!!pickSlot} onOpenChange={(o) => !o && setPickSlot(null)}>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {t("Aukeratu", "Elegir")} {pickSlot ? t(...SLOT_LABEL[pickSlot]) : ""}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[60vh] space-y-1 overflow-auto">
+            {pickSlot && picks[pickSlot] && (
+              <button
+                onClick={() => { setPicks((p) => ({ ...p, [pickSlot]: null })); setPickSlot(null); }}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-2 text-xs font-semibold text-destructive"
+              >
+                <X className="h-3 w-3" /> {t("Kendu hutsunetik", "Quitar del hueco")}
+              </button>
+            )}
+            {pickSlot &&
+              (cands.data ?? [])
+                .filter((c) => c.activo && c.estado !== "no_disponible")
+                .filter((c) => (pickSlot === "entrenador" ? c.esEntrenador : !c.esEntrenador && c.posiciones.includes(pickSlot)))
+                .filter((c) => !usados.has(c.id) || picks[pickSlot] === c.id)
+                .sort((a, b) => a.nombre.localeCompare(b.nombre))
+                .map((c) => (
+                  <button
+                    key={c.id}
+                    translate="no"
+                    onClick={() => { setPicks((p) => ({ ...p, [pickSlot]: c.id })); setPickSlot(null); }}
+                    className={`w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted ${picks[pickSlot] === c.id ? "bg-primary/10 font-semibold" : ""}`}
+                  >
+                    {c.nombre}
+                  </button>
+                ))}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {pasada && lastClosed && ideal.data && (
         <section className="rounded-2xl border border-border bg-card p-4">
