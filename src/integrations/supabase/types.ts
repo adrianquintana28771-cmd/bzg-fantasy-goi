@@ -918,6 +918,118 @@ export type Database = {
           },
         ]
       }
+      predicciones: {
+        Row: {
+          central: string | null
+          created_at: string
+          entrenador: string | null
+          extremo_der: string | null
+          extremo_izq: string | null
+          id: string
+          jornada_id: string
+          lateral_der: string | null
+          lateral_izq: string | null
+          pivote: string | null
+          portero: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          central?: string | null
+          created_at?: string
+          entrenador?: string | null
+          extremo_der?: string | null
+          extremo_izq?: string | null
+          id?: string
+          jornada_id: string
+          lateral_der?: string | null
+          lateral_izq?: string | null
+          pivote?: string | null
+          portero?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          central?: string | null
+          created_at?: string
+          entrenador?: string | null
+          extremo_der?: string | null
+          extremo_izq?: string | null
+          id?: string
+          jornada_id?: string
+          lateral_der?: string | null
+          lateral_izq?: string | null
+          pivote?: string | null
+          portero?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "predicciones_central_fkey"
+            columns: ["central"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predicciones_entrenador_fkey"
+            columns: ["entrenador"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predicciones_extremo_der_fkey"
+            columns: ["extremo_der"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predicciones_extremo_izq_fkey"
+            columns: ["extremo_izq"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predicciones_jornada_id_fkey"
+            columns: ["jornada_id"]
+            isOneToOne: false
+            referencedRelation: "jornadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predicciones_lateral_der_fkey"
+            columns: ["lateral_der"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predicciones_lateral_izq_fkey"
+            columns: ["lateral_izq"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predicciones_pivote_fkey"
+            columns: ["pivote"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predicciones_portero_fkey"
+            columns: ["portero"]
+            isOneToOne: false
+            referencedRelation: "club_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           apellido: string | null
