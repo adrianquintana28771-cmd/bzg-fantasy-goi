@@ -294,6 +294,9 @@ function Home() {
           )}
         </div>
 
+        <IdealSeven />
+
+
         {/* Top 5 & recent matches */}
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div>
