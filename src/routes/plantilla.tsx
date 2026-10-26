@@ -32,12 +32,6 @@ import {
   type Rareza,
 } from "@/components/equipo-card";
 
-const RAREZA_STYLE: Record<Rareza, string> = {
-  normal: "border-border bg-background",
-  raro: "border-sky-500/60 bg-sky-500/10",
-  legendario: "border-[color:var(--gold,#d4a017)] bg-[color:var(--gold,#d4a017)]/15",
-};
-
 /** Puntuación final de la carta: máximo 2 dígitos */
 function cartaPuntos(rating: number, rareza: Rareza) {
   return Math.min(99, Math.round(rating * RAREZA_MULT[rareza]));
@@ -473,6 +467,7 @@ function Inner({ userId }: { userId: string }) {
     rareza: Rareza;
   }> | null>(null);
   const [sobreRevelado, setSobreRevelado] = useState(false);
+  const [sobreCartaIndex, setSobreCartaIndex] = useState(0);
   const [sobreAbriendo, setSobreAbriendo] = useState(false);
   const sobreBusy = useRef(false);
   const sobreVideo = useRef<HTMLVideoElement | null>(null);
@@ -545,7 +540,7 @@ function Inner({ userId }: { userId: string }) {
         rareza: r.p_rareza,
       }));
     },
-    onSuccess: (data, tipo) => {
+    onSuccess: async (data, tipo) => {
       qc.setQueryData<{ sobres: number; premium: number }>(["wallet", userId], (w) =>
         w
           ? tipo === "premium"
@@ -553,9 +548,9 @@ function Inner({ userId }: { userId: string }) {
             : { ...w, sobres: Math.max(0, w.sobres - 1) }
           : w,
       );
-      setSobreResult(data);
       qc.invalidateQueries({ queryKey: ["wallet", userId] });
-      void qc.refetchQueries({ queryKey: ["inventory", userId] });
+      await qc.refetchQueries({ queryKey: ["inventory", userId] });
+      setSobreResult(data);
     },
     onError: (e: Error) => {
       sobreBusy.current = false;
@@ -573,6 +568,8 @@ function Inner({ userId }: { userId: string }) {
     // A synchronous guard also blocks clicks before React updates the buttons.
     if (sobreBusy.current) return;
     sobreBusy.current = true;
+    setSobreResult(null);
+    setSobreCartaIndex(0);
     setSobreRevelado(false);
     setSobreAbriendo(true);
     openSobreMut.mutate(tipo);
@@ -599,6 +596,21 @@ function Inner({ userId }: { userId: string }) {
   const locked = !!lineup.data?.locked || !!jornada.data?.is_locked;
 
   const cardById = (id: string | null | undefined) => (id ? (cards.find((c) => c.pool.id === id) ?? null) : null);
+  const sobrePlayer = sobreResult?.[sobreCartaIndex];
+  const sobreCard = cardById(sobrePlayer?.id);
+
+  function siguienteCartaSobre() {
+    if (!sobreResult) return;
+    if (sobreCartaIndex < sobreResult.length - 1) {
+      setSobreCartaIndex((index) => index + 1);
+      return;
+    }
+    sobreBusy.current = false;
+    setSobreAbriendo(false);
+    setSobreResult(null);
+    setSobreRevelado(false);
+    setSobreCartaIndex(0);
+  }
 
   /** Todas las posiciones en las que puede jugar (mínimo la principal) */
   const posList = (id: string, principal: Posicion): Posicion[] => {
@@ -878,13 +890,14 @@ function Inner({ userId }: { userId: string }) {
             setSobreAbriendo(false);
             setSobreResult(null);
             setSobreRevelado(false);
+            setSobreCartaIndex(0);
           }
         }}
       >
         <DialogContent
           className={
             sobreRevelado && sobreResult
-              ? "max-w-lg"
+              ? "max-h-[90dvh] max-w-sm overflow-y-auto"
               : "w-[min(94vw,52rem)] max-w-none border-0 bg-transparent p-0 shadow-none [&>button]:text-primary-foreground"
           }
         >
@@ -893,26 +906,28 @@ function Inner({ userId }: { userId: string }) {
               <DialogHeader>
                 <DialogTitle className="font-display text-2xl">{t("Gutunazal berria!", "¡Nuevo sobre!")}</DialogTitle>
               </DialogHeader>
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                {(sobreResult ?? []).map((p, i) => (
-                  <div key={`${p.id}-${i}`} className={`rounded-lg border-2 p-3 text-center ${RAREZA_STYLE[p.rareza]}`}>
-                    <div className="relative mb-1">
-                      <CardPhoto className="mx-auto h-16 w-full" images={cardImages.data} pool={cardById(p.id)?.pool} name={p.nombre} />
-                      {cardById(p.id)?.pool.club_teams?.nombre && (
-                        <div className="absolute inset-x-0 top-0 truncate rounded bg-black/60 px-1 text-[9px] font-semibold text-white">
-                          {cardById(p.id)!.pool.club_teams!.nombre}
-                        </div>
-                      )}
-                    </div>
-                    <div className="font-display text-3xl text-primary">{cartaPuntos(p.rating, p.rareza)}</div>
-                    <div translate="no" className="truncate text-xs font-semibold">
-                      {p.nombre}
-                    </div>
-                    <div className="text-[10px] uppercase text-muted-foreground">
-                      {t(RAREZA_LABEL_EU[p.rareza], RAREZA_LABEL_ES[p.rareza])}
-                    </div>
-                  </div>
-                ))}
+              <div className="mt-4 flex flex-col items-center gap-3">
+                <div aria-live="polite" className="text-sm tabular-nums text-muted-foreground">
+                  {sobreCartaIndex + 1} / {sobreResult.length}
+                </div>
+                {sobrePlayer && (
+                  <Button
+                    key={`${sobrePlayer.id}-${sobreCartaIndex}`}
+                    variant="ghost"
+                    onClick={siguienteCartaSobre}
+                    aria-label={sobreCartaIndex < sobreResult.length - 1 ? t("Hurrengo fitxa", "Siguiente ficha") : t("Amaitu", "Finalizar")}
+                    className="h-auto w-full max-w-[16rem] whitespace-normal p-0 text-left hover:bg-transparent motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
+                  >
+                    <EquipoCard
+                      pool={sobreCard?.pool ?? sobrePlayer}
+                      images={cardImages.data}
+                      posiciones={posList(sobrePlayer.id, sobrePlayer.posicion)}
+                      usos={1}
+                      puntos={ptsJornada(sobrePlayer.id)}
+                      media={jornadaPts.data?.medias.get(sobrePlayer.id) ?? 0}
+                    />
+                  </Button>
+                )}
               </div>
             </div>
           ) : (
