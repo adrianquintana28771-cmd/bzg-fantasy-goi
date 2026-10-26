@@ -11,7 +11,8 @@ import { EquipoCard, type PoolRow, type Posicion } from "@/components/equipo-car
 import { useCardImages } from "@/lib/card-images";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
-import { PRED_SLOTS, SLOT_LABEL, fetchIdealSeven } from "@/lib/ideal-seven";
+import { PRED_SLOTS, fetchIdealSeven } from "@/lib/ideal-seven";
+import { PredictionCourt } from "@/components/prediction-court";
 
 /** Fila de clasificación: todo el rectángulo enlaza con la ficha de jugador/a. */
 function LeaderRow({
@@ -428,20 +429,13 @@ function IdealSeven() {
         </span>
         <Sparkles className="h-5 w-5 text-primary" />
       </div>
-      <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-        {PRED_SLOTS.map((s) => {
-          const p = data.ideal[s];
-          return (
-            <li key={s} className="flex items-center justify-between gap-2 rounded-lg bg-secondary px-3 py-2 text-sm">
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">{t(...SLOT_LABEL[s])}</span>
-              <span className="truncate font-semibold" translate="no">
-                {p ? data.nameById.get(p.id) : "—"}
-              </span>
-              <span className="font-display text-primary">{p ? round2(p.puntos) : ""}</span>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="mt-3 overflow-hidden rounded-xl">
+        <PredictionCourt
+          picks={Object.fromEntries(PRED_SLOTS.map((s) => [s, data.ideal[s]?.id ?? null]))}
+          names={data.nameById}
+          points={Object.fromEntries(PRED_SLOTS.filter((s) => data.ideal[s]).map((s) => [s, `${round2(data.ideal[s]!.puntos)} pts`]))}
+        />
+      </div>
     </div>
   );
 }
