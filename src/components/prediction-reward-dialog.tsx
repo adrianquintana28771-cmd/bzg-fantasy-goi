@@ -58,8 +58,8 @@ export function PredictionRewardDialog() {
     <Dialog open={open} onOpenChange={(o) => { if (!o && phase !== "video" && !busy && result) finish(); }}>
       <DialogContent
         className={phase === "video"
-          ? "w-[min(94vw,52rem)] max-w-none border-0 bg-transparent p-0 shadow-none [&>button]:hidden"
-          : "max-h-[90dvh] max-w-sm overflow-y-auto [&>button]:hidden"}
+          ? "w-[min(94vw,52rem)] max-w-none border-0 bg-transparent p-0 shadow-none [&>button.absolute]:hidden"
+          : "max-h-[90dvh] max-w-sm overflow-y-auto [&>button.absolute]:hidden"}
       >
         {phase === "ask" && p && (
           <>
