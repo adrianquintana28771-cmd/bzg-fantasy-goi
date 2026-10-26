@@ -50,7 +50,7 @@ function PrediccionPage() {
       return data ?? [];
     },
   });
-  const cands = useQuery({ queryKey: ["pred-candidates"], queryFn: fetchClubCandidates });
+  const cands = useQuery({ queryKey: ["pred-candidates"], queryFn: () => fetchClubCandidates() });
   const mine = useQuery({
     queryKey: ["predicciones", user?.id],
     enabled: !!user,
