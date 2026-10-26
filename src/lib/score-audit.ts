@@ -2,11 +2,18 @@ import { type Tramo } from '@/lib/club-data';
 
 export type AuditAction = { match_id: string; player_id: string; action_id: string; cantidad: number };
 export type AuditType = { id: string; nombre: string; puntos: number; activo: boolean; solo_portero: boolean; tramos: Tramo[] | null };
-export type AuditLine = { match: string; actionId: string; action: string; quantity: string; origin: 'recorded' | 'automatic'; points: number; rule: 'linear' | 'tiers' | 'shared' | 'percentage' | 'goalkeeper' };
+export type AuditLine = { match: string; actionId: string; action: string; quantity: string; origin: 'recorded' | 'automatic'; points: number; rule: 'linear' | 'tiers' | 'shared' | 'percentage' | 'goalkeeper' | 'result' };
+/** Goles encajados por el equipo en un partido y su media en jornadas anteriores (null = sin datos). */
+export type AuditBonus = { goles: number | null; media: number | null };
+export const BONUS_ID = 'bonus_resultado';
 const round = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 
+/** Puntos fijos del tramo de % que contiene el valor. Igual que public.tramo_pct_pts. */
+const pctTierPts = (pct: number, tramos: Tramo[]) =>
+  [...tramos].sort((a, b) => b.desde - a.desde).find(t => pct >= t.desde && (t.hasta == null || pct <= t.hasta))?.puntos ?? 0;
+
 /** Mirror configured goalkeeper criteria per match, then aggregate the jornada. */
-export function auditPlayer(playerId: string, actions: AuditAction[], types: AuditType[]) {
+export function auditPlayer(playerId: string, actions: AuditAction[], types: AuditType[], played?: ReadonlySet<string>, bonus?: ReadonlyMap<string, AuditBonus>) {
   const byType = new Map(types.map(t => [t.id, t]));
   const participants = new Map<string, Set<string>>();
   for (const a of actions) {
@@ -69,6 +76,19 @@ export function auditPlayer(playerId: string, actions: AuditAction[], types: Aud
       const points = quantity * Number(type.puntos);
       expected += points;
       lines.push({ match, actionId: id, action: type.nombre, quantity: String(quantity), origin: 'recorded', points, rule: 'linear' });
+    }
+  }
+  // Bonus por resultado: quien jugó el partido suma si el equipo encajó menos goles que su media de jornadas anteriores.
+  const bonusType = byType.get(BONUS_ID);
+  if (played && bonus && bonusType?.activo) {
+    for (const match of played) {
+      const b = bonus.get(match);
+      if (!b || b.goles == null || b.media == null || b.media <= 0 || b.goles >= b.media) continue;
+      const pct = (b.media - b.goles) * 100 / b.media;
+      const points = pctTierPts(pct, bonusType.tramos ?? []);
+      if (points === 0) continue;
+      expected += round(points);
+      lines.push({ match, actionId: BONUS_ID, action: bonusType.nombre, quantity: `-${round(pct)} %`, origin: 'automatic', points, rule: 'result' });
     }
   }
   return { lines, expected: round(expected) };
