@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BookOpen, ExternalLink, Package, QrCode, Sparkles, Trophy } from "lucide-react";
+import { BookOpen, ExternalLink, Package, QrCode, Sparkles, Target, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
 import { openGuidedTour, TOUR_COMPLETED_EVENT } from "@/components/guided-tour";
@@ -300,22 +300,11 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-border bg-card p-4 text-center">
-          <Package className="mx-auto h-6 w-6 text-primary" />
-          <div className="mt-1 font-display text-3xl">{wallet.data?.sobres ?? 0}</div>
-          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
-            {t("Gutunazal arruntak", "Sobres normales")}
-          </div>
-        </div>
-        <div className="rounded-2xl border-2 border-[color:var(--gold,#d4a017)] bg-card p-4 text-center">
-          <Sparkles className="mx-auto h-6 w-6 text-[color:var(--gold,#d4a017)]" />
-          <div className="mt-1 font-display text-3xl">{wallet.data?.premium ?? 0}</div>
-          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
-            {t("Premium gutunazalak", "Sobres premium")}
-          </div>
-        </div>
-      </div>
+      <Button asChild size="lg" className="w-full">
+        <Link to="/prediccion">
+          <Target aria-hidden /> {t("Iragarpena", "Predicción")}
+        </Link>
+      </Button>
 
       {/* QR premium */}
       <section className="rounded-2xl border-2 border-[color:var(--gold,#d4a017)]/60 bg-card p-4">
