@@ -918,6 +918,41 @@ export type Database = {
           },
         ]
       }
+      prediccion_recompensas: {
+        Row: {
+          aciertos: number
+          cartas: string[]
+          created_at: string
+          id: string
+          jornada_id: string
+          user_id: string
+        }
+        Insert: {
+          aciertos?: number
+          cartas?: string[]
+          created_at?: string
+          id?: string
+          jornada_id: string
+          user_id: string
+        }
+        Update: {
+          aciertos?: number
+          cartas?: string[]
+          created_at?: string
+          id?: string
+          jornada_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediccion_recompensas_jornada_id_fkey"
+            columns: ["jornada_id"]
+            isOneToOne: false
+            referencedRelation: "jornadas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       predicciones: {
         Row: {
           central: string | null

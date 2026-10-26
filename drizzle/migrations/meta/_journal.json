@@ -218,6 +218,13 @@
       "when": 1793021152450,
       "tag": "0030_create_predicciones",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1793023326060,
+      "tag": "0031_create_prediccion_recompensas",
+      "breakpoints": true
     }
   ]
 }
