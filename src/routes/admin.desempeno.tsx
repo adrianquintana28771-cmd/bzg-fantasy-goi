@@ -643,6 +643,17 @@ function Desempeno() {
             </div>
           )}
 
+          {!esEntrenador && bonusActivo && (
+            <div className="mt-4 rounded-2xl border border-border bg-card p-4 text-sm">
+              <div className="font-semibold">{t("Emaitza-bonua", "Bonus por resultado")}</div>
+              <div className="text-xs text-muted-foreground">
+                {bonusMedia == null
+                  ? t("Ez dago aurreko jardunaldirik: ez du punturik ematen", "Sin jornadas anteriores: no suma puntos")
+                  : `${bonusGoles} ${t("gol jasota", "goles encajados")} · ${t("batez bestekoa", "media")} ${String(round2(bonusMedia)).replace(".", ",")} → ${signedPoints(bonusLine?.points ?? 0)} pts`}
+              </div>
+            </div>
+          )}
+
           {grupos.map((g) => (
             <div key={g} className="mt-6">
               <h2 className="font-display text-lg capitalize">{td(g)}</h2>
