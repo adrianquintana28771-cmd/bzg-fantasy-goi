@@ -89,6 +89,7 @@ function PrediccionPage() {
   if (loading) return null;
   const locked = !activa || activa.is_locked;
   const usados = new Set(Object.values(picks).filter(Boolean));
+  const names = new Map((cands.data ?? []).map((c) => [c.id, c.nombre]));
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 px-4 py-6">
