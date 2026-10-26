@@ -11,6 +11,7 @@ import { EquipoCard, type PoolRow, type Posicion } from "@/components/equipo-car
 import { useCardImages } from "@/lib/card-images";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
+import { PRED_SLOTS, SLOT_LABEL, fetchIdealSeven } from "@/lib/ideal-seven";
 
 /** Fila de clasificación: todo el rectángulo enlaza con la ficha de jugador/a. */
 function LeaderRow({
@@ -294,6 +295,9 @@ function Home() {
           )}
         </div>
 
+        <IdealSeven />
+
+
         {/* Top 5 & recent matches */}
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div>
@@ -394,6 +398,50 @@ function Home() {
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+/** 7 ideal: mejor alineación posible de la última jornada cerrada. */
+function IdealSeven() {
+  const t = useT();
+  const { data } = useQuery({
+    queryKey: ["home-ideal-seven"],
+    queryFn: async () => {
+      const { data: j } = await supabase
+        .from("jornadas")
+        .select("numero")
+        .eq("is_locked", true)
+        .order("numero", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!j) return null;
+      return { numero: j.numero, ...(await fetchIdealSeven(j.numero)) };
+    },
+  });
+  if (!data) return null;
+  return (
+    <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-card">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+          {t("Zazpiko ideala", "7 ideal")} · J{data.numero}
+        </span>
+        <Sparkles className="h-5 w-5 text-primary" />
+      </div>
+      <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+        {PRED_SLOTS.map((s) => {
+          const p = data.ideal[s];
+          return (
+            <li key={s} className="flex items-center justify-between gap-2 rounded-lg bg-secondary px-3 py-2 text-sm">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">{t(...SLOT_LABEL[s])}</span>
+              <span className="truncate font-semibold" translate="no">
+                {p ? data.nameById.get(p.id) : "—"}
+              </span>
+              <span className="font-display text-primary">{p ? round2(p.puntos) : ""}</span>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

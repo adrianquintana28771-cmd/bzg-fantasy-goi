@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MisionesRouteImport } from './routes/misiones'
 import { Route as PlantillaRouteImport } from './routes/plantilla'
+import { Route as PrediccionRouteImport } from './routes/prediccion'
 import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -51,6 +52,11 @@ const MisionesRoute = MisionesRouteImport.update({
 const PlantillaRoute = PlantillaRouteImport.update({
   id: '/plantilla',
   path: '/plantilla',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrediccionRoute = PrediccionRouteImport.update({
+  id: '/prediccion',
+  path: '/prediccion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RankingsRoute = RankingsRouteImport.update({
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/misiones': typeof MisionesRoute
   '/plantilla': typeof PlantillaRoute
+  '/prediccion': typeof PrediccionRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/misiones': typeof MisionesRoute
   '/plantilla': typeof PlantillaRoute
+  '/prediccion': typeof PrediccionRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/misiones': typeof MisionesRoute
   '/plantilla': typeof PlantillaRoute
+  '/prediccion': typeof PrediccionRoute
   '/rankings': typeof RankingsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/misiones'
     | '/plantilla'
+    | '/prediccion'
     | '/rankings'
     | '/reset-password'
     | '/admin/auditoria'
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/misiones'
     | '/plantilla'
+    | '/prediccion'
     | '/rankings'
     | '/reset-password'
     | '/admin/auditoria'
@@ -283,6 +294,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/misiones'
     | '/plantilla'
+    | '/prediccion'
     | '/rankings'
     | '/reset-password'
     | '/admin/auditoria'
@@ -309,6 +321,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   MisionesRoute: typeof MisionesRoute
   PlantillaRoute: typeof PlantillaRoute
+  PrediccionRoute: typeof PrediccionRoute
   RankingsRoute: typeof RankingsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   AdminAuditoriaRoute: typeof AdminAuditoriaRoute
@@ -358,6 +371,13 @@ declare module '@tanstack/react-router' {
       path: '/plantilla'
       fullPath: '/plantilla'
       preLoaderRoute: typeof PlantillaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prediccion': {
+      id: '/prediccion'
+      path: '/prediccion'
+      fullPath: '/prediccion'
+      preLoaderRoute: typeof PrediccionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rankings': {
@@ -501,6 +521,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   MisionesRoute: MisionesRoute,
   PlantillaRoute: PlantillaRoute,
+  PrediccionRoute: PrediccionRoute,
   RankingsRoute: RankingsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   AdminAuditoriaRoute: AdminAuditoriaRoute,
