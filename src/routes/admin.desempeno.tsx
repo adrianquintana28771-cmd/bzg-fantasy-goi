@@ -9,8 +9,9 @@ import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/i18n";
 import { ESTADO_LABEL, ESTADO_LABEL_EU, type PlayerEstado } from "@/lib/fantasy/types";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchAllRows, pctParadas, type Tramo } from "@/lib/club-data";
-import { auditPlayer } from "@/lib/score-audit";
+import { fetchAllRows, pctParadas, round2, type Tramo } from "@/lib/club-data";
+import { auditPlayer, BONUS_ID } from "@/lib/score-audit";
+import { fetchBonusByMatch } from "@/lib/score-audit-data";
 
 export const Route = createFileRoute("/admin/desempeno")({
   head: () => ({
@@ -244,7 +245,7 @@ function Desempeno() {
   const visibleActions = useMemo(
     () =>
       (actions.data ?? []).filter((a) =>
-        !a.activo || a.id === PCT_ID || a.id === ACC_ID
+        !a.activo || a.id === PCT_ID || a.id === ACC_ID || a.id === BONUS_ID
           ? false
           : esEntrenador
           ? a.solo_entrenador
@@ -288,10 +289,31 @@ function Desempeno() {
     return { ...tr, n, pts: Math.round(n * tr.puntos * 100) / 100 };
   });
 
-  const calculated = auditPlayer(playerId, [
-    ...(otrosPorteros.data?.actions ?? []),
-    ...Object.entries(counts).map(([action_id, cantidad]) => ({ match_id: matchId, player_id: playerId, action_id, cantidad })),
-  ], actions.data ?? []);
+  /** Media de goles encajados del equipo en jornadas anteriores (bonus por resultado). */
+  const bonusByMatch = useQuery({
+    queryKey: ["bonus_by_match"],
+    enabled: !!match,
+    queryFn: fetchBonusByMatch,
+  });
+  const bonusCtx = useMemo(() => {
+    if (!match || !bonusByMatch.data) return undefined;
+    const m = new Map(bonusByMatch.data);
+    const otrosGol = (otrosPorteros.data?.actions ?? [])
+      .filter((a: { action_id: string }) => a.action_id === "gol_encajado")
+      .reduce((s: number, a: { cantidad: number }) => s + (a.cantidad ?? 0), 0);
+    m.set(matchId, { goles: otrosGol + (counts.gol_encajado ?? 0), media: m.get(matchId)?.media ?? null });
+    return m;
+  }, [match, matchId, bonusByMatch.data, otrosPorteros.data, counts]);
+  const calculated = auditPlayer(
+    playerId,
+    [
+      ...(otrosPorteros.data?.actions ?? []),
+      ...Object.entries(counts).map(([action_id, cantidad]) => ({ match_id: matchId, player_id: playerId, action_id, cantidad })),
+    ],
+    actions.data ?? [],
+    esEntrenador ? undefined : new Set([matchId]),
+    bonusCtx,
+  );
   // Sin paradas, lanzamientos fuera ni goles en contra, el % cuenta como 0 y se calcula igual.
   const verPortero = esPortero || (!esEntrenador && tambienPortero);
   const pct = verPortero
@@ -308,6 +330,10 @@ function Desempeno() {
   const accPct = accDen > 0 ? Math.round((accGoles * 10000) / accDen) / 100 : null;
   const accLine = calculated.lines.find((l) => l.actionId === ACC_ID);
   const accActivo = !!actions.data?.find((a) => a.id === ACC_ID && a.activo);
+  const bonusLine = calculated.lines.find((l) => l.actionId === BONUS_ID);
+  const bonusActivo = !!actions.data?.find((a) => a.id === BONUS_ID && a.activo);
+  const bonusMedia = bonusCtx?.get(matchId)?.media ?? null;
+  const bonusGoles = bonusCtx?.get(matchId)?.goles ?? 0;
 
   function bump(id: string, delta: number) {
     const act = visibleActions.find((a) => a.id === id);
@@ -613,6 +639,17 @@ function Desempeno() {
                 {accDen > 0
                   ? <>({counts.gol ?? 0} + {counts.gol_7m ?? 0}) / ({counts.gol ?? 0} + {counts.gol_7m ?? 0} + {accFallados}) × 100 → {signedPoints(accLine?.points ?? 0)} pts</>
                   : t("Jaurtiketarik gabe: ez du punturik ematen", "Sin lanzamientos: no suma puntos")}
+              </div>
+            </div>
+          )}
+
+          {!esEntrenador && bonusActivo && (
+            <div className="mt-4 rounded-2xl border border-border bg-card p-4 text-sm">
+              <div className="font-semibold">{t("Emaitza-bonua", "Bonus por resultado")}</div>
+              <div className="text-xs text-muted-foreground">
+                {bonusMedia == null
+                  ? t("Ez dago aurreko jardunaldirik: ez du punturik ematen", "Sin jornadas anteriores: no suma puntos")
+                  : `${bonusGoles} ${t("gol jasota", "goles encajados")} · ${t("batez bestekoa", "media")} ${String(round2(bonusMedia)).replace(".", ",")} → ${signedPoints(bonusLine?.points ?? 0)} pts`}
               </div>
             </div>
           )}

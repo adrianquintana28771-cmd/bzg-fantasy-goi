@@ -190,6 +190,13 @@
       "when": 1792869887255,
       "tag": "0026_field_shooting_percentage",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1793002662506,
+      "tag": "0027_add_result_bonus_recalc",
+      "breakpoints": true
     }
   ]
 }

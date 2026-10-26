@@ -20,6 +20,7 @@ import { useAuth } from "@/lib/auth-context";
 import { fetchPoolPlayer, fetchTeams, round2, type Tramo } from "@/lib/club-data";
 import { useCardImages, usePhotoSource } from "@/lib/card-images";
 import { auditPlayer, type AuditType } from "@/lib/score-audit";
+import { fetchBonusByMatch } from "@/lib/score-audit-data";
 import { PlayerPhotoBackground } from "@/components/player-photo-background";
 
 const ESTADO_COLOR: Record<PlayerEstado, string> = {
@@ -120,19 +121,36 @@ function Jugador() {
             if ((page?.length ?? 0) < 1000) break;
           }
         }
-        const result = auditPlayer(player.club_player_id, allActions, types as AuditType[]);
+        const { data: playedRows, error: playedError } = await supabase
+          .from("club_match_players")
+          .select("match_id,club_matches(jornada)")
+          .eq("player_id", player.club_player_id)
+          .eq("jugado", true);
+        if (playedError) throw playedError;
+        const played = new Set((playedRows ?? []).map((r) => r.match_id));
+        const bonusByMatch = played.size ? await fetchBonusByMatch() : new Map();
+        const result = auditPlayer(
+          player.club_player_id,
+          allActions,
+          types as AuditType[],
+          player.club?.es_entrenador ? undefined : played,
+          bonusByMatch,
+        );
         const jornadas = new Map(rows.map(r => [r.match_id, r.club_matches?.jornada ?? 0]));
+        for (const r of (playedRows ?? []) as unknown as { match_id: string; club_matches: { jornada: number } | null }[])
+          if (!jornadas.has(r.match_id)) jornadas.set(r.match_id, r.club_matches?.jornada ?? 0);
         actions = result.lines.map(line => {
           const type = types.find(t => t.id === line.actionId);
+          const esPct = line.rule === "percentage" || line.rule === "result";
           return {
             jornada: jornadas.get(line.match) ?? 0,
             action_id: line.actionId,
             nombre: line.action,
             puntos: type?.puntos ?? 0,
             orden: type?.orden ?? 0,
-            cantidad: line.rule === "percentage" ? 1 : Number(line.quantity),
+            cantidad: esPct ? 1 : Number(line.quantity),
             pts: line.points,
-            ...(line.rule === "percentage" ? { pct: Number.parseFloat(line.quantity) } : {}),
+            ...(esPct ? { pct: Number.parseFloat(line.quantity) } : {}),
           };
         });
       }

@@ -70,3 +70,38 @@ test("field shooting percentage: highest tier only, 7m counted once, no points w
   expect(auditPlayer("p", [a("gol", 2), a("gol_7m", 2)], types).expected).toBe(5); // 100 %
   expect(auditPlayer("p", [a("gol", 0)], types).expected).toBe(0);
 });
+
+describe("team result bonus (goles encajados vs media de jornadas anteriores)", () => {
+  const bonusTypes: AuditType[] = [
+    { id: "bonus_resultado", nombre: "Bonus", puntos: 0, activo: true, solo_portero: false,
+      tramos: [10, 15, 20, 25, 30, 35, 40, 45, 50].map((d, i) => ({ desde: d, hasta: null, puntos: 1 + i * 0.5 })) },
+  ];
+  const bonus = new Map([
+    ["j1", { goles: 20, media: null }],
+    ["j2a", { goles: 18, media: 20 }],
+    ["j2b", { goles: 10, media: 20 }],
+    ["j2c", { goles: 19, media: 20 }],
+    ["j2d", { goles: 20, media: 20 }],
+    ["j2e", { goles: 22, media: 20 }],
+  ]);
+  test("first jornada has no bonus: no previous average", () =>
+    expect(auditPlayer("p", [], bonusTypes, new Set(["j1"]), bonus).expected).toBe(0));
+  test("conceding 10% less than the average gives +1", () =>
+    expect(auditPlayer("p", [], bonusTypes, new Set(["j2a"]), bonus).expected).toBe(1));
+  test("conceding 50% less gives +5", () =>
+    expect(auditPlayer("p", [], bonusTypes, new Set(["j2b"]), bonus).expected).toBe(5));
+  test("5% less stays below the first tier", () =>
+    expect(auditPlayer("p", [], bonusTypes, new Set(["j2c"]), bonus).expected).toBe(0));
+  test("conceding the average or more gives no bonus", () => {
+    expect(auditPlayer("p", [], bonusTypes, new Set(["j2d"]), bonus).expected).toBe(0);
+    expect(auditPlayer("p", [], bonusTypes, new Set(["j2e"]), bonus).expected).toBe(0);
+  });
+  test("not marked as played: no bonus", () =>
+    expect(auditPlayer("p", [], bonusTypes, new Set(), bonus).expected).toBe(0));
+  test("disabled bonus criterion does not score", () =>
+    expect(auditPlayer("p", [], bonusTypes.map(t => ({ ...t, activo: false })), new Set(["j2a"]), bonus).expected).toBe(0));
+  test("edited tiers change the bonus", () =>
+    expect(auditPlayer("p", [], bonusTypes.map(t => ({ ...t, tramos: [{ desde: 10, hasta: null, puntos: 3 }] })), new Set(["j2a"]), bonus).expected).toBe(3));
+  test("bonus adds to recorded actions of the same match", () =>
+    expect(auditPlayer("p", [action("j2a", "gol", 2)], [...bonusTypes, { id: "gol", nombre: "Gol", puntos: 2, activo: true, solo_portero: false, tramos: null }], new Set(["j2a"]), bonus).expected).toBe(5));
+});
