@@ -167,7 +167,6 @@ function PrediccionPage() {
           </div>
         </DialogContent>
       </Dialog>
-      )}
 
       {pasada && lastClosed && ideal.data && (
         <section className="rounded-2xl border border-border bg-card p-4">
