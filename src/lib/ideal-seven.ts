@@ -1,4 +1,8 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Db = SupabaseClient<any>;
 
 export const PRED_SLOTS = [
   "portero",
@@ -38,13 +42,17 @@ export interface Candidate {
 export function computeIdealSeven(
   candidates: Candidate[],
   points: Map<string, number>,
+  avg: Map<string, number> = new Map(),
 ): Partial<Record<PredSlot, { id: string; puntos: number }>> {
   const pts = (id: string) => points.get(id);
+  // Empate a puntos: mejor media de temporada, luego id estable.
+  const byPts = (a: { id: string; puntos: number }, b: { id: string; puntos: number }) =>
+    b.puntos - a.puntos || (avg.get(b.id) ?? 0) - (avg.get(a.id) ?? 0) || a.id.localeCompare(b.id);
   const lists = FIELD_SLOTS.map((slot) =>
     candidates
       .filter((c) => !c.esEntrenador && c.posiciones.includes(slot) && pts(c.id) !== undefined)
       .map((c) => ({ id: c.id, puntos: pts(c.id)! }))
-      .sort((a, b) => b.puntos - a.puntos)
+      .sort(byPts)
       .slice(0, FIELD_SLOTS.length + 1),
   );
   let best: { total: number; pick: ({ id: string; puntos: number } | null)[] } = { total: -Infinity, pick: [] };
@@ -80,7 +88,7 @@ export function computeIdealSeven(
   const coach = candidates
     .filter((c) => c.esEntrenador && pts(c.id) !== undefined)
     .map((c) => ({ id: c.id, puntos: pts(c.id)! }))
-    .sort((a, b) => b.puntos - a.puntos)[0];
+    .sort(byPts)[0];
   if (coach) out.entrenador = coach;
   return out;
 }
@@ -91,10 +99,10 @@ export interface ClubPerson extends Candidate {
   activo: boolean;
 }
 
-export async function fetchClubCandidates(): Promise<ClubPerson[]> {
+export async function fetchClubCandidates(db: Db = supabase): Promise<ClubPerson[]> {
   const [{ data: players, error: e1 }, { data: pos, error: e2 }] = await Promise.all([
-    supabase.from("club_players").select("id,nombre,alias,apellido1,estado,activo,es_entrenador"),
-    supabase.from("club_player_positions").select("player_id,position_id").range(0, 4999),
+    db.from("club_players").select("id,nombre,alias,apellido1,estado,activo,es_entrenador"),
+    db.from("club_player_positions").select("player_id,position_id").range(0, 4999),
   ]);
   if (e1) throw e1;
   if (e2) throw e2;
@@ -110,32 +118,58 @@ export async function fetchClubCandidates(): Promise<ClubPerson[]> {
   }));
 }
 
-/** Puntos base por persona del club en una jornada (sin multiplicador de rareza). */
-export async function fetchJornadaPoints(numero: number): Promise<Map<string, number>> {
-  const rows: { puntos: number; player_pool: { club_player_id: string | null } | null }[] = [];
+/** Puntos base por persona del club en una jornada (sin multiplicador de rareza) y media de temporada. */
+export async function fetchJornadaPoints(numero: number, db: Db = supabase) {
+  const rows: { puntos: number; jornada_numero: number; player_pool: { club_player_id: string | null } | null }[] = [];
   for (let from = 0; ; from += 1000) {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("player_jornada_stats")
-      .select("puntos, player_pool(club_player_id)")
-      .eq("jornada_numero", numero)
+      .select("puntos, jornada_numero, player_pool(club_player_id)")
+      .lte("jornada_numero", numero)
+      .order("id")
       .range(from, from + 999);
     if (error) throw error;
     rows.push(...((data ?? []) as unknown as typeof rows));
     if (!data || data.length < 1000) break;
   }
-  const m = new Map<string, number>();
+  const per = new Map<string, Map<number, number>>();
   rows.forEach((r) => {
     const id = r.player_pool?.club_player_id;
     if (!id) return;
-    const v = Number(r.puntos);
-    m.set(id, Math.max(m.get(id) ?? -Infinity, v));
+    const m = per.get(id) ?? new Map<number, number>();
+    m.set(r.jornada_numero, Math.max(m.get(r.jornada_numero) ?? -Infinity, Number(r.puntos)));
+    per.set(id, m);
   });
-  return m;
+  const points = new Map<string, number>();
+  const avg = new Map<string, number>();
+  per.forEach((m, id) => {
+    if (m.has(numero)) points.set(id, m.get(numero)!);
+    const v = [...m.values()];
+    avg.set(id, v.reduce((a, b) => a + b, 0) / v.length);
+  });
+  return { points, avg };
 }
 
-export async function fetchIdealSeven(numero: number) {
-  const [cands, points] = await Promise.all([fetchClubCandidates(), fetchJornadaPoints(numero)]);
-  const ideal = computeIdealSeven(cands, points);
+/** Aciertos: vale cualquier persona con la puntuación del 7 ideal en ese puesto (empates incluidos). */
+export function countAciertos(
+  pick: Partial<Record<PredSlot, string | null>>,
+  ideal: Partial<Record<PredSlot, { id: string; puntos: number }>>,
+  candidates: Candidate[],
+  points: Map<string, number>,
+): PredSlot[] {
+  const byId = new Map(candidates.map((c) => [c.id, c]));
+  return PRED_SLOTS.filter((s) => {
+    const id = pick[s];
+    const best = ideal[s];
+    const c = id ? byId.get(id) : undefined;
+    if (!c || !best || points.get(c.id) !== best.puntos) return false;
+    return s === "entrenador" ? c.esEntrenador : !c.esEntrenador && c.posiciones.includes(s);
+  });
+}
+
+export async function fetchIdealSeven(numero: number, db: Db = supabase) {
+  const [cands, { points, avg }] = await Promise.all([fetchClubCandidates(db), fetchJornadaPoints(numero, db)]);
+  const ideal = computeIdealSeven(cands, points, avg);
   const nameById = new Map(cands.map((c) => [c.id, c.nombre]));
-  return { ideal, nameById };
+  return { ideal, nameById, cands, points };
 }
