@@ -6,14 +6,14 @@ import { useT } from "@/lib/i18n";
 
 /** Same slot coordinates as the Equipo court. */
 const SLOT_XY: Record<PredSlot, { x: number; y: number }> = {
-  portero: { x: 50, y: 88 },
-  extremo_izq: { x: 90, y: 58 },
-  extremo_der: { x: 10, y: 58 },
-  lateral_izq: { x: 86, y: 30 },
-  lateral_der: { x: 14, y: 30 },
-  central: { x: 50, y: 22 },
-  pivote: { x: 50, y: 52 },
-  entrenador: { x: 14, y: 90 },
+  portero: { x: 50, y: 84 },
+  extremo_izq: { x: 84, y: 56 },
+  extremo_der: { x: 16, y: 56 },
+  lateral_izq: { x: 80, y: 30 },
+  lateral_der: { x: 20, y: 30 },
+  central: { x: 50, y: 18 },
+  pivote: { x: 50, y: 48 },
+  entrenador: { x: 17, y: 84 },
 };
 
 export function PredictionCourt({
@@ -49,7 +49,7 @@ export function PredictionCourt({
           >
             <div className={`flex flex-col items-center gap-1 ${onPick && !disabled ? "transition hover:scale-105" : ""}`}>
               <div
-                className={`grid h-14 w-14 place-items-center overflow-hidden rounded-full border-2 font-display text-sm shadow-lg ${
+                className={`grid h-12 w-12 place-items-center overflow-hidden rounded-full border-2 font-display text-sm shadow-lg ${
                   id ? "border-primary bg-primary text-primary-foreground" : "border-dashed border-white/70 bg-black/30 text-white"
                 }`}
               >
@@ -64,7 +64,7 @@ export function PredictionCourt({
                   POS_SHORT[slot]
                 )}
               </div>
-              <div translate="no" className="max-w-[90px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+              <div translate="no" className="max-w-[78px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                 {id ? names.get(id) : t(...SLOT_LABEL[slot])}
               </div>
               {points?.[slot] && (
