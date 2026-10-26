@@ -14,6 +14,7 @@ import {
   SLOT_LABEL,
   fetchClubCandidates,
   fetchIdealSeven,
+  countAciertos,
   type PredSlot,
 } from "@/lib/ideal-seven";
 
@@ -173,11 +174,11 @@ function PrediccionPage() {
         <section className="rounded-2xl border border-border bg-card p-4">
           <h2 className="font-display text-lg">
             J{lastClosed.numero} · {t("Asmatutakoak", "Aciertos")}:{" "}
-            {PRED_SLOTS.filter((s) => pasada[s] && ideal.data.ideal[s]?.id === pasada[s]).length}/{PRED_SLOTS.length}
+            {countAciertos(pasada, ideal.data.ideal, ideal.data.cands, ideal.data.points).length}/{PRED_SLOTS.length}
           </h2>
           <ul className="mt-2 space-y-1 text-sm">
             {PRED_SLOTS.map((s) => {
-              const ok = !!pasada[s] && ideal.data.ideal[s]?.id === pasada[s];
+              const ok = countAciertos(pasada, ideal.data.ideal, ideal.data.cands, ideal.data.points).includes(s);
               return (
                 <li key={s} className="flex justify-between gap-2">
                   <span className="text-muted-foreground">{t(...SLOT_LABEL[s])}</span>
