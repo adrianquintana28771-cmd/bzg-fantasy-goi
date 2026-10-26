@@ -13,6 +13,7 @@ import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
 import { PRED_SLOTS, fetchIdealSeven } from "@/lib/ideal-seven";
 import { PredictionCourt } from "@/components/prediction-court";
+import { PredictionRewardDialog } from "@/components/prediction-reward-dialog";
 
 /** Fila de clasificación: todo el rectángulo enlaza con la ficha de jugador/a. */
 function LeaderRow({
@@ -195,6 +196,7 @@ function Home() {
 
   return (
     <div>
+      <PredictionRewardDialog />
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div
