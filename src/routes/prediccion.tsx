@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Target } from "lucide-react";
+import { Target, Lock, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PredictionCourt } from "@/components/prediction-court";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
@@ -38,6 +39,7 @@ function PrediccionPage() {
   const { user, loading } = useAuth();
   const qc = useQueryClient();
   const [picks, setPicks] = useState<Picks>({});
+  const [pickSlot, setPickSlot] = useState<PredSlot | null>(null);
 
   const jornadas = useQuery({
     queryKey: ["pred-jornadas"],
