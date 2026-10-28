@@ -58,6 +58,17 @@ export const POS_SHORT: Record<Posicion, string> = {
   entrenador: "ENT",
 };
 
+export const POS_SHORT_EU: Record<Posicion, string> = {
+  portero: "AT",
+  extremo_izq: "EH",
+  extremo_der: "ES H",
+  lateral_izq: "EA",
+  lateral_der: "ES A",
+  central: "ER",
+  pivote: "PI",
+  entrenador: "ENT",
+};
+
 export interface PoolRow {
   id: string;
   nombre: string;
@@ -123,7 +134,7 @@ export function EquipoCard({
       <div translate="no" title={pool.nombre} className="absolute inset-x-[7%] top-[4%] break-words text-xs font-semibold">{nombre}</div>
       <div className="absolute left-[46%] right-[5%] top-[21%] flex min-w-0 flex-col gap-0.5 bg-card p-0.5 text-card-foreground sm:gap-2 sm:p-1">
         {pool.club_teams?.nombre && <div translate="no" className="break-words text-[8px] leading-tight sm:text-[10px]">{pool.club_teams.nombre}</div>}
-        <div className="break-words text-[9px] uppercase sm:text-[10px]">{posiciones.map((p) => POS_SHORT[p]).join(" · ")}</div>
+        <div className="break-words text-[9px] uppercase sm:text-[10px]">{posiciones.map((p) => t(POS_SHORT_EU[p], POS_SHORT[p])).join(" · ")}</div>
       </div>
       <div className="absolute inset-x-[7%] top-[49%] flex min-w-0 flex-col gap-0.5 rounded bg-card/95 p-1.5 text-xs leading-tight text-card-foreground sm:gap-1 sm:p-2 sm:leading-normal">
         <div className="text-[10px] font-bold uppercase">

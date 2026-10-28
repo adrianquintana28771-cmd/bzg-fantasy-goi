@@ -1,5 +1,5 @@
 import campoAsset from "@/assets/campo-bzg.png.asset.json";
-import { CardPhoto, POS_SHORT, type PoolRow } from "@/components/equipo-card";
+import { CardPhoto, POS_SHORT, POS_SHORT_EU, type PoolRow } from "@/components/equipo-card";
 import { useCardImages } from "@/lib/card-images";
 import { PRED_SLOTS, SLOT_LABEL, type PredSlot } from "@/lib/ideal-seven";
 import { useT } from "@/lib/i18n";
@@ -61,10 +61,10 @@ export function PredictionCourt({
                     className="h-full w-full rounded-full"
                   />
                 ) : (
-                  POS_SHORT[slot]
+                  t(POS_SHORT_EU[slot], POS_SHORT[slot])
                 )}
               </div>
-              <div translate="no" className="max-w-[78px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+              <div translate={id ? "no" : undefined} className="max-w-[78px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                 {id ? names.get(id) : t(...SLOT_LABEL[slot])}
               </div>
               {points?.[slot] && (

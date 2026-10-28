@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { supabase } from "@/integrations/supabase/client";
 import { useDisplayPoints } from "@/hooks/use-display-points";
 import { useT } from "@/lib/i18n";
-import { POS_SHORT } from "@/components/equipo-card";
+import { POS_SHORT, POS_SHORT_EU } from "@/components/equipo-card";
 import type { JornadaSel } from "@/components/jornada-bar";
 
 export function RankingLineupDialog({ user, jornada, onClose }: {
@@ -53,7 +53,7 @@ export function RankingLineupDialog({ user, jornada, onClose }: {
               <ul className="divide-y divide-border">
                 {rows.map((row) => (
                   <li key={row.posicion} className="flex items-center gap-3 py-2 text-sm">
-                    <span className="w-8 shrink-0 font-bold text-muted-foreground">{POS_SHORT[row.posicion]}</span>
+                    <span className="w-8 shrink-0 font-bold text-muted-foreground">{t(POS_SHORT_EU[row.posicion], POS_SHORT[row.posicion])}</span>
                     {row.player_id ? (
                       <Link to="/jugadores/$playerId" params={{ playerId: row.player_id }} className="min-w-0 flex-1 break-words font-semibold hover:underline" translate="no" onClick={onClose}>
                         {row.nombre ?? row.player_id}
