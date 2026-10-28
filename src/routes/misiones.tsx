@@ -118,6 +118,18 @@ const missionCopy: Record<
     ],
     url: "https://www.instagram.com/berdezurigorri/",
   },
+  "55c68bb8-9bb5-4f2b-b2d0-cacaa0f74b41": {
+    title: ["Jarraitu Fantasyren Instagram kontu ofiziala", "Sigue a la cuenta oficial de Instagram del fantasy"],
+    description: ["", ""],
+  },
+  "6f91aba0-fbd9-434e-8284-60e070340988": {
+    title: ["Jarraitu BZGren Facebook kontu ofiziala", "Sigue la cuenta oficial del BZG en Facebook"],
+    description: ["", ""],
+  },
+  "e89454c9-2504-4001-ba2f-63e42be167b6": {
+    title: ["Eman atsegin dut BZGren Facebookeko azken argitalpenari", "Dale like a la ultima publicación de Facebook de BZG"],
+    description: ["", ""],
+  },
 };
 
 function MisionesPage() {
