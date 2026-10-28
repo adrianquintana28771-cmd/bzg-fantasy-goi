@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PRED_SLOTS, countAciertos, fetchIdealSeven, type PredSlot } from "@/lib/ideal-seven";
-import { REWARD_BY_ACIERTOS } from "@/lib/prediction-rewards";
+import { REWARD_BY_ACIERTOS, isJornadaClosed } from "@/lib/prediction-rewards";
 
 /** Primera jornada cerrada con predicción del usuario y sin recompensa recogida. */
 export const getPendingPredictionReward = createServerFn({ method: "GET" })
@@ -9,12 +9,12 @@ export const getPendingPredictionReward = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const db = context.supabase;
     const [{ data: preds }, { data: done }] = await Promise.all([
-      db.from("predicciones").select("jornada_id, jornadas!inner(numero, is_locked)").eq("user_id", context.userId),
+      db.from("predicciones").select("jornada_id, jornadas!inner(numero, is_locked, is_active)").eq("user_id", context.userId),
       db.from("prediccion_recompensas").select("jornada_id").eq("user_id", context.userId),
     ]);
     const claimed = new Set((done ?? []).map((d) => d.jornada_id));
-    const pending = ((preds ?? []) as unknown as { jornada_id: string; jornadas: { numero: number; is_locked: boolean } }[])
-      .filter((p) => p.jornadas.is_locked && !claimed.has(p.jornada_id))
+    const pending = ((preds ?? []) as unknown as { jornada_id: string; jornadas: { numero: number; is_locked: boolean; is_active: boolean } }[])
+      .filter((p) => isJornadaClosed(p.jornadas) && !claimed.has(p.jornada_id))
       .sort((a, b) => a.jornadas.numero - b.jornadas.numero)[0];
     return pending ? { jornadaId: pending.jornada_id, numero: pending.jornadas.numero } : null;
   });
@@ -26,8 +26,8 @@ export const claimPredictionReward = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const uid = context.userId;
-    const { data: j } = await supabaseAdmin.from("jornadas").select("numero, is_locked").eq("id", data.jornadaId).maybeSingle();
-    if (!j?.is_locked) throw new Error("Jornada no cerrada");
+    const { data: j } = await supabaseAdmin.from("jornadas").select("numero, is_locked, is_active").eq("id", data.jornadaId).maybeSingle();
+    if (!j || !isJornadaClosed(j)) throw new Error("Jornada no cerrada");
     const { data: pred } = await supabaseAdmin
       .from("predicciones").select("*").eq("user_id", uid).eq("jornada_id", data.jornadaId).maybeSingle();
     if (!pred) throw new Error("Sin predicción");

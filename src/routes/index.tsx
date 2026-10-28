@@ -415,6 +415,7 @@ function IdealSeven() {
         .from("jornadas")
         .select("numero")
         .eq("is_locked", true)
+        .eq("is_active", false)
         .order("numero", { ascending: false })
         .limit(1)
         .maybeSingle();

@@ -9,6 +9,7 @@ import { PredictionCourt } from "@/components/prediction-court";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
+import { isJornadaClosed } from "@/lib/prediction-rewards";
 import {
   PRED_SLOTS,
   SLOT_LABEL,
@@ -66,7 +67,7 @@ function PrediccionPage() {
     if (actual) setPicks(Object.fromEntries(PRED_SLOTS.map((s) => [s, actual[s]])));
   }, [actual]);
 
-  const lastClosed = [...(jornadas.data ?? [])].reverse().find((j) => j.is_locked && mine.data?.some((p) => p.jornada_id === j.id));
+  const lastClosed = [...(jornadas.data ?? [])].reverse().find((j) => isJornadaClosed(j) && mine.data?.some((p) => p.jornada_id === j.id));
   const pasada = mine.data?.find((p) => p.jornada_id === lastClosed?.id);
   const ideal = useQuery({
     queryKey: ["ideal-seven", lastClosed?.numero],

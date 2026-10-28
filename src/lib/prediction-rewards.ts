@@ -1,5 +1,10 @@
 export type RewardRareza = "normal" | "raro" | "legendario";
 
+/** close_jornada bloquea la jornada y deja de marcarla como activa. */
+export function isJornadaClosed(jornada: { is_locked: boolean; is_active: boolean } | null | undefined): boolean {
+  return jornada?.is_locked === true && jornada.is_active === false;
+}
+
 /** Cartas entregadas según aciertos de la predicción (0–8). */
 export const REWARD_BY_ACIERTOS: Record<number, RewardRareza[]> = {
   0: [],

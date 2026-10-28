@@ -1,6 +1,24 @@
 import { describe, expect, test } from "bun:test";
-import { REWARD_BY_ACIERTOS } from "../src/lib/prediction-rewards";
+import { REWARD_BY_ACIERTOS, isJornadaClosed } from "../src/lib/prediction-rewards";
 import { computeIdealSeven, countAciertos } from "../src/lib/ideal-seven";
+
+describe("cierre definitivo para resultados y recompensas", () => {
+  test("Cerrar alineaciones no permite recompensas ni resultados", () => {
+    expect(isJornadaClosed({ is_locked: true, is_active: true })).toBe(false);
+  });
+  test("Cerrar jornada permite recompensas y resultados", () => {
+    expect(isJornadaClosed({ is_locked: true, is_active: false })).toBe(true);
+  });
+  test("una jornada abierta no permite recompensas", () => {
+    expect(isJornadaClosed({ is_locked: false, is_active: true })).toBe(false);
+  });
+  test("una jornada futura inactiva no permite recompensas", () => {
+    expect(isJornadaClosed({ is_locked: false, is_active: false })).toBe(false);
+  });
+  test("una jornada inexistente no permite recompensas", () => {
+    expect(isJornadaClosed(null)).toBe(false);
+  });
+});
 
 describe("recompensas de predicción", () => {
   test("5 aciertos = 2 comunes y 1 raro", () => {
