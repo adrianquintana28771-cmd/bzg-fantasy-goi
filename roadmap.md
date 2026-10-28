@@ -1,4 +1,5 @@
 # Pendiente
+- [ ] Evitar recompensas, 7 ideal y aciertos anticipados: exigir cierre definitivo, no solo bloqueo de alineaciones; verificar sin modificar cuentas reales.
 - [x] Cuenta de pruebas lovable creada con rol usuario, oculta en clasificaciones generales/por jornada, detalles públicos y listados de perfiles. Acceso y exclusiones comprobados con su propia sesión; cuentas reales intactas.
 - [x] Bonus por resultado por tramos (10%+→+1 … 50%+→+5) según goles encajados vs media de jornadas anteriores del equipo, editable en Criterios; sin bonus en J1 ni para entrenadores. 26 pruebas correctas, recálculo histórico verificado fila a fila (guardado = acciones + bonus). Guardado de tramos con sesión Super Admin pendiente de sesión autorizada.
 - [x] Copia inmutable verificada: 157 usuarios, 6253 cartas, 618 alineaciones y 3888 posiciones congeladas. Las 6253 cartas de 147 propietarios quedan con un uso; sobres e inserciones nuevas inicializan un uso. Nueve comprobaciones SQL correctas y 78 fichas reales muestran 1/1 sin errores. Consumo existente comprobado sin cerrar jornadas ni abrir sobres reales.
