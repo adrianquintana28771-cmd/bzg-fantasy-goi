@@ -7,7 +7,7 @@ import { BackButton } from '@/components/back-button';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/auth-context';
-import { useT } from '@/lib/i18n';
+import { useT, useTd } from '@/lib/i18n';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchScoreAudit } from '@/lib/score-audit-data';
 
@@ -18,6 +18,7 @@ export const Route = createFileRoute('/admin/auditoria')({
 const fmt = (n: number) => n.toLocaleString('es-ES', { maximumFractionDigits: 2 });
 function AuditPage() {
   const t = useT();
+  const td = useTd();
   const { isSuperAdmin } = useAuth();
   const [jornada, setJornada] = useState<number | null>(null);
   const [search, setSearch] = useState('');
@@ -53,7 +54,7 @@ function AuditPage() {
       {p.unavailable && <p className="mt-2 text-warning">{t('Ez eskuragarri: 0 puntu.', 'No disponible: 0 puntos.')}</p>}
       {p.saved == null && p.lines.length > 0 && <p className="mt-2 text-destructive">{t('Puntuazioa gorde gabe.', 'Falta la puntuación guardada.')}</p>}
       {p.lines.length === 0 && <p className="mt-2 text-muted-foreground">{t('Ez dago ekintzarik erregistratuta.', 'Sin acciones registradas.')}</p>}
-      <ul className="mt-3 space-y-3">{p.lines.map((l,i) => <li key={i}><div translate="no" className="text-xs text-muted-foreground">{l.match}</div><div>{l.action} · {l.quantity} → <strong>{fmt(l.points)} pts</strong></div><div className="text-xs text-muted-foreground">{l.origin === 'recorded' ? t('Erregistratua', 'Registrado') : t('Autokalkulatua', 'Autocalculado')} · {l.rule === 'shared' ? t('Atezain bat baino gehiago: −0,3 puntu gol bakoitzeko', 'Varios porteros: −0,3 puntos por gol') : l.rule === 'tiers' ? t('Partidako tarteak: −0,1 / −0,2 / −0,3 / −0,4', 'Tramos por partido: −0,1 / −0,2 / −0,3 / −0,4') : l.rule === 'percentage' ? t('Bonus jarraitua, partidako jaurtiketen arabera', 'Bonus continuo según lanzamientos del partido') : l.rule === 'goalkeeper' ? t('Parada × 2,5 · kanpora × 0,5', 'Parada × 2,5 · fuera × 0,5') : t('Kopurua × irizpidearen puntuak', 'Cantidad × puntos del criterio')}</div></li>)}</ul>
+      <ul className="mt-3 space-y-3">{p.lines.map((l,i) => <li key={i}><div translate="no" className="text-xs text-muted-foreground">{l.match}</div><div>{td(l.action)} · {l.quantity} → <strong>{fmt(l.points)} pts</strong></div><div className="text-xs text-muted-foreground">{l.origin === 'recorded' ? t('Erregistratua', 'Registrado') : t('Autokalkulatua', 'Autocalculado')} · {l.rule === 'shared' ? t('Atezain bat baino gehiago: −0,3 puntu gol bakoitzeko', 'Varios porteros: −0,3 puntos por gol') : l.rule === 'tiers' ? t('Partidako tarteak: −0,1 / −0,2 / −0,3 / −0,4', 'Tramos por partido: −0,1 / −0,2 / −0,3 / −0,4') : l.rule === 'percentage' ? t('Bonus jarraitua, partidako jaurtiketen arabera', 'Bonus continuo según lanzamientos del partido') : l.rule === 'goalkeeper' ? t('Geldiketa × 2,5 · kanpora × 0,5', 'Parada × 2,5 · fuera × 0,5') : t('Kopurua × irizpidearen puntuak', 'Cantidad × puntos del criterio')}</div></li>)}</ul>
     </details></td><td className="p-3 tabular-nums">{p.saved == null ? '—' : fmt(p.saved)}</td><td className="p-3 tabular-nums">{fmt(p.expected)}</td><td className={`p-3 font-semibold tabular-nums ${p.difference !== 0 ? 'text-destructive' : 'text-muted-foreground'}`}>{fmt(p.difference)}</td></tr>)}</tbody></table></div>
     {!audit.isPending && rows.length === 0 && <p className="py-8 text-center text-muted-foreground">{t('Ez dago emaitzarik.', 'Sin resultados.')}</p>}
   </main>;

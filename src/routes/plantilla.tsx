@@ -22,6 +22,7 @@ import {
   EquipoCard,
   MAX_USOS,
   POS_SHORT,
+  POS_SHORT_EU,
   PuntosRareza,
   RAREZA_LABEL_ES,
   RAREZA_LABEL_EU,
@@ -47,6 +48,17 @@ const POS_LABEL: Record<Posicion, string> = {
   central: "Erdikoa",
   pivote: "Pibota",
   entrenador: "Entrenatzailea",
+};
+
+const POS_LABEL_ES: Record<Posicion, string> = {
+  portero: "Portero/a",
+  extremo_izq: "Extremo izq.",
+  extremo_der: "Extremo der.",
+  lateral_izq: "Lateral izq.",
+  lateral_der: "Lateral der.",
+  central: "Central",
+  pivote: "Pivote",
+  entrenador: "Entrenador/a",
 };
 
 const SLOTS: Posicion[] = [
@@ -731,14 +743,14 @@ function Inner({ userId }: { userId: string }) {
                         </span>
                       </div>
                     ) : (
-                      POS_SHORT[slot]
+                      t(POS_SHORT_EU[slot], POS_SHORT[slot])
                     )}
                   </div>
                   <div
-                    translate="no"
+                    translate={c ? "no" : undefined}
                     className="max-w-[90px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white"
                   >
-                    {c ? c.pool.nombre : POS_LABEL[slot]}
+                    {c ? c.pool.nombre : t(POS_LABEL[slot], POS_LABEL_ES[slot])}
                   </div>
                   {c && (
                     <div className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold">
@@ -802,7 +814,7 @@ function Inner({ userId }: { userId: string }) {
                         className="flex items-center justify-between gap-1 rounded-md bg-secondary px-2 py-1 text-[11px]"
                       >
                         <span className="truncate">
-                          <span className="font-bold">{POS_SHORT[p.slot]}</span> <span translate="no">{p.nombre}</span>
+                          <span className="font-bold">{t(POS_SHORT_EU[p.slot], POS_SHORT[p.slot])}</span> <span translate="no">{p.nombre}</span>
                         </span>
                         <PuntosRareza
                           base={p.base}
@@ -859,7 +871,7 @@ function Inner({ userId }: { userId: string }) {
           </p>
         ) : visibleCards.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            {t("Iragazkirekin ez dago jokalaririk. Saiatu beste iragazki batekin.", "Nenhum jogador com esses filtros. Tente outro filtro.")}
+            {t("Iragazkirekin ez dago jokalaririk. Saiatu beste iragazki batekin.", "No hay jugadores con estos filtros. Prueba otro filtro.")}
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -961,7 +973,7 @@ function Inner({ userId }: { userId: string }) {
         <DialogContent className="w-[calc(100%-2rem)] max-w-3xl">
           <DialogHeader>
             <DialogTitle>
-              {t("Aukeratu", "Elegir")} {pickSlot ? POS_LABEL[pickSlot] : ""}
+              {t("Aukeratu", "Elegir")} {pickSlot ? t(POS_LABEL[pickSlot], POS_LABEL_ES[pickSlot]) : ""}
             </DialogTitle>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-auto">

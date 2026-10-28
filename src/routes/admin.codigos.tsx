@@ -6,7 +6,7 @@ import { BackButton } from "@/components/back-button";
 import { AdminGuard } from "@/components/admin-guard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
-import { useT } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/codigos")({
   head: () => ({
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/admin/codigos")({
 });
 
 function Page() {
-  const t = useT();
+  const { t, td, lang } = useLang();
   const { canManageAll: isSA, isAdminMisiones } = useAuth();
   const canManageAll = isSA || isAdminMisiones;
   const [codigo, setCodigo] = useState("");
@@ -129,7 +129,7 @@ function Page() {
                   }
                 }} className="w-full rounded-lg border border-border bg-background px-3 py-2">
                   <option value="">{t("Aukeratu partida", "Selecciona un partido")}</option>
-                  {matches.map((m) => <option key={m.id} value={m.id} translate="no">{m.fecha} · J{m.jornada} · {m.club_teams?.nombre ?? "BZG"} ({m.club_teams?.categoria} · {m.club_teams?.sexo}) vs {m.rival}{m.competicion ? ` · ${m.competicion}` : ""}</option>)}
+                  {matches.map((m) => <option key={m.id} value={m.id} translate="no">{m.fecha} · J{m.jornada} · {m.club_teams?.nombre ?? "BZG"} ({td(m.club_teams?.categoria ?? "")} · {td(m.club_teams?.sexo ?? "")}) vs {m.rival}{m.competicion ? ` · ${m.competicion}` : ""}</option>)}
                 </select>
                 {matchesError && <span className="text-destructive">{t("Ezin izan dira partidak kargatu.", "No se pudieron cargar los partidos.")}</span>}
               </label>
@@ -176,8 +176,8 @@ function Page() {
               </div>
               <span className="text-xs text-muted-foreground">
                 <span className="block font-semibold">{c.activa_desde && new Date(c.activa_desde).getTime() > Date.now() ? t("Programatuta", "Programado") : t("Aktibo", "Activo")}</span>
-                {c.activa_desde && <span className="block">{t("Aktibazioa", "Activación")}: {new Date(c.activa_desde).toLocaleString("es-ES", { timeZone: "Europe/Madrid" })}</span>}
-                {t("Iraungitzea", "Caduca")}: {new Date(c.caduca_at as string).toLocaleString("es-ES", { timeZone: "Europe/Madrid" })}
+                {c.activa_desde && <span className="block">{t("Aktibazioa", "Activación")}: {new Date(c.activa_desde).toLocaleString(lang === "eu" ? "eu-ES" : "es-ES", { timeZone: "Europe/Madrid" })}</span>}
+                {t("Iraungitzea", "Caduca")}: {new Date(c.caduca_at as string).toLocaleString(lang === "eu" ? "eu-ES" : "es-ES", { timeZone: "Europe/Madrid" })}
               </span>
             </li>
           ))}

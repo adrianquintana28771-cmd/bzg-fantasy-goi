@@ -83,7 +83,7 @@ export function SiteHeader() {
       : isAdmin
         ? "Admin"
         : isAdminMisiones
-          ? "Admin misiones"
+          ? t("Misioen administratzailea", "Admin misiones")
           : t("Erabiltzailea", "Usuario");
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);

@@ -388,7 +388,7 @@ function Fila({
           className="h-4 w-4 accent-[var(--color-primary)]"
         />
         <input
-          value={nombre}
+          value={nombreCambiado ? nombre : td(c.nombre)}
           onChange={(e) => setNombre(e.target.value)}
           aria-label={t("Irizpidearen izena", "Nombre del criterio")}
           className={`min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm ${c.activo ? "font-medium" : "text-muted-foreground line-through"}`}
