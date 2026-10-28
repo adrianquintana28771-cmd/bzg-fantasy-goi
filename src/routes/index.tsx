@@ -366,7 +366,7 @@ function Home() {
             </div>
           ))}
           <div>
-            <h2 className="mb-3 font-display text-xl">📈 {t("% paradas (media)", "% paradas (media)")}</h2>
+            <h2 className="mb-3 font-display text-xl">📈 {t("Geldiketen % (batez bestekoa)", "% paradas (media)")}</h2>
             <div className="space-y-2">
               {savePctLeaders.map((p, i) => (
                 <LeaderRow

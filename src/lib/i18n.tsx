@@ -73,6 +73,23 @@ const DB_EU: Record<string, string> = {
   Central: "Erdikoa",
   Pivote: "Pibota",
   "Especialista defensivo": "Defentsa-espezialista",
+  "Porcentaje de paradas": "Geldiketen ehunekoa",
+  "Porcentaje de acierto": "Asmatze-ehunekoa",
+  "Bonus por resultado": "Emaitzagatiko bonusa",
+  "Perdida de Balon": "Baloi-galera",
+  "Pase fallado(portero)": "Atezainaren huts egindako pasea",
+  "Tarjeta Roja(Portero)": "Atezainaren txartel gorria",
+  "Tarjeta Azul(sancion)": "Txartel urdina (zigorra)",
+  "Expulsion 2 minutos (portero)": "Atezainaren 2 minutuko kanporaketa",
+  "2 minutos provocado": "Eragindako 2 minutuko kanporaketa",
+  "2 minutos provocado (portero)": "Atezainak eragindako 2 minutuko kanporaketa",
+  Pasivo: "Joko pasiboa",
+  "Entrenador/a": "Entrenatzailea",
+  masculino: "gizonezkoak",
+  femenino: "emakumezkoak",
+  cadete: "kadetea",
+  juvenil: "gaztea",
+  senior: "seniorra",
 };
 
 const LangContext = createContext<Ctx>({
