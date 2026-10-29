@@ -1,4 +1,5 @@
 # Pendiente
+- [ ] Retirar Predicción y recompensas, eliminar sus registros exclusivos y ocultar el ideal de Inicio conservando su cálculo; sin tocar inventarios ni puntuaciones.
 - [x] Novedades en euskera: clasificaciones, posiciones de fichas/campo/historial, misiones añadidas y criterios de desempeño/auditoría; idioma inicial y cambio EUS/ESP comprobados con lovable sin modificar datos. Pantallas Super Admin sin verificación visual por falta de sesión autorizada.
 - [x] Recompensas, 7 ideal y aciertos exigen cierre definitivo (bloqueada e inactiva); 13 pruebas correctas y rechazo comprobado con lovable sin guardar premios ni modificar cuentas reales.
 - [x] Cuenta de pruebas lovable creada con rol usuario, oculta en clasificaciones generales/por jornada, detalles públicos y listados de perfiles. Acceso y exclusiones comprobados con su propia sesión; cuentas reales intactas.
