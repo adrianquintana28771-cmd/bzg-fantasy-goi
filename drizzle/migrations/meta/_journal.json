@@ -239,6 +239,13 @@
       "when": 1793258168924,
       "tag": "0033_revoke_unneeded_anon_execute",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1793311407775,
+      "tag": "0034_disable_retired_prediction_game",
+      "breakpoints": true
     }
   ]
 }
