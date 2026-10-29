@@ -16,6 +16,7 @@ import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useCardImages } from "@/lib/card-images";
 import { Button } from "@/components/ui/button";
 import { fetchAllRows, round2 } from "@/lib/club-data";
+import { userRankingSummary } from "@/lib/user-ranking-summary";
 
 import {
   CardPhoto,
@@ -198,6 +199,16 @@ function Inner({ userId }: { userId: string }) {
   const CAT_LABEL = lang === "eu" ? CATEGORY_LABEL_EU : CATEGORY_LABEL;
   const qc = useQueryClient();
   const cardImages = useCardImages();
+
+  const rankingSummary = useQuery({
+    queryKey: ["team-user-ranking-summary", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("user_ranking");
+      if (error) throw error;
+      return userRankingSummary(data ?? [], userId, t("Erabiltzailea", "Usuario"));
+    },
+    refetchInterval: 30_000,
+  });
 
   const wallet = useQuery({
     queryKey: ["wallet", userId],
@@ -659,10 +670,24 @@ function Inner({ userId }: { userId: string }) {
               : t("Jardunaldi aktiborik ez", "Sin jornada activa")}
           </p>
         </div>
-        <div className="rounded-xl bg-primary/10 px-4 py-2 text-center">
-          <div className="font-display text-2xl text-primary">{displayPts(puntosJornada)}</div>
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-            {t("jardunaldiko ptak", "pts jornada")}
+        <div className="flex max-w-full flex-wrap justify-end gap-2">
+          <div className="rounded-xl bg-primary/10 px-4 py-2 text-center">
+            <div className="font-display text-2xl text-primary">{displayPts(puntosJornada)}</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              {t("jardunaldiko ptak", "pts jornada")}
+            </div>
+          </div>
+          <div className="rounded-xl bg-secondary px-4 py-2 text-center">
+            <div className="font-display text-2xl text-primary">{rankingSummary.data ? `#${rankingSummary.data.posicion}` : "—"}</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              {t("Sailkapena", "Clasificación")}
+            </div>
+          </div>
+          <div className="rounded-xl bg-secondary px-4 py-2 text-center">
+            <div className="font-display text-2xl text-primary">{rankingSummary.data ? displayPts(rankingSummary.data.puntos) : "—"}</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              {t("Puntuak guztira", "Puntos totales")}
+            </div>
           </div>
         </div>
       </header>
