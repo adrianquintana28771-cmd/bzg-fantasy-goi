@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BookOpen, ExternalLink, Package, QrCode, Sparkles, Target, Trophy } from "lucide-react";
+import { BookOpen, ExternalLink, Package, QrCode, Sparkles, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/back-button";
 import { openGuidedTour, TOUR_COMPLETED_EVENT } from "@/components/guided-tour";
@@ -311,12 +311,6 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
           {t("Lortu gutunazalak eta handitu zure taldea", "Consigue sobres y amplía tu equipo")}
         </p>
       </header>
-
-      <Button asChild size="lg" className="w-full">
-        <Link to="/prediccion">
-          <Target aria-hidden /> {t("Iragarpena", "Predicción")}
-        </Link>
-      </Button>
 
       {/* QR premium */}
       <section className="rounded-2xl border-2 border-[color:var(--gold,#d4a017)]/60 bg-card p-4">
