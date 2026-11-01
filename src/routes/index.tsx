@@ -11,6 +11,9 @@ import { EquipoCard, type PoolRow, type Posicion } from "@/components/equipo-car
 import { useCardImages } from "@/lib/card-images";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
+import { PRED_SLOTS, fetchIdealSeven } from "@/lib/ideal-seven";
+import { PredictionCourt } from "@/components/prediction-court";
+import { useAuth } from "@/lib/auth-context";
 
 /** Fila de clasificación: todo el rectángulo enlaza con la ficha de jugador/a. */
 function LeaderRow({
@@ -294,6 +297,8 @@ function Home() {
           )}
         </div>
 
+        <IdealSeven />
+
         {/* Top 5 & recent matches */}
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div>
@@ -398,3 +403,43 @@ function Home() {
   );
 }
 
+
+/** 8 ideal: solo visible para super_admin. */
+function IdealSeven() {
+  const t = useT();
+  const { isSuperAdmin } = useAuth();
+  const { data } = useQuery({
+    queryKey: ["home-ideal-seven"],
+    enabled: isSuperAdmin,
+    queryFn: async () => {
+      const { data: j } = await supabase
+        .from("jornadas")
+        .select("numero")
+        .eq("is_locked", true)
+        .eq("is_active", false)
+        .order("numero", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!j) return null;
+      return { numero: j.numero, ...(await fetchIdealSeven(j.numero)) };
+    },
+  });
+  if (!isSuperAdmin || !data) return null;
+  return (
+    <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-card">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+          {t("8 ideala", "8 ideal")} · J{data.numero}
+        </span>
+        <Sparkles className="h-5 w-5 text-primary" />
+      </div>
+      <div className="mt-3 overflow-hidden rounded-xl">
+        <PredictionCourt
+          picks={Object.fromEntries(PRED_SLOTS.map((s) => [s, data.ideal[s]?.id ?? null]))}
+          names={data.nameById}
+          points={Object.fromEntries(PRED_SLOTS.filter((s) => data.ideal[s]).map((s) => [s, `${round2(data.ideal[s]!.puntos)} pts`]))}
+        />
+      </div>
+    </div>
+  );
+}
