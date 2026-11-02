@@ -6,8 +6,6 @@ import { BackButton } from "@/components/back-button";
 import { useT, useLang } from "@/lib/i18n";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU, type Category } from "@/lib/fantasy/types";
 import { fetchAllRows } from "@/lib/club-data";
-import { Button } from "@/components/ui/button";
-import { BarChart3 } from "lucide-react";
 
 export const Route = createFileRoute("/partidos/")({
   head: () => {
