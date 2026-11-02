@@ -24,3 +24,4 @@ Player photo surfaces share decorative layers and resolve existing Storage objec
 - Prediction participation and reward endpoints are retired; keep the ideal lineup calculator and court independent of participation so matchday ideals remain reusable without awarding cards.
 - Equipo's user summary reads the existing public ranking RPC and uses the leaderboard's total-score/alphabetical ordering; excluded accounts get no invented standing or total.
 - Translate stored scoring labels through the existing `td` dictionary and stock mission copy at display time, preserving original stored values and editable drafts; why: language switching must not rewrite club configuration or mission data.
+- Team performance is read-only, counts only explicit played match participants once, and computes percentages from their summed actions; why: cross-team call-ups belong to the selected match without inferring participation or altering Fantasy scores.
