@@ -1,5 +1,5 @@
 # Pendiente
-- [ ] Crear Desempeño por equipo: selectores, totales e individuales de participantes reales, incluidos convocados; sin escrituras ni cambios Fantasy.
+- [x] Desempeño por equipo accesible desde Partidos: equipo/jornada/partido, totales e individuales de participantes reales, incluidos convocados; tres pruebas correctas, J1 con 14 participantes y un convocado, EUS/ESP y móvil comprobados; sin escrituras ni cambios Fantasy.
 - [x] Predicción y premios retirados: 15 predicciones y 4 registros de premio eliminados; estructuras vacías y desactivadas por confirmación del usuario. Ideal oculto de Inicio, cálculo conservado (2 pruebas correctas); Misiones, Inicio y página retirada comprobadas sin errores ni cambios de inventario/puntuaciones.
 - [x] Novedades en euskera: clasificaciones, posiciones de fichas/campo/historial, misiones añadidas y criterios de desempeño/auditoría; idioma inicial y cambio EUS/ESP comprobados con lovable sin modificar datos. Pantallas Super Admin sin verificación visual por falta de sesión autorizada.
 - [x] Recompensas, 7 ideal y aciertos exigen cierre definitivo (bloqueada e inactiva); 13 pruebas correctas y rechazo comprobado con lovable sin guardar premios ni modificar cuentas reales.

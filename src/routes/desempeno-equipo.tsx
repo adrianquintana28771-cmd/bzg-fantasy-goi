@@ -76,7 +76,8 @@ function TeamPerformancePage() {
   const { data } = useSuspenseQuery(performanceQuery(selected.match?.id));
   const { players: counts, totals } = aggregateTeamPerformance(data.participants, data.actions);
   const recorded = new Set(data.actions.filter(a => counts[a.player_id]).map(a => a.action_id));
-  const criteria = data.criteria.filter(c => c.activo || recorded.has(c.id));
+  const calculated = new Set(["porcentaje_acierto", "porcentaje_paradas", "bonus_resultado"]);
+  const criteria = data.criteria.filter(c => recorded.has(c.id) || (c.activo && !calculated.has(c.id)));
   const percentages = performancePercentages(totals);
   const number = (n: number | null) => n === null ? "—" : `${n.toLocaleString(lang === "eu" ? "eu-ES" : "es-ES", { maximumFractionDigits: 2 })}%`;
   const matchLabel = (m: Performance["matches"][number]) => `${m.fecha.split("-").reverse().join("/")}${m.hora ? ` · ${m.hora}` : ""} · ${m.competicion ?? `J${m.jornada}`}`;
@@ -117,7 +118,7 @@ function TeamPerformancePage() {
         <label id="match-label" className="text-sm font-semibold">{t("Partida", "Partido")}</label>
         <Select value={selected.match?.id ?? ""} onValueChange={partido => navigate({ search: { equipo: selected.team?.id ?? "", jornada: selected.jornada ?? 0, partido } })}>
           <SelectTrigger aria-labelledby="match-label"><SelectValue /></SelectTrigger>
-          <SelectContent>{selected.options.map(m => <SelectItem key={m.id} value={m.id}>{matchLabel(m)}</SelectItem>)}</SelectContent>
+          <SelectContent>{selected.options.map(m => <SelectItem key={m.id} value={m.id}>{matchLabel(m)} · <span translate="no">{m.rival}</span></SelectItem>)}</SelectContent>
         </Select>
       </div>}
     </div>
