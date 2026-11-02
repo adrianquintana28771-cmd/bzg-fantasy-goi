@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DesempenoEquipoRouteImport } from './routes/desempeno-equipo'
 import { Route as MisionesRouteImport } from './routes/misiones'
 import { Route as PlantillaRouteImport } from './routes/plantilla'
 import { Route as RankingsRouteImport } from './routes/rankings'
@@ -41,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesempenoEquipoRoute = DesempenoEquipoRouteImport.update({
+  id: '/desempeno-equipo',
+  path: '/desempeno-equipo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MisionesRoute = MisionesRouteImport.update({
@@ -153,6 +159,7 @@ const ApiPublicHooksSyncMatchesRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/desempeno-equipo': typeof DesempenoEquipoRoute
   '/misiones': typeof MisionesRoute
   '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/desempeno-equipo': typeof DesempenoEquipoRoute
   '/misiones': typeof MisionesRoute
   '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/desempeno-equipo': typeof DesempenoEquipoRoute
   '/misiones': typeof MisionesRoute
   '/plantilla': typeof PlantillaRoute
   '/rankings': typeof RankingsRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/desempeno-equipo'
     | '/misiones'
     | '/plantilla'
     | '/rankings'
@@ -256,6 +266,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/desempeno-equipo'
     | '/misiones'
     | '/plantilla'
     | '/rankings'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/desempeno-equipo'
     | '/misiones'
     | '/plantilla'
     | '/rankings'
@@ -307,6 +319,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  DesempenoEquipoRoute: typeof DesempenoEquipoRoute
   MisionesRoute: typeof MisionesRoute
   PlantillaRoute: typeof PlantillaRoute
   RankingsRoute: typeof RankingsRoute
@@ -344,6 +357,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/desempeno-equipo': {
+      id: '/desempeno-equipo'
+      path: '/desempeno-equipo'
+      fullPath: '/desempeno-equipo'
+      preLoaderRoute: typeof DesempenoEquipoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/misiones': {
@@ -499,6 +519,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  DesempenoEquipoRoute: DesempenoEquipoRoute,
   MisionesRoute: MisionesRoute,
   PlantillaRoute: PlantillaRoute,
   RankingsRoute: RankingsRoute,
