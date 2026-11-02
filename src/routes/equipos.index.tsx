@@ -5,7 +5,7 @@ import { BackButton } from "@/components/back-button";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU, type Category } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
 import { fetchPool, fetchPointsByPlayer, fetchTeams, round2 } from "@/lib/club-data";
-import { Users } from "lucide-react";
+import { Users, BarChart3 } from "lucide-react";
 
 export const Route = createFileRoute("/equipos/")({
   head: () => {
@@ -64,6 +64,14 @@ function Equipos() {
       <p className="text-sm text-muted-foreground">
         {t("BZG Etxebarriko eskubaloi taldeak", "Equipos de balonmano del BZG Etxebarri")}
       </p>
+      <Link
+        to="/desempeno-equipo"
+        search={{ equipo: "", jornada: 0, partido: "" }}
+        className="mt-4 inline-flex items-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-secondary"
+      >
+        <BarChart3 className="h-4 w-4" aria-hidden />
+        {t("Errendimendua taldeka", "Desempeño por equipo")}
+      </Link>
       {q.isLoading && (
         <p className="mt-6 text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>
       )}
