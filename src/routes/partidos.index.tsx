@@ -6,8 +6,6 @@ import { BackButton } from "@/components/back-button";
 import { useT, useLang } from "@/lib/i18n";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU, type Category } from "@/lib/fantasy/types";
 import { fetchAllRows } from "@/lib/club-data";
-import { Button } from "@/components/ui/button";
-import { BarChart3 } from "lucide-react";
 
 export const Route = createFileRoute("/partidos/")({
   head: () => {
@@ -95,11 +93,6 @@ function Partidos() {
     <div className="mx-auto max-w-4xl px-4 py-8">
       <BackButton />
       <h1 className="mt-3 font-display text-4xl">{t("Partidak", "Partidos")}</h1>
-      <Button asChild variant="outline" className="mt-4">
-        <Link to="/desempeno-equipo" search={{ equipo: "", jornada: 0, partido: "" }}>
-          <BarChart3 aria-hidden />{t("Errendimendua taldeka", "Desempeño por equipo")}
-        </Link>
-      </Button>
       <p className="text-sm text-muted-foreground">
         {t(
           "Aukeratu jardunaldia eta ikusi talde bakoitzaren partida.",

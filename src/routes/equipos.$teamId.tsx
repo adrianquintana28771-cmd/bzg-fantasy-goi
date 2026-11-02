@@ -3,7 +3,7 @@ import { useDisplayPoints } from "@/hooks/use-display-points";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CategoryBadge } from "@/components/fantasy-ui";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BarChart3 } from "lucide-react";
 import { POSITION_LABEL, POSITION_LABEL_EU, type Category } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
 import { fetchAllRows, fetchPool, fetchPointsByPlayer, fetchTeams, round2 } from "@/lib/club-data";
@@ -123,6 +123,16 @@ function EquipoDetalle() {
           </div>
         </div>
       </div>
+      <Link
+        to="/desempeno-equipo"
+        search={{ equipo: teamId, jornada: 0, partido: "" }}
+        className="mt-4 inline-flex items-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-secondary"
+      >
+        <BarChart3 className="h-4 w-4" aria-hidden />
+        {t("Errendimendua taldeka", "Desempeño por equipo")}
+      </Link>
+
+
 
       {coaches.length > 0 && (
         <>
