@@ -159,6 +159,15 @@ function Jugador() {
         puntos: Number(r.puntos),
         estado: r.estado as PlayerEstado,
       }));
+      // Ajuste solo visual (no guardado) para la lesión de cruzado
+      if (player.id === DISPLAY_BONUS.poolId) {
+        const b = DISPLAY_BONUS;
+        const s = stats.find((x) => x.jornada === b.jornada);
+        if (s) s.puntos = round2(s.puntos + b.puntos);
+        else stats.push({ jornada: b.jornada, puntos: b.puntos, estado: "no_disponible" });
+        stats.sort((a, c) => a.jornada - c.jornada);
+        actions = [...actions, { jornada: b.jornada, action_id: "cruzado", nombre: b.label, puntos: b.puntos, cantidad: 1, orden: 9999, pts: b.puntos }];
+      }
       return { player, team, stats, actions };
     },
   });

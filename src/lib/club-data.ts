@@ -81,10 +81,19 @@ export async function fetchPointsByPlayer(): Promise<Record<string, number>> {
     for (const r of data ?? []) out[r.player_id] = (out[r.player_id] ?? 0) + Number(r.puntos);
     if (!data || data.length < 1000) break;
   }
+  out[DISPLAY_BONUS.poolId] = (out[DISPLAY_BONUS.poolId] ?? 0) + DISPLAY_BONUS.puntos;
   return out;
 }
 
 export const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * Ajuste solo visual (no guardado): Olatz Oihana Solla Ripa (lesión de cruzado)
+ * muestra 0,1 puntos en J1 con la etiqueta «Cruzado» en lugar de 0.
+ */
+export const DISPLAY_BONUS = { poolId: "berde-6", jornada: 1, puntos: 0.1, label: "Cruzado" } as const;
+const withDisplayBonus = <T extends { player_id: string; puntos: number; jornada_numero?: number }>(rows: T[]) =>
+  [...rows, { player_id: DISPLAY_BONUS.poolId, puntos: DISPLAY_BONUS.puntos, jornada_numero: DISPLAY_BONUS.jornada } as T];
 
 // Penalización de porteros por goles encajados, acumulativa por tramos:
 // 1-10: -0,25/gol · 11-20: -0,50/gol · 21-30: -0,75/gol · 31+: -1/gol
@@ -147,7 +156,7 @@ export async function fetchPlayerRanking(): Promise<RankedPlayer[]> {
   }
   const [teams, pool] = await Promise.all([fetchTeams(), fetchPool()]);
   const agg: Record<string, { puntos: number; jornadas: Set<number>; por: Record<number, number> }> = {};
-  for (const r of statsRows) {
+  for (const r of withDisplayBonus(statsRows)) {
     const a = (agg[r.player_id] ??= { puntos: 0, jornadas: new Set(), por: {} });
     a.puntos += Number(r.puntos);
     a.por[r.jornada_numero] = round2((a.por[r.jornada_numero] ?? 0) + Number(r.puntos));
