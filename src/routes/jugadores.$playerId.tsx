@@ -17,7 +17,7 @@ import {
 } from "@/lib/fantasy/types";
 import { useT, useTd, useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
-import { fetchPoolPlayer, fetchTeams, round2, type Tramo } from "@/lib/club-data";
+import { DISPLAY_BONUS, fetchPoolPlayer, fetchTeams, round2, type Tramo } from "@/lib/club-data";
 import { useCardImages, usePhotoSource } from "@/lib/card-images";
 import { auditPlayer, type AuditType } from "@/lib/score-audit";
 import { fetchBonusByMatch } from "@/lib/score-audit-data";
