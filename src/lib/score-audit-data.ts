@@ -64,8 +64,7 @@ export async function fetchScoreAudit(jornada: number) {
   const matchLabels = new Map((matches.data ?? []).map(m => [m.id, `${m.club_teams?.nombre ?? ''} · ${m.rival}`]));
   return poolRows.map(p => {
     const clubId = p.club_player_id ?? '';
-    // Los entrenadores no reciben puntos automáticos por resultado: solo acciones registradas.
-    const played = p.club?.es_entrenador ? undefined : playedBy.get(clubId);
+    const played = playedBy.get(clubId);
     const result = auditPlayer(clubId, actions, config, played, bonusByMatch);
     const stat = saved.get(p.id);
     const expected = stat?.estado === 'no_disponible' ? 0 : result.expected;
