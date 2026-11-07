@@ -133,7 +133,7 @@ function Jugador() {
           player.club_player_id,
           allActions,
           types as AuditType[],
-          player.club?.es_entrenador ? undefined : played,
+          played,
           bonusByMatch,
         );
         const jornadas = new Map(rows.map(r => [r.match_id, r.club_matches?.jornada ?? 0]));

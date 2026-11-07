@@ -253,6 +253,13 @@
       "when": 1793542200369,
       "tag": "0035_optimize_user_ranking_by_jornada",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1794077438944,
+      "tag": "0036_result_bonus_for_coaches",
+      "breakpoints": true
     }
   ]
 }

@@ -311,7 +311,7 @@ function Desempeno() {
       ...Object.entries(counts).map(([action_id, cantidad]) => ({ match_id: matchId, player_id: playerId, action_id, cantidad })),
     ],
     actions.data ?? [],
-    esEntrenador ? undefined : new Set([matchId]),
+    new Set([matchId]),
     bonusCtx,
   );
   // Sin paradas, lanzamientos fuera ni goles en contra, el % cuenta como 0 y se calcula igual.
