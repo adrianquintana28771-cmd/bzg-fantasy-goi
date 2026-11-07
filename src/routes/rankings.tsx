@@ -64,13 +64,8 @@ function Rankings() {
   useEffect(() => {
     if (teamId && !teams.some((tm) => tm.id === teamId)) setTeamId("");
   }, [category, gender, teamId, teams]);
+  // Orden general (sin filtros); en Total/jornada se conserva el puesto general al filtrar, en Media no.
   const sorted = ranking
-    .filter(
-      (r) =>
-        (!category || r.team?.categoria === category) &&
-        (!gender || r.team?.sexo === gender) &&
-        (!teamId || r.team?.id === teamId),
-    )
     .map((r) =>
       jor === "total"
         ? r
@@ -78,7 +73,14 @@ function Rankings() {
           ? { ...r, puntos: r.jornadas > 0 ? round2(r.puntos / r.jornadas) : 0 }
           : { ...r, puntos: r.porJornada[jor] ?? 0, jornadas: r.porJornada[jor] ? 1 : 0 },
     )
-    .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre));
+    .sort((a, b) => b.puntos - a.puntos || a.nombre.localeCompare(b.nombre))
+    .map((r, i) => ({ ...r, globalRank: i + 1 }))
+    .filter(
+      (r) =>
+        (!category || r.team?.categoria === category) &&
+        (!gender || r.team?.sexo === gender) &&
+        (!teamId || r.team?.id === teamId),
+    );
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -146,7 +148,7 @@ function Rankings() {
           <div className="mt-6 space-y-2">
             {isLoading && <p className="text-sm text-muted-foreground">{t("Kargatzen…", "Cargando…")}</p>}
             {sorted.map((p, i) => (
-              <RankedPlayerRow key={p.id} p={p} rank={i + 1} />
+              <RankedPlayerRow key={p.id} p={p} rank={jor === "media" ? i + 1 : p.globalRank} />
             ))}
             {!isLoading && sorted.length === 0 && (
               <div className="rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">
