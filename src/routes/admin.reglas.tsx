@@ -305,8 +305,8 @@ function TramosPortero({ actions }: { actions: Criterio[] }) {
       </summary>
       <p className="mt-2 text-xs text-muted-foreground">
         {t(
-          "Geldiketak eta golak: puntuak unitateko, tarteka metatuta (hutsik = lineala). Golak: atezain bakarra badago bakarrik; 2+ badaude, gol bakoitza irizpidearen puntuak. Ehunekoa: tarteko puntu finkoak, % = geldiketak / (geldiketak + kanpora + golak) × 100. Emaitza-bonua: taldeak aurreko jardunaldietako batez bestekoa baino % gutxiagotan gol jasotzen badu, tarteko puntu finkoak; 1. jardunaldian ez da aplikatzen eta entrenatzaileek ez dute jasotzen.",
-          "Paradas y goles: puntos por unidad, acumulativos por tramos (vacío = lineal). Goles: solo si juega un único portero; con 2+ cada gol vale los puntos del criterio. Porcentaje: puntos fijos del tramo, % = paradas / (paradas + fuera + goles) × 100. Bonus por resultado: si el equipo encaja un % menos de goles que su media de jornadas anteriores, puntos fijos del tramo; no se aplica en la jornada 1 ni a entrenadores/as.",
+          "Geldiketak eta golak: puntuak unitateko, tarteka metatuta (hutsik = lineala). Golak: atezain bakarra badago bakarrik; 2+ badaude, gol bakoitza irizpidearen puntuak. Ehunekoa: tarteko puntu finkoak, % = geldiketak / (geldiketak + kanpora + golak) × 100. Emaitza-bonua: taldeak aurreko jardunaldietako batez bestekoa baino % gutxiagotan gol jasotzen badu, tarteko puntu finkoak; 1. jardunaldian ez da aplikatzen; parte hartzen duten entrenatzaileek ere jasotzen dute.",
+          "Paradas y goles: puntos por unidad, acumulativos por tramos (vacío = lineal). Goles: solo si juega un único portero; con 2+ cada gol vale los puntos del criterio. Porcentaje: puntos fijos del tramo, % = paradas / (paradas + fuera + goles) × 100. Bonus por resultado: si el equipo encaja un % menos de goles que su media de jornadas anteriores, puntos fijos del tramo; no se aplica en la jornada 1; incluye a entrenadores/as que participan.",
         )}
       </p>
       {TRAMO_IDS.map((id) => {

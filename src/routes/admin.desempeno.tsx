@@ -643,7 +643,7 @@ function Desempeno() {
             </div>
           )}
 
-          {!esEntrenador && bonusActivo && (
+          {bonusActivo && (
             <div className="mt-4 rounded-2xl border border-border bg-card p-4 text-sm">
               <div className="font-semibold">{t("Emaitza-bonua", "Bonus por resultado")}</div>
               <div className="text-xs text-muted-foreground">
