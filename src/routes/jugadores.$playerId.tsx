@@ -108,7 +108,13 @@ function Jugador() {
           } | null;
         };
         const rows = (data ?? []) as unknown as Row[];
-        const matchIds = [...new Set(rows.map(r => r.match_id))];
+        const { data: playedRows, error: playedError } = await supabase
+          .from("club_match_players")
+          .select("match_id,club_matches(jornada)")
+          .eq("player_id", player.club_player_id)
+          .eq("jugado", true);
+        if (playedError) throw playedError;
+        const matchIds = [...new Set([...rows.map(r => r.match_id), ...(playedRows ?? []).map(r => r.match_id)])];
         const { data: config, error: configError } = await supabase.from("club_action_types").select("id,nombre,puntos,activo,solo_portero,tramos,orden");
         if (configError) throw configError;
         const types = (config ?? []).map(t => ({ ...t, puntos: Number(t.puntos), tramos: t.tramos as Tramo[] | null }));
@@ -121,12 +127,6 @@ function Jugador() {
             if ((page?.length ?? 0) < 1000) break;
           }
         }
-        const { data: playedRows, error: playedError } = await supabase
-          .from("club_match_players")
-          .select("match_id,club_matches(jornada)")
-          .eq("player_id", player.club_player_id)
-          .eq("jugado", true);
-        if (playedError) throw playedError;
         const played = new Set((playedRows ?? []).map((r) => r.match_id));
         const bonusByMatch = played.size ? await fetchBonusByMatch() : new Map();
         const result = auditPlayer(
