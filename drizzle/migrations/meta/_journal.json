@@ -267,6 +267,13 @@
       "when": 1794320789633,
       "tag": "0037_player_card_storage_signed_in_only",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1794464373118,
+      "tag": "0038_player_card_storage_staff_read_only",
+      "breakpoints": true
     }
   ]
 }
