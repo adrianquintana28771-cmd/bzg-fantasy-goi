@@ -56,3 +56,4 @@
 - [x] Inicio «Jugador/a de la jornada»: solo la ficha completa (nombre, equipo, rareza y puntos ya van dentro); quitados los textos duplicados de fuera.
 - [x] Móvil: «Mis jugadores» y el selector de la alineación muestran 2 fichas por fila (3 en pantalla mayor); texto compactado para que nada se corte ni se solape; comprobado a 375 px y 1280 px sin tocar cálculos.
 - [x] Equipo: quitado el botón «Todos/Total» del historial de jornadas; solo se ve una jornada cada vez (la más reciente al entrar) y se cambia pulsando J1, J2…; comprobado con sesión real sin tocar datos.
+- Security: player card photo downloads not tied to owner (fix)
