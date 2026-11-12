@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/club-data";
+import { signCardImagePaths } from "@/lib/card-images.functions";
 
 export const CARD_BUCKET = "player-card-images";
 export type Rareza = "normal" | "raro" | "legendario";
@@ -37,31 +38,22 @@ export async function fetchCardImages(): Promise<CardImages> {
   const rows = await fetchAllRows((from, to) =>
     supabase.from("player_card_images").select("player_id,rareza,path,updated_at").range(from, to),
   );
-  const bucket = supabase.storage.from(CARD_BUCKET);
   const ids = [...new Set(rows.map((r) => r.player_id))];
-  // Inspect existing objects, not guessed signed URLs (missing objects can still be signed).
-  const folders = new Map(await Promise.all(ids.map(async (id) => {
-    const { data: files } = await bucket.list(id, { limit: 100 });
-    return [id, new Set((files ?? []).map((f) => `${id}/${f.name}`))] as const;
-  })));
+  // Inspect existing objects server-side (direct bucket reads are staff-only).
+  const { files: existing, signed: signedMap } = await signCardImagePaths({ data: { folders: [...ids, "templates"] } });
+  const present = new Set(existing);
   const candidates = new Map<string, string[]>();
   for (const r of rows) {
     const rz = r.rareza as Rareza;
     const base = `${r.player_id}/${FILE_OF[rz]}`;
-    const files = folders.get(r.player_id);
-    const formats = [`${base}.webp`, `${base}.png`, `${base}.jpeg`, `${base}.jpg`].filter((path) => files?.has(path));
+    const formats = [`${base}.webp`, `${base}.png`, `${base}.jpeg`, `${base}.jpg`].filter((path) => present.has(path));
     candidates.set(`${r.player_id}:${rz}`, [...new Set([...formats, r.path])]);
   }
-  const { data: templateFiles } = await bucket.list("templates", { limit: 100 });
-  const templateNames = new Set((templateFiles ?? []).map((f) => `templates/${f.name}`));
   const tplCandidates = new Map(RAREZAS.map((rz) => {
     const base = TEMPLATE_PATH[rz].replace(/\.png$/, "");
-    return [rz, [`${base}.webp`, `${base}.png`, `${base}.jpeg`, `${base}.jpg`].filter((path) => templateNames.has(path))] as const;
+    return [rz, [`${base}.webp`, `${base}.png`, `${base}.jpeg`, `${base}.jpg`].filter((path) => present.has(path))] as const;
   }));
-  const all = [...new Set([...candidates.values(), ...tplCandidates.values()].flat())];
-  const { data: signed } = await supabase.storage.from(CARD_BUCKET).createSignedUrls(all, 60 * 60 * 6);
-  const url = new Map<string, string>();
-  for (const s of signed ?? []) if (s.signedUrl && !s.error && s.path) url.set(s.path, s.signedUrl);
+  const url = new Map<string, string>(Object.entries(signedMap));
   const alternatives: NonNullable<CardImages["alternatives"]> = {};
   const out: CardImages = { photos: {}, paths: {}, templates: {}, alternatives };
   for (const r of rows) {
