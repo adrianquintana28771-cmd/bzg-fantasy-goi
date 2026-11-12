@@ -112,6 +112,13 @@ function AdminJugadores() {
   const teamsOf = (id: string) =>
     (q.data?.links ?? []).filter((l) => l.player_id === id && teamName.has(l.team_id)).map((l) => l.team_id);
 
+  const posOf = (id: string) =>
+    (q.data?.playerPositions ?? [])
+      .filter((r) => r.player_id === id)
+      .sort((a, b) => Number(b.es_principal) - Number(a.es_principal))
+      .map((r) => POS_LABEL[r.position_id as keyof typeof POS_LABEL] ?? r.position_id)
+      .join(", ");
+
   const list = useMemo(() => {
     const f = filter.trim().toLowerCase();
     const all = q.data?.players ?? [];
@@ -189,7 +196,7 @@ function AdminJugadores() {
     <div className="mx-auto max-w-5xl px-4 py-8">
       <BackButton />
       <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
-        <h1 className="font-display text-4xl">{t("Jokalarien kudeaketa", "Gestión de jugadores/as")}</h1>
+        <h1 className="font-display text-4xl">{t("Jokalarien kudeaketa eta posizioak", "Gestión y posiciones de jugadores/as")}</h1>
         <button
           type="button"
           onClick={() => {
@@ -236,6 +243,7 @@ function AdminJugadores() {
                 <span className="block text-xs text-muted-foreground">
                   {teamsOf(p.id).map((id) => teamName.get(id)).join(" · ") || t("Talderik gabe", "Sin equipo")}
                   {p.es_entrenador ? ` · ${t("Entrenatzailea", "Entrenador/a")}` : ""}
+                  {!p.es_entrenador && posOf(p.id) ? ` · ${posOf(p.id)}` : ""}
                   {!p.activo ? ` · ${t("Desaktibatuta", "Desactivado/a")}` : ""}
                 </span>
               </button>
