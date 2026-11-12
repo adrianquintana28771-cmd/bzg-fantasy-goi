@@ -22,6 +22,7 @@ import { Route as AdminCodigosRouteImport } from './routes/admin.codigos'
 import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
 import { Route as AdminFotosRouteImport } from './routes/admin.fotos'
 import { Route as AdminFuentesRouteImport } from './routes/admin.fuentes'
+import { Route as AdminInicioRouteImport } from './routes/admin.inicio'
 import { Route as AdminJugadoresRouteImport } from './routes/admin.jugadores'
 import { Route as AdminMisionesRouteImport } from './routes/admin.misiones'
 import { Route as AdminPasswordRouteImport } from './routes/admin.password'
@@ -99,6 +100,11 @@ const AdminFuentesRoute = AdminFuentesRouteImport.update({
   path: '/admin/fuentes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInicioRoute = AdminInicioRouteImport.update({
+  id: '/admin/inicio',
+  path: '/admin/inicio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminJugadoresRoute = AdminJugadoresRouteImport.update({
   id: '/admin/jugadores',
   path: '/admin/jugadores',
@@ -169,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fuentes': typeof AdminFuentesRoute
+  '/admin/inicio': typeof AdminInicioRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fuentes': typeof AdminFuentesRoute
+  '/admin/inicio': typeof AdminInicioRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/admin/desempeno': typeof AdminDesempenoRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fuentes': typeof AdminFuentesRoute
+  '/admin/inicio': typeof AdminInicioRoute
   '/admin/jugadores': typeof AdminJugadoresRoute
   '/admin/misiones': typeof AdminMisionesRoute
   '/admin/password': typeof AdminPasswordRoute
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/admin/desempeno'
     | '/admin/fotos'
     | '/admin/fuentes'
+    | '/admin/inicio'
     | '/admin/jugadores'
     | '/admin/misiones'
     | '/admin/password'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/admin/desempeno'
     | '/admin/fotos'
     | '/admin/fuentes'
+    | '/admin/inicio'
     | '/admin/jugadores'
     | '/admin/misiones'
     | '/admin/password'
@@ -302,6 +313,7 @@ export interface FileRouteTypes {
     | '/admin/desempeno'
     | '/admin/fotos'
     | '/admin/fuentes'
+    | '/admin/inicio'
     | '/admin/jugadores'
     | '/admin/misiones'
     | '/admin/password'
@@ -329,6 +341,7 @@ export interface RootRouteChildren {
   AdminDesempenoRoute: typeof AdminDesempenoRoute
   AdminFotosRoute: typeof AdminFotosRoute
   AdminFuentesRoute: typeof AdminFuentesRoute
+  AdminInicioRoute: typeof AdminInicioRoute
   AdminJugadoresRoute: typeof AdminJugadoresRoute
   AdminMisionesRoute: typeof AdminMisionesRoute
   AdminPasswordRoute: typeof AdminPasswordRoute
@@ -436,6 +449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFuentesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/inicio': {
+      id: '/admin/inicio'
+      path: '/admin/inicio'
+      fullPath: '/admin/inicio'
+      preLoaderRoute: typeof AdminInicioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/jugadores': {
       id: '/admin/jugadores'
       path: '/admin/jugadores'
@@ -529,6 +549,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDesempenoRoute: AdminDesempenoRoute,
   AdminFotosRoute: AdminFotosRoute,
   AdminFuentesRoute: AdminFuentesRoute,
+  AdminInicioRoute: AdminInicioRoute,
   AdminJugadoresRoute: AdminJugadoresRoute,
   AdminMisionesRoute: AdminMisionesRoute,
   AdminPasswordRoute: AdminPasswordRoute,

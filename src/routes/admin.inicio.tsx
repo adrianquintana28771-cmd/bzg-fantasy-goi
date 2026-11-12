@@ -67,7 +67,9 @@ function Page() {
 
   const toggle = async (userId: string, key: Key) => {
     const cur = visMap.get(userId) ?? EMPTY;
-    const next = { user_id: userId, show_player_of_week: cur.show_player_of_week, show_top_team: cur.show_top_team, show_ideal_seven: cur.show_ideal_seven, [key]: !cur[key] };
+    const flags: Vis = { show_player_of_week: cur.show_player_of_week, show_top_team: cur.show_top_team, show_ideal_seven: cur.show_ideal_seven };
+    flags[key] = !cur[key];
+    const next = { user_id: userId, ...flags };
     setBusy(userId + key);
     setMsg(null);
     const { error } = await supabase.from("home_featured_visibility").upsert(next);
