@@ -141,6 +141,17 @@ function Admin() {
         {isSuperAdmin && (
           <Section icon={ClipboardList} title={t("Puntuazioen auditoria", "Auditoría de puntuaciones")} description={t("Jardunaldiko puntuak eta haien jatorria.", "Puntos por jornada y su origen.")} to="/admin/auditoria" />
         )}
+        {isSuperAdmin && (
+          <Section
+            icon={ShieldAlert}
+            title={t("Hasierako ikusgarritasuna", "Visibilidad de inicio")}
+            description={t(
+              "Aukeratu zein erabiltzailek ikusten duten jardunaldiko jokalaria, talde nabarmendua eta 8 ideala.",
+              "Elige qué usuarios ven el jugador/a de la jornada, el equipo destacado y el 8 ideal.",
+            )}
+            to="/admin/inicio"
+          />
+        )}
         {canManageAll && (
           <Section
             icon={Settings}

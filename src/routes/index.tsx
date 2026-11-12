@@ -12,6 +12,7 @@ import { useCardImages } from "@/lib/card-images";
 import { CATEGORY_LABEL, CATEGORY_LABEL_EU } from "@/lib/fantasy/types";
 import { useT, useLang } from "@/lib/i18n";
 import { PRED_SLOTS, fetchIdealSeven } from "@/lib/ideal-seven";
+import { useHomeVisibility } from "@/hooks/use-home-visibility";
 import { PredictionCourt } from "@/components/prediction-court";
 import { useAuth } from "@/lib/auth-context";
 
@@ -161,6 +162,7 @@ function Home() {
     : [];
   const playerOfWeek = weekRanking[0]?.puntos ? weekRanking[0] : undefined;
   const cardImages = useCardImages();
+  const vis = useHomeVisibility();
   // Carta del jugador/a de la jornada: misma ficha visual que en «Mi equipo».
   const { data: powPool } = useQuery({
     queryKey: ["home-pow-pool", playerOfWeek?.id],
@@ -245,7 +247,7 @@ function Home() {
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="grid gap-6 md:grid-cols-3">
           {/* Player of the week */}
-          {playerOfWeek && (
+          {vis.playerOfWeek && playerOfWeek && (
             <div className="rounded-2xl border border-border bg-card p-5 shadow-card md:col-span-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-widest text-primary">
@@ -268,7 +270,7 @@ function Home() {
             </div>
           )}
           {/* Top team */}
-          {topTeam && (
+          {vis.topTeam && topTeam && (
             <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-widest text-accent">
@@ -404,10 +406,10 @@ function Home() {
 }
 
 
-/** 8 ideal: solo visible para super_admin. */
+/** 8 ideal: super_admin y usuarios autorizados. */
 function IdealSeven() {
   const t = useT();
-  const { isSuperAdmin } = useAuth();
+  const { idealSeven: isSuperAdmin } = useHomeVisibility();
   const { data } = useQuery({
     queryKey: ["home-ideal-seven"],
     enabled: isSuperAdmin,
