@@ -417,6 +417,38 @@ export type Database = {
           },
         ]
       }
+      home_featured_visibility: {
+        Row: {
+          show_ideal_seven: boolean
+          show_player_of_week: boolean
+          show_top_team: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          show_ideal_seven?: boolean
+          show_player_of_week?: boolean
+          show_top_team?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          show_ideal_seven?: boolean
+          show_player_of_week?: boolean
+          show_top_team?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_featured_visibility_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_usage_backup: {
         Row: {
           created_at: string

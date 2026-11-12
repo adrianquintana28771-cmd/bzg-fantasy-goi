@@ -274,6 +274,13 @@
       "when": 1794464373118,
       "tag": "0038_player_card_storage_staff_read_only",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1794464676065,
+      "tag": "0039_home_featured_visibility",
+      "breakpoints": true
     }
   ]
 }
