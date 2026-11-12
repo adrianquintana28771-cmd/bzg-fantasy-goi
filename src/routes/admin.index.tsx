@@ -155,21 +155,10 @@ function Admin() {
         {canManageAll && (
           <Section
             icon={Users}
-            title={t("Jokalarien posizioak", "Posiciones de jugadores/as")}
+            title={t("Jokalarien kudeaketa eta posizioak", "Gestión y posiciones de jugadores/as")}
             description={t(
-              "Gehitu edo kendu posizioak edozein jokalariri, talde edo kategoria kontuan hartu gabe.",
-              "Añade o quita posiciones a cualquier jugador/a, sin importar equipo o categoría.",
-            )}
-            to="/admin/posiciones"
-          />
-        )}
-        {canManageAll && (
-          <Section
-            icon={Users}
-            title={t("Jokalarien kudeaketa", "Gestión de jugadores/as")}
-            description={t(
-              "Sortu, editatu edo desaktibatu jokalariak. Historia eta puntuak gordetzen dira.",
-              "Crea, edita o desactiva jugadores/as. Se conservan su historial y puntos.",
+              "Sortu, editatu edo desaktibatu jokalariak eta kudeatu haien posizioak. Historia eta puntuak gordetzen dira.",
+              "Crea, edita o desactiva jugadores/as y gestiona sus posiciones. Se conservan su historial y puntos.",
             )}
             to="/admin/jugadores"
           />
