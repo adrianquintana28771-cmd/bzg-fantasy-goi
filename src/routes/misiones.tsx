@@ -192,10 +192,10 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
   const timers = useRef<number[]>([]);
   useEffect(() => () => timers.current.forEach((id) => window.clearTimeout(id)), []);
   // Persist mission wait start so mobile tab suspension doesn't lose the timer.
-  const [, setTick] = useState(0);
+  const [tick, setTick] = useState(0);
   const waitKey = (id: string) => `bzg-mision-wait-${id}`;
   const waitStart = (id: string) => {
-    if (typeof window === "undefined") return null;
+    if (typeof window === "undefined" || tick === 0) return null;
     const v = Number(window.localStorage.getItem(waitKey(id)));
     return Number.isFinite(v) && v > 0 ? v : null;
   };
