@@ -152,6 +152,17 @@ function Admin() {
             to="/admin/inicio"
           />
         )}
+        {isSuperAdmin && (
+          <Section
+            icon={Users}
+            title={t("Jokalarien eskuragarritasuna", "Disponibilidad de jugadores/as")}
+            description={t(
+              "Ikusi eta aldatu ez eskuragarri eta zalantzazko jokalariak leku bakarretik.",
+              "Consulta y cambia jugadores/as no disponibles y dudosos desde un solo lugar.",
+            )}
+            to="/admin/disponibilidad"
+          />
+        )}
         {canManageAll && (
           <Section
             icon={Settings}

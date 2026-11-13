@@ -20,6 +20,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
 import { Route as AdminCodigosRouteImport } from './routes/admin.codigos'
 import { Route as AdminDesempenoRouteImport } from './routes/admin.desempeno'
+import { Route as AdminDisponibilidadRouteImport } from './routes/admin.disponibilidad'
 import { Route as AdminFotosRouteImport } from './routes/admin.fotos'
 import { Route as AdminFuentesRouteImport } from './routes/admin.fuentes'
 import { Route as AdminInicioRouteImport } from './routes/admin.inicio'
@@ -88,6 +89,11 @@ const AdminCodigosRoute = AdminCodigosRouteImport.update({
 const AdminDesempenoRoute = AdminDesempenoRouteImport.update({
   id: '/admin/desempeno',
   path: '/admin/desempeno',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDisponibilidadRoute = AdminDisponibilidadRouteImport.update({
+  id: '/admin/disponibilidad',
+  path: '/admin/disponibilidad',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminFotosRoute = AdminFotosRouteImport.update({
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
+  '/admin/disponibilidad': typeof AdminDisponibilidadRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fuentes': typeof AdminFuentesRoute
   '/admin/inicio': typeof AdminInicioRoute
@@ -200,6 +207,7 @@ export interface FileRoutesByTo {
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
+  '/admin/disponibilidad': typeof AdminDisponibilidadRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fuentes': typeof AdminFuentesRoute
   '/admin/inicio': typeof AdminInicioRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/codigos': typeof AdminCodigosRoute
   '/admin/desempeno': typeof AdminDesempenoRoute
+  '/admin/disponibilidad': typeof AdminDisponibilidadRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fuentes': typeof AdminFuentesRoute
   '/admin/inicio': typeof AdminInicioRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/codigos'
     | '/admin/desempeno'
+    | '/admin/disponibilidad'
     | '/admin/fotos'
     | '/admin/fuentes'
     | '/admin/inicio'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/codigos'
     | '/admin/desempeno'
+    | '/admin/disponibilidad'
     | '/admin/fotos'
     | '/admin/fuentes'
     | '/admin/inicio'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/codigos'
     | '/admin/desempeno'
+    | '/admin/disponibilidad'
     | '/admin/fotos'
     | '/admin/fuentes'
     | '/admin/inicio'
@@ -339,6 +351,7 @@ export interface RootRouteChildren {
   AdminAuditoriaRoute: typeof AdminAuditoriaRoute
   AdminCodigosRoute: typeof AdminCodigosRoute
   AdminDesempenoRoute: typeof AdminDesempenoRoute
+  AdminDisponibilidadRoute: typeof AdminDisponibilidadRoute
   AdminFotosRoute: typeof AdminFotosRoute
   AdminFuentesRoute: typeof AdminFuentesRoute
   AdminInicioRoute: typeof AdminInicioRoute
@@ -433,6 +446,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/desempeno'
       fullPath: '/admin/desempeno'
       preLoaderRoute: typeof AdminDesempenoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/disponibilidad': {
+      id: '/admin/disponibilidad'
+      path: '/admin/disponibilidad'
+      fullPath: '/admin/disponibilidad'
+      preLoaderRoute: typeof AdminDisponibilidadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/fotos': {
@@ -547,6 +567,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAuditoriaRoute: AdminAuditoriaRoute,
   AdminCodigosRoute: AdminCodigosRoute,
   AdminDesempenoRoute: AdminDesempenoRoute,
+  AdminDisponibilidadRoute: AdminDisponibilidadRoute,
   AdminFotosRoute: AdminFotosRoute,
   AdminFuentesRoute: AdminFuentesRoute,
   AdminInicioRoute: AdminInicioRoute,
