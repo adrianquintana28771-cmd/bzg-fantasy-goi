@@ -191,6 +191,25 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
   const [waiting, setWaiting] = useState<Record<string, boolean>>({});
   const timers = useRef<number[]>([]);
   useEffect(() => () => timers.current.forEach((id) => window.clearTimeout(id)), []);
+  // Persist mission wait start so mobile tab suspension doesn't lose the timer.
+  const [tick, setTick] = useState(0);
+  const waitKey = (id: string) => `bzg-mision-wait-${id}`;
+  const waitStart = (id: string) => {
+    if (typeof window === "undefined" || tick === 0) return null;
+    const v = Number(window.localStorage.getItem(waitKey(id)));
+    return Number.isFinite(v) && v > 0 ? v : null;
+  };
+  useEffect(() => {
+    const iv = window.setInterval(() => setTick((n) => n + 1), 1000);
+    const onVis = () => setTick((n) => n + 1);
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", onVis);
+    return () => {
+      window.clearInterval(iv);
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", onVis);
+    };
+  }, []);
 
   const wallet = useQuery({
     queryKey: ["wallet", userId],
@@ -402,20 +421,31 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
                         href={copy?.url ?? mision.enlace ?? undefined}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={() => {
+                        onClick={(e) => {
                           const wait = mision.espera_segundos ?? 0;
                           if (wait <= 0) return claimMut.mutate(mision.id);
-                          if (waiting[mision.id]) return;
-                          setWaiting((w) => ({ ...w, [mision.id]: true }));
-                          timers.current.push(
-                            window.setTimeout(() => {
+                          const start = waitStart(mision.id);
+                          if (start) {
+                            e.preventDefault();
+                            if (Date.now() - start >= wait * 1000) {
+                              window.localStorage.removeItem(waitKey(mision.id));
                               claimMut.mutate(mision.id);
-                              setWaiting((w) => ({ ...w, [mision.id]: false }));
-                            }, wait * 1000),
-                          );
+                            }
+                            return;
+                          }
+                          window.localStorage.setItem(waitKey(mision.id), String(Date.now()));
+                          setWaiting((w) => ({ ...w, [mision.id]: true }));
                         }}
                       >
-                        {waiting[mision.id] ? t("Itxaron minutu bat…", "Espera 1 minuto…") : actionLabel}{" "}
+                        {(() => {
+                          const wait = mision.espera_segundos ?? 0;
+                          const start = wait > 0 ? waitStart(mision.id) : null;
+                          if (!start) return actionLabel;
+                          const left = Math.ceil((wait * 1000 - (Date.now() - start)) / 1000);
+                          return left > 0
+                            ? t(`Itxaron ${left}s…`, `Espera ${left}s…`)
+                            : t("Eskatu saria", "Reclamar premio");
+                        })()}{" "}
                         <ExternalLink aria-hidden />
                       </a>
                     </Button>

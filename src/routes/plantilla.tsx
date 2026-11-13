@@ -525,12 +525,18 @@ function Inner({ userId }: { userId: string }) {
     let disposed = false;
     // Never hide a successfully opened pack if loading or playback fails.
     const revealTimer = window.setTimeout(() => setSobreRevelado(true), 15000);
-    void video.play().catch(() => {
-      if (!disposed) setSobreRevelado(true);
-    });
+    const tryPlay = () => video.play().catch(() => undefined);
+    void tryPlay();
+    video.addEventListener("canplay", tryPlay, { once: true });
+    // Skip only if playback never actually starts.
+    const stallTimer = window.setTimeout(() => {
+      if (!disposed && video.currentTime === 0) setSobreRevelado(true);
+    }, 6000);
     return () => {
       disposed = true;
       window.clearTimeout(revealTimer);
+      window.clearTimeout(stallTimer);
+      video.removeEventListener("canplay", tryPlay);
       video.pause();
       video.removeAttribute("src");
       video.load();
@@ -977,7 +983,7 @@ function Inner({ userId }: { userId: string }) {
                   autoPlay
                   muted
                   playsInline
-                  preload="none"
+                  preload="auto"
                   aria-hidden="true"
                   onEnded={() => setSobreRevelado(true)}
                   onError={() => setSobreRevelado(true)}
