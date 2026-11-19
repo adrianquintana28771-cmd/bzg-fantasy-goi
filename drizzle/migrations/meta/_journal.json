@@ -281,6 +281,13 @@
       "when": 1794464676065,
       "tag": "0039_home_featured_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1795081628472,
+      "tag": "0040_code_redeem_cooldown_2h",
+      "breakpoints": true
     }
   ]
 }

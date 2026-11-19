@@ -296,7 +296,19 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       qc.invalidateQueries({ queryKey: ["wallet", userId] });
       qc.invalidateQueries({ queryKey: ["misiones", userId] });
     },
-    onError: (e: Error) =>
+    onError: (e: Error) => {
+      const wait = e.message.match(/espera_codigo:(\d+)/);
+      if (wait) {
+        const total = Number(wait[1]);
+        const h = Math.floor(total / 3600);
+        const m = Math.floor((total % 3600) / 60);
+        const sec = total % 60;
+        const x = `${h}h ${m}min ${sec}s`;
+        toast.error(
+          t(`${x} falta hurrengo kodea trukatu ahal izateko`, `Falta ${x} para poder canjear el siguiente código`),
+        );
+        return;
+      }
       toast.error(
         e.message.includes("canjeado")
           ? t("Kode hau trukatu duzu jada", "Ya has canjeado este código")
@@ -305,7 +317,8 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
             : e.message.includes("aún no activo")
               ? t("Kode hau ez dago aktibo oraindik", "Este código todavía no está activo")
             : t("Kodea ez da baliozkoa", "Código no válido"),
-      ),
+      );
+    },
   });
 
   // Auto-canjea cuando se llega desde el QR del pabellón
