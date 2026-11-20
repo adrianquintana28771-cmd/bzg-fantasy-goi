@@ -1327,6 +1327,11 @@ export type Database = {
         Args: { _codigo: string; _inicio_local: string; _match_id: string }
         Returns: string
       }
+      auth_rate_check: {
+        Args: { _bucket: string; _max: number; _window_seconds: number }
+        Returns: boolean
+      }
+      auth_rate_clear: { Args: { _bucket: string }; Returns: undefined }
       check_cron_token: {
         Args: { _nombre: string; _token: string }
         Returns: boolean

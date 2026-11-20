@@ -3,7 +3,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LogIn, UserPlus } from "lucide-react";
-import { loginWithUsername } from "@/lib/auth.functions";
+import { loginWithUsername, checkSignupAvailability } from "@/lib/auth.functions";
 import { useT } from "@/lib/i18n";
 
 type T = (eu: string, es: string) => string;
@@ -12,7 +12,7 @@ const DNI_LETTERS = "TRWAGMYFPDXBNJZSQVHLCKE";
 export function passwordSchema(t: T) {
   return z
     .string()
-    .min(4, t("Gutxienez 4 karaktere", "Mínimo 4 caracteres"))
+    .min(8, t("Gutxienez 8 karaktere", "Mínimo 8 caracteres"))
     .max(72, t("Gehienez 72 karaktere", "Máximo 72 caracteres"))
     .refine((v) => /\d/.test(v), t("Gutxienez zenbaki 1 behar du", "Debe incluir al menos 1 número"))
     .refine(
@@ -58,15 +58,6 @@ function schemas(t: T) {
     }),
     signup: z.object({ username, password, nombre: name, apellido: name, dni }),
   };
-}
-
-async function rpc<T>(fn: string, args: Record<string, unknown>) {
-  return (
-    supabase.rpc as unknown as (
-      f: string,
-      a: Record<string, unknown>,
-    ) => Promise<{ data: T | null; error: unknown }>
-  )(fn, args);
 }
 
 const LOCK_KEY = "bzg_login_lock";
@@ -159,6 +150,12 @@ function LoginForm({ onDone }: { onDone?: () => void }) {
     setBusy(true);
     try {
       const res = await loginWithUsername({ data: parsed.data });
+      if (!res.ok && "limited" in res && res.limited) {
+        toast.error(
+          t("Saiakera gehiegi. Saiatu berriro 15 minutu barru.", "Demasiados intentos. Prueba en 15 minutos."),
+        );
+        return;
+      }
       const { error } = res.ok
         ? await supabase.auth.setSession({
             access_token: res.access_token,
@@ -225,10 +222,14 @@ function SignupForm({ onDone }: { onDone?: () => void }) {
     if (!parsed.success) return void toast.error(parsed.error.issues[0].message);
     setBusy(true);
     try {
-      const [{ data: userTaken }, { data: dniTaken }] = await Promise.all([
-        rpc<boolean>("username_exists", { _username: parsed.data.username }),
-        rpc<boolean>("dni_exists", { _dni: parsed.data.dni }),
-      ]);
+      const avail = await checkSignupAvailability({
+        data: { username: parsed.data.username, dni: parsed.data.dni },
+      });
+      if (avail.limited)
+        return void toast.error(
+          t("Saiakera gehiegi. Itxaron pixka bat.", "Demasiados intentos. Espera un poco."),
+        );
+      const { userTaken, dniTaken } = avail;
       if (userTaken)
         return void toast.error(
           t("Erabiltzaile-izen hori hartuta dago", "Ese nombre de usuario ya está cogido"),

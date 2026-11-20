@@ -288,6 +288,13 @@
       "when": 1795081628472,
       "tag": "0040_code_redeem_cooldown_2h",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1795155972899,
+      "tag": "0041_security_phase2_lineups_dni_login_limits",
+      "breakpoints": true
     }
   ]
 }
