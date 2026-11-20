@@ -141,7 +141,24 @@ function Fotos() {
     } catch {
       return { error: { message: t("Irudia ezin da irakurri.", "No se puede leer la imagen.") } };
     }
-    return supabase.storage.from(CARD_BUCKET).upload(path, file, { upsert: true, contentType: format.contentType, cacheControl: "3600" });
+    const res = await supabase.storage.from(CARD_BUCKET).upload(path, file, { upsert: true, contentType: format.contentType, cacheControl: "3600" });
+    if (!res.error && format.extension !== "webp") await uploadLightWebp(path, file);
+    return res;
+  };
+
+  // Light WebP copy next to the original (preferred by the cards); original bytes untouched.
+  const uploadLightWebp = async (path: string, file: File) => {
+    try {
+      const bmp = await createImageBitmap(file);
+      const max = path.startsWith("templates/") ? 1600 : 800;
+      const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      c.getContext("2d")?.drawImage(bmp, 0, 0, c.width, c.height);
+      bmp.close();
+      const blob = await new Promise<Blob | null>((r) => c.toBlob(r, "image/webp", 0.85));
+      if (blob?.type === "image/webp") await supabase.storage.from(CARD_BUCKET).upload(path.replace(/\.[^.]+$/, ".webp"), blob, { upsert: true, contentType: "image/webp", cacheControl: "31536000" });
+    } catch { /* original stays usable */ }
   };
 
   const runImport = async () => {
