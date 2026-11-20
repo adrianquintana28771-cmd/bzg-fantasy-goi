@@ -119,7 +119,7 @@ export function EquipoCard({
   const template = images?.templates[pool.rareza];
   const nombre = pool.nombre.trim().split(/\s+/).slice(0, 2).join(" ");
   return (
-    <div className="relative aspect-[518/763] w-full overflow-hidden rounded-lg border border-border bg-card text-left text-primary-foreground">
+    <div className={`relative aspect-[518/763] w-full overflow-hidden rounded-lg border bg-card ${pool.rareza === "legendario" ? "border-accent ring-2 ring-accent" : pool.rareza === "raro" ? "border-primary ring-2 ring-primary" : "border-border"} text-left text-primary-foreground`}>
       <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         {template && (
           <img src={template} alt="" className="absolute -left-[112.4%] top-0 h-full w-[218.3%] max-w-none" />

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/club-data";
 import { signCardImagePaths } from "@/lib/card-images.functions";
+import { useAuth } from "@/lib/auth-context";
 
 export const CARD_BUCKET = "player-card-images";
 export type Rareza = "normal" | "raro" | "legendario";
@@ -84,7 +85,10 @@ export function usePhotoSource(ci: CardImages | undefined, id: string | null | u
 }
 
 export function useCardImages() {
-  return useQuery({ queryKey: ["card-images"], queryFn: fetchCardImages, staleTime: 1000 * 60 * 30 });
+  const { session } = useAuth();
+  const uid = session?.user?.id ?? null;
+  // Espera a la sesión: firmar sin ella dejaba las plantillas de rareza vacías.
+  return useQuery({ queryKey: ["card-images", uid], queryFn: fetchCardImages, enabled: !!uid, staleTime: 1000 * 60 * 30, retry: 3 });
 }
 
 /** Foto de la rareza, si no la común, si no null (placeholder). */
