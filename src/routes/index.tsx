@@ -163,6 +163,7 @@ function Home() {
   const playerOfWeek = weekRanking[0]?.puntos ? weekRanking[0] : undefined;
   const cardImages = useCardImages();
   const vis = useHomeVisibility();
+  const { isSuperAdmin } = useAuth();
   // Carta del jugador/a de la jornada: misma ficha visual que en «Mi equipo».
   const { data: powPool } = useQuery({
     queryKey: ["home-pow-pool", playerOfWeek?.id],
@@ -234,12 +235,12 @@ function Home() {
             >
               <Users className="h-4 w-4" /> {t("Ikusi taldeak", "Ver equipos")}
             </Link>
-            <Link
+            {isSuperAdmin && (<Link
               to="/admin"
               className="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20"
             >
               <Shield className="h-4 w-4" /> {t("Administrazioa", "Administración")}
-            </Link>
+            </Link>)}
           </div>
         </div>
       </section>
