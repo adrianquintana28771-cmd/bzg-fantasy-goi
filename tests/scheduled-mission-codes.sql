@@ -18,6 +18,6 @@ SELECT 'Madrid summer time converts to UTC correctly',
  ('2026-10-17 18:00:00'::timestamp AT TIME ZONE 'Europe/Madrid') = '2026-10-17 16:00:00+00'::timestamptz
 UNION ALL
 SELECT 'Madrid winter time converts to UTC correctly',
- ('2026-11-17 18:00:00'::timestamp AT TIME ZONE 'Europe/Madrid') = '2026-11-17 17:00:00+00'::timestamptz;-- Code redemption cooldown: second code blocked for 2 hours after the previous one.
-SELECT 'claim_qr enforces a 2-hour cooldown between codes' AS test,
- pg_get_functiondef('private.claim_qr(text)'::regprocedure) LIKE '%interval ''2 hours''%espera_codigo%' AS passed;
+ ('2026-11-17 18:00:00'::timestamp AT TIME ZONE 'Europe/Madrid') = '2026-11-17 17:00:00+00'::timestamptz;-- Code redemption cooldown: second code blocked for 1 hour after the previous one.
+SELECT 'claim_qr enforces a 1-hour cooldown between codes' AS test,
+ pg_get_functiondef('private.claim_qr(text)'::regprocedure) LIKE '%interval ''1 hour''%espera_codigo%' AS passed;
