@@ -198,11 +198,20 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
   const q = useQuery({
     queryKey: ["user-ranking"],
     queryFn: async () => {
-      const [tot, por] = await Promise.all([supabase.rpc("user_ranking"), supabase.rpc("user_ranking_by_jornada")]);
+      const fetchPor = async () => {
+        const all = [];
+        for (let from = 0; ; from += 1000) {
+          const { data, error } = await supabase.rpc("user_ranking_by_jornada").range(from, from + 999);
+          if (error) throw error;
+          all.push(...(data ?? []));
+          if (!data || data.length < 1000) break;
+        }
+        return all;
+      };
+      const [tot, porData] = await Promise.all([supabase.rpc("user_ranking"), fetchPor()]);
       if (tot.error) throw tot.error;
-      if (por.error) throw por.error;
       const porUser: Record<string, Record<number, number>> = {};
-      for (const r of por.data ?? []) {
+      for (const r of porData) {
         (porUser[r.user_id] ??= {})[r.jornada] = Number(r.puntos);
       }
       return (tot.data ?? []).map((r) => ({
