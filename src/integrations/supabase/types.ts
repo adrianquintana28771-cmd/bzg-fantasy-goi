@@ -1414,6 +1414,14 @@ export type Database = {
           username: string
         }[]
       }
+      user_ranking_fichas: {
+        Args: never
+        Returns: {
+          fichas: number
+          jornada: number
+          user_id: string
+        }[]
+      }
       username_exists: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {

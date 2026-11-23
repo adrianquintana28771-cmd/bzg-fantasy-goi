@@ -208,8 +208,21 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
         }
         return all;
       };
-      const [tot, porData] = await Promise.all([supabase.rpc("user_ranking"), fetchPor()]);
+      const fetchFichas = async () => {
+        const all: { user_id: string; jornada: number; fichas: number }[] = [];
+        for (let from = 0; ; from += 1000) {
+          const { data, error } = await supabase.rpc("user_ranking_fichas").range(from, from + 999);
+          if (error) return { data: null, error };
+          all.push(...(data ?? []));
+          if (!data || data.length < 1000) break;
+        }
+        return { data: all, error: null };
+      };
+      const [tot, porData, fich] = await Promise.all([supabase.rpc("user_ranking"), fetchPor(), fetchFichas()]);
       if (tot.error) throw tot.error;
+      if (fich.error) throw fich.error;
+      const fichasUser: Record<string, Record<number, number>> = {};
+      for (const r of fich.data ?? []) (fichasUser[r.user_id] ??= {})[r.jornada] = Number(r.fichas);
       const porUser: Record<string, Record<number, number>> = {};
       for (const r of porData) {
         (porUser[r.user_id] ??= {})[r.jornada] = Number(r.puntos);
@@ -220,6 +233,7 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
         puntos: Math.round(Number(r.puntos) * 100) / 100,
         jornadas: Number(r.jornadas),
         porJornada: porUser[r.user_id] ?? {},
+        fichas: fichasUser[r.user_id] ?? {},
       }));
     },
   });
@@ -244,7 +258,12 @@ function UsuariosRanking({ jor }: { jor: JornadaSel }) {
       jor === "total"
         ? u
         : jor === "media"
-          ? { ...u, puntos: u.jornadas > 0 ? Math.round((u.puntos / u.jornadas) * 100) / 100 : 0 }
+          ? (() => {
+              // Media: solo jornadas con al menos 2 fichas alineadas
+              const validas = Object.entries(u.porJornada).filter(([j]) => (u.fichas[Number(j)] ?? 0) >= 2);
+              const suma = validas.reduce((a, [, v]) => a + v, 0);
+              return { ...u, jornadas: validas.length, puntos: validas.length > 0 ? Math.round((suma / validas.length) * 100) / 100 : 0 };
+            })()
           : {
               ...u,
               puntos: Math.round((u.porJornada[jor] ?? 0) * 100) / 100,

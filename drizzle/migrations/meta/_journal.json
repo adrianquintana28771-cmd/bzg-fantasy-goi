@@ -302,6 +302,13 @@
       "when": 1795282599887,
       "tag": "0042_code_redeem_cooldown_1h",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1795424956675,
+      "tag": "0043_user_ranking_fichas",
+      "breakpoints": true
     }
   ]
 }
