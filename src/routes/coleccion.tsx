@@ -55,7 +55,9 @@ function Coleccion() {
     enabled: !!user && !isStaff,
     queryFn: async () => {
       const rows = await fetchAllRows((f, to) => supabase.from("user_players").select("player_id").eq("user_id", user!.id).range(f, to));
-      return new Set(rows.map((r) => r.player_id));
+      const m = new Map<string, number>();
+      for (const r of rows) m.set(r.player_id, (m.get(r.player_id) ?? 0) + 1);
+      return m;
     },
   });
   const [category, setCategory] = useState("");
@@ -101,7 +103,7 @@ function Coleccion() {
     );
   }
 
-  const owned = ownedQ.data ?? new Set<string>();
+  const owned = ownedQ.data ?? new Map<string, number>();
   const total = groups.reduce((n, g) => n + RZ.filter((rz) => g.cards[rz]).length, 0);
   const have = groups.reduce((n, g) => n + RZ.filter((rz) => g.cards[rz] && owned.has(g.cards[rz]!.id)).length, 0);
   const toPool = (r: Row, team: { id: string; nombre: string }): PoolRow => ({ id: r.id, nombre: r.nombre, posicion: r.posicion, rating: r.rating, rareza: r.rareza, club_player_id: r.club_player_id, team_id: r.team_id, estado: r.estado, club_teams: team });
@@ -149,6 +151,7 @@ function Coleccion() {
                     <div key={rz} role="button" tabIndex={0} onClick={() => setBig(p)} onKeyDown={(e) => e.key === "Enter" && setBig(p)} className="relative cursor-pointer">
                       <EquipoCard pool={p} images={images.data} posiciones={[p.posicion]} puntos={0} />
                       <button type="button" aria-label={t("Argazkia handitu", "Ampliar foto")} onClick={(e) => { e.stopPropagation(); setPhoto(p); }} className="absolute left-[7.7%] top-[15.6%] h-[31.5%] w-[34%]" />
+                      {(owned.get(r.id) ?? 0) > 1 && <span className="pointer-events-none absolute bottom-1 right-1 rounded-md bg-primary px-1.5 py-0.5 text-xs font-bold text-primary-foreground shadow">x{owned.get(r.id)}</span>}
                     </div>
                   );
                 })}
