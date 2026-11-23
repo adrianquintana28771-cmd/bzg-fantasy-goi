@@ -119,7 +119,7 @@ export function EquipoCard({
   const template = images?.templates[pool.rareza];
   const nombre = pool.nombre.trim().split(/\s+/).slice(0, 2).join(" ");
   return (
-    <div className={`relative aspect-[518/763] w-full overflow-hidden rounded-lg border bg-card ${pool.rareza === "legendario" ? "border-accent ring-2 ring-accent" : pool.rareza === "raro" ? "border-primary ring-2 ring-primary" : "border-border"} text-left text-primary-foreground`}>
+    <div className={`relative aspect-[518/763] w-full overflow-hidden [container-type:inline-size] rounded-lg border bg-card ${pool.rareza === "legendario" ? "border-accent ring-2 ring-accent" : pool.rareza === "raro" ? "border-primary ring-2 ring-primary" : "border-border"} text-left text-primary-foreground`}>
       <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         {template && (
           <img src={template} decoding="async" alt="" className="absolute -left-[112.4%] top-0 h-full w-[218.3%] max-w-none" />
@@ -131,13 +131,13 @@ export function EquipoCard({
           className="absolute left-[7.7%] top-[15.6%] h-[31.5%] w-[34%] [clip-path:polygon(0_8%,10%_4%,25%_1%,50%_0,75%_1%,90%_4%,100%_8%,100%_79%,50%_100%,0_79%)]"
         />
       </div>
-      <div translate="no" title={pool.nombre} className="absolute inset-x-[7%] top-[4%] break-words text-xs font-semibold">{nombre}</div>
-      <div className="absolute left-[46%] right-[5%] top-[21%] flex min-w-0 flex-col gap-0.5 bg-card p-0.5 text-card-foreground sm:gap-2 sm:p-1">
-        {pool.club_teams?.nombre && <div translate="no" className="break-words text-[8px] leading-tight sm:text-[10px]">{pool.club_teams.nombre}</div>}
-        <div className="break-words text-[9px] uppercase sm:text-[10px]">{posiciones.map((p) => t(POS_SHORT_EU[p], POS_SHORT[p])).join(" · ")}</div>
+      <div translate="no" title={pool.nombre} style={{ fontSize: `min(10cqw, ${Math.round(150 / Math.max(nombre.length, 1) * 10) / 10}cqw)` }} className="absolute inset-x-[7%] top-[4%] overflow-hidden whitespace-nowrap font-semibold leading-tight">{nombre}</div>
+      <div className="absolute left-[46%] right-[5%] top-[21%] flex min-w-0 flex-col gap-[1.5cqw] bg-card p-[1cqw] text-card-foreground">
+        {pool.club_teams?.nombre && <div translate="no" className="break-words text-[6.5cqw] leading-tight">{pool.club_teams.nombre}</div>}
+        <div className="break-words text-[7cqw] uppercase leading-tight">{posiciones.map((p) => t(POS_SHORT_EU[p], POS_SHORT[p])).join(" · ")}</div>
       </div>
-      <div className="absolute inset-x-[7%] top-[49%] flex min-w-0 flex-col gap-0.5 rounded bg-card/95 p-1.5 text-xs leading-tight text-card-foreground sm:gap-1 sm:p-2 sm:leading-normal">
-        <div className="text-[10px] font-bold uppercase">
+      <div className="absolute inset-x-[7%] top-[49%] flex min-w-0 flex-col gap-[1cqw] rounded bg-card/95 p-[2.5cqw] text-[8cqw] leading-tight text-card-foreground">
+        <div className="text-[7.5cqw] font-bold uppercase">
           {t(RAREZA_LABEL_EU[pool.rareza], RAREZA_LABEL_ES[pool.rareza])} {fmtMult(RAREZA_MULT[pool.rareza])}
           {(total ?? 0) > 1 && <span className="ml-1">x{total}</span>}
         </div>
@@ -147,16 +147,16 @@ export function EquipoCard({
           </div>
         )}
         {usos !== undefined && (
-          <div className={cn("text-[10px] font-semibold", usos <= 1 ? "text-destructive" : "text-muted-foreground")}>
+          <div className={cn("text-[7cqw] font-semibold", usos <= 1 ? "text-destructive" : "text-muted-foreground")}>
             {t("Geratzen diren erabilerak", "Usos restantes")}: {usos}/1
           </div>
         )}
-        <div className="text-[10px] font-semibold">
+        <div className="text-[7cqw] font-semibold">
           <div className="text-muted-foreground">{t("Jardunaldia", "Jornada")}:</div>
           <PuntosRareza base={puntos} rareza={pool.rareza} />
         </div>
         {media !== undefined && (
-          <div className="text-[9px] text-muted-foreground sm:text-[10px]">
+          <div className="text-[7cqw] text-muted-foreground">
             {t("Batez bestekoa", "Media")}: <span className="font-semibold text-foreground">{displayPts(media)} pts</span>
           </div>
         )}
