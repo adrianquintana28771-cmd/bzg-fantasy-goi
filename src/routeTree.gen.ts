@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ColeccionRouteImport } from './routes/coleccion'
 import { Route as DesempenoEquipoRouteImport } from './routes/desempeno-equipo'
 import { Route as MisionesRouteImport } from './routes/misiones'
 import { Route as PlantillaRouteImport } from './routes/plantilla'
@@ -44,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColeccionRoute = ColeccionRouteImport.update({
+  id: '/coleccion',
+  path: '/coleccion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DesempenoEquipoRoute = DesempenoEquipoRouteImport.update({
@@ -171,6 +177,7 @@ const ApiPublicHooksSyncMatchesRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/coleccion': typeof ColeccionRoute
   '/desempeno-equipo': typeof DesempenoEquipoRoute
   '/misiones': typeof MisionesRoute
   '/plantilla': typeof PlantillaRoute
@@ -199,6 +206,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/coleccion': typeof ColeccionRoute
   '/desempeno-equipo': typeof DesempenoEquipoRoute
   '/misiones': typeof MisionesRoute
   '/plantilla': typeof PlantillaRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/coleccion': typeof ColeccionRoute
   '/desempeno-equipo': typeof DesempenoEquipoRoute
   '/misiones': typeof MisionesRoute
   '/plantilla': typeof PlantillaRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/coleccion'
     | '/desempeno-equipo'
     | '/misiones'
     | '/plantilla'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/coleccion'
     | '/desempeno-equipo'
     | '/misiones'
     | '/plantilla'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/coleccion'
     | '/desempeno-equipo'
     | '/misiones'
     | '/plantilla'
@@ -343,6 +355,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  ColeccionRoute: typeof ColeccionRoute
   DesempenoEquipoRoute: typeof DesempenoEquipoRoute
   MisionesRoute: typeof MisionesRoute
   PlantillaRoute: typeof PlantillaRoute
@@ -383,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coleccion': {
+      id: '/coleccion'
+      path: '/coleccion'
+      fullPath: '/coleccion'
+      preLoaderRoute: typeof ColeccionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/desempeno-equipo': {
@@ -559,6 +579,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  ColeccionRoute: ColeccionRoute,
   DesempenoEquipoRoute: DesempenoEquipoRoute,
   MisionesRoute: MisionesRoute,
   PlantillaRoute: PlantillaRoute,

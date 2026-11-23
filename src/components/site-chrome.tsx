@@ -11,6 +11,7 @@ import {
   Sparkles,
   BarChart3,
   CircleHelp,
+  Layers,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import escudoAsset from "@/assets/escudo-bzg.png.asset.json";
@@ -46,6 +47,14 @@ const BASE_NAV: NavItem[] = [
     label: ["Misioak", "Misiones"],
     Icon: Sparkles,
     color: "var(--gold)",
+    authOnly: true,
+    gameOnly: true,
+  },
+  {
+    to: "/coleccion",
+    label: ["Bilduma", "Colección"],
+    Icon: Layers,
+    color: "var(--color-primary)",
     authOnly: true,
     gameOnly: true,
   },
