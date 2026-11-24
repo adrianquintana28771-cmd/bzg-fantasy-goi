@@ -78,9 +78,7 @@ export const checkSignupAvailability = createServerFn({ method: "POST" })
       _window_seconds: 3600,
     });
     if (ok === false) return { limited: true as const, userTaken: false, dniTaken: false };
-    const [{ data: userTaken }, { data: dniTaken }] = await Promise.all([
-      supabaseAdmin.rpc("username_exists", { _username: data.username }),
-      supabaseAdmin.rpc("dni_exists", { _dni: data.dni }),
-    ]);
-    return { limited: false as const, userTaken: !!userTaken, dniTaken: !!dniTaken };
+    const { data: userTaken } = await supabaseAdmin.rpc("username_exists", { _username: data.username });
+    // El registro de DNI no se revela públicamente.
+    return { limited: false as const, userTaken: !!userTaken, dniTaken: false };
   });

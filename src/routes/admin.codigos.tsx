@@ -124,7 +124,7 @@ function Page() {
                   setMatchId(e.target.value);
                   const match = matches.find((m) => m.id === e.target.value);
                   if (match) {
-                    setCodigo(`BZG-${match.id.slice(0, 8)}`.toUpperCase());
+                    setCodigo(`BZG-${Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[b % 32]).join("")}`);
                     setInicio(match.hora && /^\d{2}:\d{2}/.test(match.hora) ? `${match.fecha}T${match.hora.slice(0, 5)}` : "");
                   }
                 }} className="w-full rounded-lg border border-border bg-background px-3 py-2">

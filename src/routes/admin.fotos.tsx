@@ -209,7 +209,7 @@ function Fotos() {
       const miss = RAREZAS.filter((rz) => !ci.data?.paths[p.id]?.[rz]).map((rz) => FILE_OF[rz]);
       if (miss.length) rows.push([p.id, fullName(p), p.es_entrenador ? "ENTRENADOR" : "JUGADOR", p.equipos, miss.join(", ")]);
     }
-    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
+    const csv = rows.map((r) => r.map((c) => { let v = String(c); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return `"${v.replace(/"/g, '""')}"`; }).join(";")).join("\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv" }));
     a.download = "fotos_pendientes.csv";
