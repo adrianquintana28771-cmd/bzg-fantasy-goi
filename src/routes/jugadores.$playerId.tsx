@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useDisplayPoints } from "@/hooks/use-display-points";
 import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +17,8 @@ import {
 } from "@/lib/fantasy/types";
 import { useT, useTd, useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
-import { DISPLAY_BONUS, fetchPoolPlayer, fetchTeams, round2, type Tramo } from "@/lib/club-data";
+import { DISPLAY_BONUS, fetchAllRows, fetchPoolPlayer, fetchTeams, round2, type Tramo } from "@/lib/club-data";
+import { buildPlayerChartRows, type PlayerChartRow } from "@/lib/player-chart";
 import { useCardImages, usePhotoSource } from "@/lib/card-images";
 import { auditPlayer, type AuditType } from "@/lib/score-audit";
 import { fetchBonusByMatch } from "@/lib/score-audit-data";
@@ -25,8 +26,8 @@ import { PlayerPhotoBackground } from "@/components/player-photo-background";
 
 const ESTADO_COLOR: Record<PlayerEstado, string> = {
   disponible: "var(--color-primary)",
-  dudoso: "#d4a017",
-  no_disponible: "#dc2626",
+  dudoso: "var(--color-chart-doubtful)",
+  no_disponible: "var(--color-chart-unavailable)",
 };
 
 export const Route = createFileRoute("/jugadores/$playerId")({
@@ -79,7 +80,13 @@ function Jugador() {
     queryFn: async () => {
       const player = await fetchPoolPlayer(playerId);
       if (!player) return null;
-      const teams = await fetchTeams();
+      const [teams, calendar, matches] = await Promise.all([
+        fetchTeams(),
+        fetchAllRows((from, to) => supabase.from("jornadas").select("numero,is_active,is_locked").order("numero").range(from, to)),
+        player.team_id
+          ? fetchAllRows((from, to) => supabase.from("club_matches").select("jornada,rival").eq("team_id", player.team_id ?? "").order("jornada").order("id").range(from, to))
+          : Promise.resolve([]),
+      ]);
       const team = teams.find((t) => t.id === player.team_id) ?? null;
       const { data: st, error: e1 } = await supabase
         .from("player_jornada_stats")
@@ -88,6 +95,7 @@ function Jugador() {
         .order("jornada_numero");
       if (e1) throw e1;
       let actions: ActionRow[] = [];
+      let playedJornadas: number[] = [];
       if (player.club_player_id) {
         const { data, error } = await supabase
           .from("club_match_actions")
@@ -114,6 +122,10 @@ function Jugador() {
           .eq("player_id", player.club_player_id)
           .eq("jugado", true);
         if (playedError) throw playedError;
+        playedJornadas = [...new Set([
+          ...rows.map(r => r.club_matches?.jornada ?? 0),
+          ...(playedRows ?? []).map(r => r.club_matches?.jornada ?? 0),
+        ])].filter(j => j > 0);
         const matchIds = [...new Set([...rows.map(r => r.match_id), ...(playedRows ?? []).map(r => r.match_id)])];
         const { data: config, error: configError } = await supabase.from("club_action_types").select("id,nombre,puntos,activo,solo_portero,tramos,orden");
         if (configError) throw configError;
@@ -168,7 +180,8 @@ function Jugador() {
         stats.sort((a, c) => a.jornada - c.jornada);
         actions = [...actions, { jornada: b.jornada, action_id: "cruzado", nombre: b.label, puntos: b.puntos, cantidad: 1, orden: 9999, pts: b.puntos }];
       }
-      return { player, team, stats, actions };
+      const chartRows = buildPlayerChartRows(calendar, matches, stats, playedJornadas, player.club?.estado ?? player.estado);
+      return { player, team, stats, actions, chartRows };
     },
   });
 
@@ -268,7 +281,7 @@ function Jugador() {
 
       <Desempeno stats={stats} actions={actions} />
 
-      <JornadasChart rows={stats} />
+      <JornadasChart rows={q.data.chartRows} />
 
       <p className="mt-4 text-xs text-muted-foreground">
         🔒 {t("Adingabeen datu pertsonalak babestuta daude.", "Los datos personales de menores están protegidos.")}
@@ -422,11 +435,20 @@ function MiniStat({ label, value }: { label: string; value: number | string }) {
   );
 }
 
-function JornadasChart({ rows }: { rows: JStat[] }) {
+function JornadaBackground({ x, y, width, height, index, rows, gradientId }: {
+  x?: number; y?: number; width?: number; height?: number; index?: number;
+  rows: PlayerChartRow[]; gradientId: string;
+}) {
+  const reason = index == null ? null : rows[index]?.reason;
+  if (reason !== "unavailable" && reason !== "doubtful") return null;
+  return <rect x={x} y={y} width={width} height={height} rx={8} fill={`url(#${gradientId}-${reason})`} />;
+}
+
+function JornadasChart({ rows: data }: { rows: PlayerChartRow[] }) {
   const t = useT();
   const { lang } = useLang();
+  const gradientId = useId().replace(/:/g, "");
   const EST_LABEL = lang === "eu" ? ESTADO_LABEL_EU : ESTADO_LABEL;
-  const data = rows.map((r) => ({ jornada: `J${r.jornada}`, pts: r.puntos, estado: r.estado }));
   return (
     <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-card">
       <h2 className="font-display text-xl">{t("Jardunaldiko puntuazioa", "Puntuación por jornada")}</h2>
@@ -437,33 +459,53 @@ function JornadasChart({ rows }: { rows: JStat[] }) {
             {EST_LABEL[e]}
           </span>
         ))}
+        <span className="inline-flex items-center gap-1">
+          <span className="h-2.5 w-2.5 rounded-sm border border-border" />
+          {t("Taldearen atsedena", "Descanso del equipo")}
+        </span>
       </div>
       {data.length === 0 ? (
         <p className="mt-3 text-sm text-muted-foreground">
           {t("Oraindik puntuatutako jardunaldirik ez.", "Sin jornadas puntuadas aún.")}
         </p>
       ) : (
-        <div className="mt-4 h-56 w-full">
+        <div className="mt-4 h-56 w-full" aria-label={t("Jardunaldiko puntuazioa", "Puntuación por jornada")}>
           <ResponsiveContainer>
             <BarChart data={data}>
+              <defs>
+                {(["unavailable", "doubtful"] as const).map(reason => (
+                  <linearGradient key={reason} id={`${gradientId}-${reason}`} x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor={reason === "unavailable" ? ESTADO_COLOR.no_disponible : ESTADO_COLOR.dudoso} stopOpacity={0} />
+                    <stop offset="25%" stopColor={reason === "unavailable" ? ESTADO_COLOR.no_disponible : ESTADO_COLOR.dudoso} stopOpacity={0.22} />
+                    <stop offset="50%" stopColor={reason === "unavailable" ? ESTADO_COLOR.no_disponible : ESTADO_COLOR.dudoso} stopOpacity={0.3} />
+                    <stop offset="75%" stopColor={reason === "unavailable" ? ESTADO_COLOR.no_disponible : ESTADO_COLOR.dudoso} stopOpacity={0.22} />
+                    <stop offset="100%" stopColor={reason === "unavailable" ? ESTADO_COLOR.no_disponible : ESTADO_COLOR.dudoso} stopOpacity={0} />
+                  </linearGradient>
+                ))}
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis dataKey="jornada" stroke="var(--color-muted-foreground)" />
+              <XAxis dataKey="jornada" interval={0} tick={{ fontSize: 11 }} stroke="var(--color-muted-foreground)" />
               <YAxis stroke="var(--color-muted-foreground)" />
               <Tooltip
-                cursor={{ fill: "var(--color-secondary)" }}
-                contentStyle={{
-                  background: "var(--color-card)",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: 8,
+                cursor={false}
+                filterNull={false}
+                content={({ active, payload }) => {
+                  const row = payload?.[0]?.payload as PlayerChartRow | undefined;
+                  if (!active || !row) return null;
+                  const detail = row.reason === "rest" ? t("Taldearen atsedena", "Descanso del equipo")
+                    : row.reason === "unavailable" ? EST_LABEL.no_disponible
+                    : row.reason === "doubtful" ? EST_LABEL.dudoso
+                    : row.reason === "unrecorded" ? t("Parte-hartzerik erregistratu gabe", "Sin participación registrada")
+                    : `${row.pts} pts`;
+                  return <div className="rounded-lg border border-border bg-card p-3 text-sm text-card-foreground shadow-card">
+                    <p className="font-semibold">{row.jornada}</p>
+                    <p>{detail}</p>
+                  </div>;
                 }}
-                formatter={(v: number, _n, item) => [
-                  `${v} pts · ${EST_LABEL[(item?.payload as { estado: PlayerEstado }).estado]}`,
-                  t("Jardunaldia", "Jornada"),
-                ]}
               />
-              <Bar dataKey="pts" radius={[6, 6, 0, 0]}>
+              <Bar dataKey="pts" radius={[6, 6, 0, 0]} background={<JornadaBackground rows={data} gradientId={gradientId} />}>
                 {data.map((r, i) => (
-                  <Cell key={i} fill={ESTADO_COLOR[r.estado]} />
+                  <Cell key={i} fill={ESTADO_COLOR[r.estado ?? "disponible"]} />
                 ))}
               </Bar>
             </BarChart>
