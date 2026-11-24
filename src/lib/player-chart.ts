@@ -14,6 +14,7 @@ export function buildPlayerChartRows(
   stats: { jornada: number; puntos: number; estado: PlayerEstado }[],
   playedJornadas: number[],
   currentEstado: PlayerEstado,
+  availabilityHistory: { numero: number; estado: PlayerEstado }[] = [],
 ): PlayerChartRow[] {
   const played = new Set(playedJornadas);
   const numbers = [...new Set([
@@ -32,7 +33,7 @@ export function buildPlayerChartRows(
     const hasMatch = fixtures.some(m => !/^descans[ao]/i.test(m.rival.trim()));
     if (!hasMatch) return { jornada, pts: null, estado: null, reason: "rest" };
     const active = calendar.some(j => j.numero === numero && j.is_active && !j.is_locked);
-    const estado = active ? currentEstado : stat?.estado ?? null;
+    const estado = active ? currentEstado : availabilityHistory.find(j => j.numero === numero)?.estado ?? stat?.estado ?? null;
     const reason = estado === "no_disponible" ? "unavailable" : estado === "dudoso" ? "doubtful" : "unrecorded";
     return { jornada, pts: null, estado, reason };
   });

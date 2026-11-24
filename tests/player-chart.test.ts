@@ -38,3 +38,24 @@ test("played zero, negative points and cross-team call-ups remain intact", () =>
   expect(rows[0]).toMatchObject({ pts: 0, reason: "played" });
   expect(rows[1]).toMatchObject({ pts: -5, reason: "played" });
 });
+
+test("closed unavailable snapshot survives a later return to available", () => {
+  const rows = buildPlayerChartRows(calendar, matches, [], [], "disponible", [{ numero: 1, estado: "no_disponible" }]);
+  expect(rows[0]).toMatchObject({ pts: null, estado: "no_disponible", reason: "unavailable" });
+  expect(rows[2]?.estado).toBe("disponible");
+});
+
+test("closed doubtful snapshot overrides the default state on a zero-point stat", () => {
+  const rows = buildPlayerChartRows(calendar, matches, [{ jornada: 2, puntos: 0, estado: "disponible" }], [], "disponible", [{ numero: 2, estado: "dudoso" }]);
+  expect(rows[1]).toMatchObject({ pts: null, estado: "dudoso", reason: "doubtful" });
+});
+
+test("snapshot does not color team rests", () => {
+  const rows = buildPlayerChartRows(calendar, [{ jornada: 1, rival: "Descansa" }], [], [], "disponible", [{ numero: 1, estado: "no_disponible" }]);
+  expect(rows[0]).toMatchObject({ pts: null, estado: null, reason: "rest" });
+});
+
+test("snapshot never hides recorded participation or changes its points", () => {
+  const rows = buildPlayerChartRows(calendar, matches, [{ jornada: 1, puntos: 12.5, estado: "disponible" }], [1], "disponible", [{ numero: 1, estado: "no_disponible" }]);
+  expect(rows[0]).toMatchObject({ pts: 12.5, reason: "played" });
+});

@@ -309,6 +309,13 @@
       "when": 1795424956675,
       "tag": "0043_user_ranking_fichas",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1795494080894,
+      "tag": "0044_jornada_player_availability_snapshot",
+      "breakpoints": true
     }
   ]
 }

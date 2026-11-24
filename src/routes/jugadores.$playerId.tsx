@@ -80,11 +80,17 @@ function Jugador() {
     queryFn: async () => {
       const player = await fetchPoolPlayer(playerId);
       if (!player) return null;
-      const [teams, calendar, matches] = await Promise.all([
+      const [teams, calendar, matches, availabilityHistory] = await Promise.all([
         fetchTeams(),
         fetchAllRows((from, to) => supabase.from("jornadas").select("numero,is_active,is_locked").order("numero").range(from, to)),
         player.team_id
           ? fetchAllRows((from, to) => supabase.from("club_matches").select("jornada,rival").eq("team_id", player.team_id ?? "").order("jornada").order("id").range(from, to))
+          : Promise.resolve([]),
+        player.club_player_id
+          ? supabase.rpc("player_availability_history", { _club_player_id: player.club_player_id }).then(({ data, error }) => {
+              if (error) throw error;
+              return data ?? [];
+            })
           : Promise.resolve([]),
       ]);
       const team = teams.find((t) => t.id === player.team_id) ?? null;
@@ -180,7 +186,7 @@ function Jugador() {
         stats.sort((a, c) => a.jornada - c.jornada);
         actions = [...actions, { jornada: b.jornada, action_id: "cruzado", nombre: b.label, puntos: b.puntos, cantidad: 1, orden: 9999, pts: b.puntos }];
       }
-      const chartRows = buildPlayerChartRows(calendar, matches, stats, playedJornadas, player.club?.estado ?? player.estado);
+      const chartRows = buildPlayerChartRows(calendar, matches, stats, playedJornadas, player.club?.estado ?? player.estado, availabilityHistory);
       return { player, team, stats, actions, chartRows };
     },
   });

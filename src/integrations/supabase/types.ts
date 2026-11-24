@@ -520,28 +520,34 @@ export type Database = {
       }
       jornadas: {
         Row: {
+          availability_captured_at: string | null
           created_at: string
           id: string
           is_active: boolean
           is_locked: boolean
           nombre: string
           numero: number
+          player_availability_snapshot: Json | null
         }
         Insert: {
+          availability_captured_at?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
           is_locked?: boolean
           nombre: string
           numero: number
+          player_availability_snapshot?: Json | null
         }
         Update: {
+          availability_captured_at?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
           is_locked?: boolean
           nombre?: string
           numero?: number
+          player_availability_snapshot?: Json | null
         }
         Relationships: []
       }
@@ -1367,6 +1373,13 @@ export type Database = {
           p_posicion: Database["public"]["Enums"]["plantilla_posicion"]
           p_rareza: Database["public"]["Enums"]["card_rareza"]
           p_rating: number
+        }[]
+      }
+      player_availability_history: {
+        Args: { _club_player_id: string }
+        Returns: {
+          estado: Database["public"]["Enums"]["player_estado"]
+          numero: number
         }[]
       }
       ranking_user_lineup: {
