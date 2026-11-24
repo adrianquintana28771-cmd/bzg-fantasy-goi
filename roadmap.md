@@ -1,4 +1,5 @@
 # Pendiente
+- [x] Gráficas: inferir no disponible en jornadas cerradas con partido sin puntos ni participación, respetando descansos y estados registrados; 12 pruebas correctas y rojo J1/amarillo J10 comprobados en ficha cfb-12 en móvil sin modificar datos.
 - [x] Disponibilidad congelada al primer cierre definitivo de cada jornada, en la jornada existente y sin cambiar puntos; diez pruebas de gráfica, cierre/lectura/inmutabilidad en una base aislada y lectura real en móvil/escritorio comprobados. Historial anterior no inventado; no se cerraron jornadas reales.
 - [x] Gráficas de jugadores: jornadas cerradas/en curso, descansos vacíos y fondos difuminados por disponibilidad conocida; seis pruebas correctas y rojo/amarillo/descanso verificados en fichas reales y móvil, sin modificar puntos ni atribuir estados actuales al pasado.
 - [x] Desempeño por equipo accesible desde Partidos: equipo/jornada/partido, totales e individuales de participantes reales, incluidos convocados; tres pruebas correctas, J1 con 14 participantes y un convocado, EUS/ESP y móvil comprobados; sin escrituras ni cambios Fantasy.

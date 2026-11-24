@@ -27,10 +27,11 @@ test("unplayed doubtful jornada carries its distinct status", () => {
   expect(rows[2]?.reason).toBe("doubtful");
 });
 
-test("current injury never gets projected onto unknown historical jornadas", () => {
-  const rows = buildPlayerChartRows(calendar, matches, [], [], "no_disponible");
-  expect(rows[0]?.reason).toBe("unrecorded");
-  expect(rows[1]?.estado).toBeNull();
+test("closed match jornadas without points or participation infer unavailability independently of current status", () => {
+  const rows = buildPlayerChartRows(calendar, matches, [{ jornada: 2, puntos: 0, estado: "disponible" }], [], "disponible");
+  expect(rows[0]).toMatchObject({ pts: null, estado: "no_disponible", reason: "unavailable" });
+  expect(rows[1]).toMatchObject({ pts: null, estado: "no_disponible", reason: "unavailable" });
+  expect(rows[2]).toMatchObject({ estado: "disponible", reason: "unrecorded" });
 });
 
 test("played zero, negative points and cross-team call-ups remain intact", () => {
@@ -58,4 +59,14 @@ test("snapshot does not color team rests", () => {
 test("snapshot never hides recorded participation or changes its points", () => {
   const rows = buildPlayerChartRows(calendar, matches, [{ jornada: 1, puntos: 12.5, estado: "disponible" }], [1], "disponible", [{ numero: 1, estado: "no_disponible" }]);
   expect(rows[0]).toMatchObject({ pts: 12.5, reason: "played" });
+});
+
+test("recorded historical availability takes precedence over inferred unavailability", () => {
+  const rows = buildPlayerChartRows(calendar, matches, [], [], "no_disponible", [{ numero: 1, estado: "disponible" }]);
+  expect(rows[0]).toMatchObject({ pts: null, estado: "disponible", reason: "unrecorded" });
+});
+
+test("result points without action rows still preserve played jornada", () => {
+  const rows = buildPlayerChartRows(calendar, matches, [{ jornada: 1, puntos: 1, estado: "disponible" }], [], "no_disponible");
+  expect(rows[0]).toMatchObject({ pts: 1, reason: "played" });
 });
