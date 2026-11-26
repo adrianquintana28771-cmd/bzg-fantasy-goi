@@ -32,7 +32,7 @@ export function PredictionCourt({
   const t = useT();
   const images = useCardImages();
   return (
-    <div className="relative w-full" style={{ aspectRatio: "1 / 1.25" }}>
+    <div className="relative w-full [container-type:inline-size]" style={{ aspectRatio: "1 / 1.25" }}>
       <img src={campoAsset.url} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-0 bg-black/10" />
       {PRED_SLOTS.map((slot) => {
@@ -47,9 +47,9 @@ export function PredictionCourt({
             className="absolute -translate-x-1/2 -translate-y-1/2"
             style={{ left: `${x}%`, top: `${y}%` }}
           >
-            <div className={`flex flex-col items-center gap-1 ${onPick && !disabled ? "transition hover:scale-105" : ""}`}>
+            <div className={`flex flex-col items-center gap-[1cqw] ${onPick && !disabled ? "transition hover:scale-105" : ""}`}>
               <div
-                className={`grid h-12 w-12 place-items-center overflow-hidden rounded-full border-2 font-display text-sm shadow-lg ${
+                className={`grid h-[13cqw] w-[13cqw] place-items-center overflow-hidden rounded-full border-2 font-display text-[3.6cqw] shadow-lg ${
                   id ? "border-primary bg-primary text-primary-foreground" : "border-dashed border-white/70 bg-black/30 text-white"
                 }`}
               >
@@ -64,11 +64,11 @@ export function PredictionCourt({
                   t(POS_SHORT_EU[slot], POS_SHORT[slot])
                 )}
               </div>
-              <div translate={id ? "no" : undefined} className="max-w-[78px] truncate rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+              <div translate={id ? "no" : undefined} className="max-w-[22cqw] truncate rounded bg-black/60 px-[1.5cqw] py-[0.5cqw] text-[2.8cqw] font-semibold text-white">
                 {id ? names.get(id) : t(...SLOT_LABEL[slot])}
               </div>
               {points?.[slot] && (
-                <div className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">{points[slot]}</div>
+                <div className="rounded bg-black/60 px-[1.5cqw] py-[0.5cqw] text-[2.8cqw] font-bold text-white">{points[slot]}</div>
               )}
             </div>
           </button>
