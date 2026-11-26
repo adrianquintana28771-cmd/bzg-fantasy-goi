@@ -261,8 +261,17 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       qc.invalidateQueries({ queryKey: ["wallet", userId] });
       qc.invalidateQueries({ queryKey: ["misiones", userId] });
     },
-    onError: (e: Error) =>
-      toast.error(e.message ?? t("Ezin izan da eskatu", "No se pudo reclamar")),
+    onError: (e: Error, misionId) => {
+      if (e.message?.includes("espera_mision")) {
+        // El servidor no tiene registrado el inicio: se reinicia la cuenta atrás.
+        window.localStorage.setItem(`bzg-mision-wait-${misionId}`, String(Date.now()));
+        void supabase.rpc("start_mision", { _mision_id: misionId });
+        setWaiting((w) => ({ ...w, [misionId]: true }));
+        toast.error(t("Itxaron pixka bat eta saiatu berriro", "Espera un poco y vuelve a intentarlo"));
+        return;
+      }
+      toast.error(e.message ?? t("Ezin izan da eskatu", "No se pudo reclamar"));
+    },
   });
 
   useEffect(() => {
@@ -447,6 +456,7 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
                             return;
                           }
                           window.localStorage.setItem(waitKey(mision.id), String(Date.now()));
+                          void supabase.rpc("start_mision", { _mision_id: mision.id });
                           setWaiting((w) => ({ ...w, [mision.id]: true }));
                         }}
                       >

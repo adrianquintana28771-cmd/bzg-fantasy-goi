@@ -1220,18 +1220,21 @@ export type Database = {
       }
       user_wallet: {
         Row: {
+          mision_starts: Json
           sobres: number
           sobres_premium: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          mision_starts?: Json
           sobres?: number
           sobres_premium?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          mision_starts?: Json
           sobres?: number
           sobres_premium?: number
           updated_at?: string
@@ -1405,6 +1408,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      start_mision: { Args: { _mision_id: string }; Returns: undefined }
       tramo_pct_pts: { Args: { _pct: number; _tramos: Json }; Returns: number }
       tramo_pts: { Args: { _n: number; _tramos: Json }; Returns: number }
       user_ranking: {
