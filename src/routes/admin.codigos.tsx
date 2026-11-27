@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin/codigos")({
       { title: "Códigos de misión · BZG Fantasy" },
       { name: "description", content: "Crear códigos de misión temporales." },
       { property: "og:title", content: "Códigos de misión · BZG Fantasy" },
-      { property: "og:description", content: "Códigos de partidos con activación programada y validez de cuatro horas." },
+      { property: "og:description", content: "Códigos diarios automáticos para sábado y domingo." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -34,9 +34,9 @@ function Page() {
   const [codigo, setCodigo] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
-  const [programar, setProgramar] = useState(false);
-  const [matchId, setMatchId] = useState("");
-  const [inicio, setInicio] = useState("");
+  const programar = false as boolean;
+  const matchId = "";
+  const inicio = "";
 
   const { data: matches = [], isError: matchesError } = useQuery({
     queryKey: ["mission-code-matches"],
@@ -106,41 +106,10 @@ function Page() {
       <h1 className="mt-4 font-display text-3xl">{t("Misio-kodeak", "Códigos de misión")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         {t(
-          "Kode bakoitzak 4 orduko balioa du aktibatzen denetik.",
-          "Cada código es válido durante 4 horas desde su activación.",
+          "Larunbatero eta igandero kode bat sortzen da automatikoki, 00:00etatik 23:59ra arte. Eskuzko kodeek 4 orduko balioa dute.",
+          "Cada sábado y cada domingo se genera automáticamente un código, válido de 00:00 a 23:59. Los códigos manuales duran 4 horas.",
         )}
       </p>
-      {isSA && (
-        <div className="mt-5 space-y-4">
-          <label className="flex items-center gap-2 text-sm font-semibold">
-            <input type="checkbox" checked={programar} onChange={(e) => { setProgramar(e.target.checked); setMsg(null); }} className="h-4 w-4 accent-primary" />
-            {t("Partida baterako programatu", "Programar para un partido")}
-          </label>
-          {programar && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="min-w-0 space-y-1 text-sm">
-                <span>{t("Partida", "Partido")}</span>
-                <select value={matchId} onChange={(e) => {
-                  setMatchId(e.target.value);
-                  const match = matches.find((m) => m.id === e.target.value);
-                  if (match) {
-                    setCodigo(`BZG-${Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[b % 32]).join("")}`);
-                    setInicio(match.hora && /^\d{2}:\d{2}/.test(match.hora) ? `${match.fecha}T${match.hora.slice(0, 5)}` : "");
-                  }
-                }} className="w-full rounded-lg border border-border bg-background px-3 py-2">
-                  <option value="">{t("Aukeratu partida", "Selecciona un partido")}</option>
-                  {matches.map((m) => <option key={m.id} value={m.id} translate="no">{m.fecha} · J{m.jornada} · {m.club_teams?.nombre ?? "BZG"} ({td(m.club_teams?.categoria ?? "")} · {td(m.club_teams?.sexo ?? "")}) vs {m.rival}{m.competicion ? ` · ${m.competicion}` : ""}</option>)}
-                </select>
-                {matchesError && <span className="text-destructive">{t("Ezin izan dira partidak kargatu.", "No se pudieron cargar los partidos.")}</span>}
-              </label>
-              <label className="min-w-0 space-y-1 text-sm">
-                <span>{t("Aktibazio data eta ordua (Madril)", "Fecha y hora de activación (Madrid)")}</span>
-                <input type="datetime-local" value={inicio} onChange={(e) => setInicio(e.target.value)} className="w-full min-w-0 rounded-lg border border-border bg-background px-3 py-2" />
-              </label>
-            </div>
-          )}
-        </div>
-      )}
       <div className="mt-4 flex gap-2">
         <input
           value={codigo}

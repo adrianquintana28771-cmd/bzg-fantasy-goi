@@ -330,6 +330,13 @@
       "when": 1795696230330,
       "tag": "0046_server_mission_wait",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1795782232352,
+      "tag": "0047_daily_weekend_mission_codes",
+      "breakpoints": true
     }
   ]
 }
