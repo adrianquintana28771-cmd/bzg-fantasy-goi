@@ -256,12 +256,19 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
       if (error) throw error;
       return data as number;
     },
-    onSuccess: () => {
+    onSuccess: (_d, misionId) => {
+      window.localStorage.removeItem(`bzg-mision-wait-${misionId}`);
       toast.success(t("Saria lortuta!", "¡Recompensa conseguida!"));
       qc.invalidateQueries({ queryKey: ["wallet", userId] });
       qc.invalidateQueries({ queryKey: ["misiones", userId] });
     },
     onError: (e: Error, misionId) => {
+      if (e.message?.includes("espera_mision_pendiente")) {
+        // La cuenta atrás sigue en marcha en el servidor: no se reinicia.
+        setWaiting((w) => ({ ...w, [misionId]: true }));
+        toast.error(t("Itxaron segundo batzuk eta saiatu berriro", "Espera unos segundos y vuelve a intentarlo"));
+        return;
+      }
       if (e.message?.includes("espera_mision")) {
         // El servidor no tiene registrado el inicio: se reinicia la cuenta atrás.
         window.localStorage.setItem(`bzg-mision-wait-${misionId}`, String(Date.now()));
@@ -449,8 +456,7 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
                           const start = waitStart(mision.id);
                           if (start) {
                             e.preventDefault();
-                            if (Date.now() - start >= wait * 1000) {
-                              window.localStorage.removeItem(waitKey(mision.id));
+                            if (Date.now() - start >= wait * 1000 && !claimMut.isPending) {
                               claimMut.mutate(mision.id);
                             }
                             return;

@@ -337,6 +337,13 @@
       "when": 1795782232352,
       "tag": "0047_daily_weekend_mission_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1795812727617,
+      "tag": "0048_keep_mission_wait_start",
+      "breakpoints": true
     }
   ]
 }
