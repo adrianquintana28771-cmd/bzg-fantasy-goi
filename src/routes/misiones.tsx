@@ -199,6 +199,77 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
     const v = Number(window.localStorage.getItem(waitKey(id)));
     return Number.isFinite(v) && v > 0 ? v : null;
   };
+  // Token cached so the wait start can be sent with keepalive in the same tap:
+  // on phones the page is suspended when TikTok/Instagram opens and a normal
+  // request is cancelled before the server records the start.
+  const accessToken = useRef<string | null>(null);
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => {
+      accessToken.current = data.session?.access_token ?? null;
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      accessToken.current = session?.access_token ?? null;
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+  const startServerWait = (id: string) => {
+    const token = accessToken.current;
+    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+    const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+    if (token && url && key) {
+      void fetch(`${url}/rest/v1/rpc/start_mision`, {
+        method: "POST",
+        keepalive: true,
+        headers: { apikey: key, Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ _mision_id: id }),
+      }).catch(() => undefined);
+    } else {
+      void supabase.rpc("start_mision", { _mision_id: id });
+    }
+  };
+  // When the user comes back, make sure the server has the start. If it was
+  // lost, register it now and align the local countdown with the server.
+  const syncing = useRef(false);
+  const syncServerWaits = async () => {
+    if (syncing.current) return;
+    const pending = Object.keys(window.localStorage)
+      .filter((k) => k.startsWith("bzg-mision-wait-"))
+      .map((k) => k.slice("bzg-mision-wait-".length));
+    if (pending.length === 0) return;
+    syncing.current = true;
+    try {
+      const { data, error } = await supabase
+        .from("user_wallet")
+        .select("mision_starts")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (error) return;
+      const starts = (data?.mision_starts ?? {}) as Record<string, unknown>;
+      for (const id of pending) {
+        const server = Number(starts[id]);
+        if (Number.isFinite(server) && server > 0 && Date.now() / 1000 - server <= 86400) continue;
+        const { error: e } = await supabase.rpc("start_mision", { _mision_id: id });
+        if (!e) window.localStorage.setItem(`bzg-mision-wait-${id}`, String(Date.now()));
+        else if (e.message?.includes("no encontrada")) window.localStorage.removeItem(`bzg-mision-wait-${id}`);
+      }
+      setTick((n) => n + 1);
+    } finally {
+      syncing.current = false;
+    }
+  };
+  useEffect(() => {
+    void syncServerWaits();
+    const onBack = () => {
+      if (document.visibilityState === "visible") void syncServerWaits();
+    };
+    document.addEventListener("visibilitychange", onBack);
+    window.addEventListener("focus", onBack);
+    return () => {
+      document.removeEventListener("visibilitychange", onBack);
+      window.removeEventListener("focus", onBack);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
   useEffect(() => {
     const iv = window.setInterval(() => setTick((n) => n + 1), 1000);
     const onVis = () => setTick((n) => n + 1);
@@ -270,9 +341,11 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
         return;
       }
       if (e.message?.includes("espera_mision")) {
-        // El servidor no tiene registrado el inicio: se reinicia la cuenta atrás.
-        window.localStorage.setItem(`bzg-mision-wait-${misionId}`, String(Date.now()));
-        void supabase.rpc("start_mision", { _mision_id: misionId });
+        // El servidor no tenía el inicio: se registra y la cuenta atrás se alinea con él.
+        void supabase.rpc("start_mision", { _mision_id: misionId }).then(({ error: se }) => {
+          if (!se) window.localStorage.setItem(`bzg-mision-wait-${misionId}`, String(Date.now()));
+          setTick((n) => n + 1);
+        });
         setWaiting((w) => ({ ...w, [misionId]: true }));
         toast.error(t("Itxaron pixka bat eta saiatu berriro", "Espera un poco y vuelve a intentarlo"));
         return;
@@ -462,7 +535,7 @@ function Inner({ userId, initialQr }: { userId: string; initialQr?: string }) {
                             return;
                           }
                           window.localStorage.setItem(waitKey(mision.id), String(Date.now()));
-                          void supabase.rpc("start_mision", { _mision_id: mision.id });
+                          startServerWait(mision.id);
                           setWaiting((w) => ({ ...w, [mision.id]: true }));
                         }}
                       >
